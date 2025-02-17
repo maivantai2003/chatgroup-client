@@ -1,6 +1,7 @@
 import axios from "axios";
+import config from "../constant/linkApi";
 const axiosInstance=axios.create({
-    baseURL:`${process.env.API_URL}/`,
+    baseURL:`${config.API_URL}/`,
     headers: {
         "Content-type": "application/json",
       },
