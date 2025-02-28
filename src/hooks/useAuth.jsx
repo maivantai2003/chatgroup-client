@@ -46,6 +46,5 @@ export const useAuth = () => {
       signOut();
     }
   };
-
   return { user, accessToken, refreshToken, isAuthenticated, signIn, signOut, refreshAccessToken };
 };
