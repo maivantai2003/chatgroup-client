@@ -10,6 +10,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Register from "./pages/Register";
 import { useState } from "react";
 import Sidebar from "./pages/Siderbar";
+import FriendSuggestions from "./pages/friends";
+import FriendList from "./pages/FriendList";
+import GroupList from "./pages/GroupList";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -36,29 +39,36 @@ function App() {
 }
 const MainLayout = () => {
   const [search,setSearch]=useState("")
+  const [activeTab, setActiveTab] = useState("message");
   return (
     <div className="bg-gray-100 flex h-screen">
-      <Sidebar/>
-      <div className="flex h-screen">
-        <div className="w-1/4 bg-blue-600 text-black flex flex-col">
-          <TitleBar name={"Mai Văn Tài"} />
-          {/* <SearchInput /> */}
-          <div className="p-4">
-            <input
-              className="w-full p-2 rounded bg-white text-black"
-              placeholder="Tìm kiếm"
-              onChange={e=>{setSearch(e.target.value)
-              }}
-              value={search}
-            />
-          </div>
-          {
-            !search?(<ListGroup />):(<input></input>)
-          }
-          {/* <ListGroup /> */}
-        </div>
-        <ChatMessage />
-        <InforChat />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="flex h-screen w-full">
+        {activeTab === "requests" ? (
+          <FriendSuggestions />
+        ) : activeTab === "friends" ? (
+          <FriendList id={2} />
+        ) :activeTab === "groups" ? (
+          <GroupList />
+        ) : (
+          <>
+            <div className="w-1/4 bg-blue-600 text-black flex flex-col">
+              <TitleBar name={"Mai Văn Tài"} id={2} />
+              <div className="p-4">
+                <input
+                  className="w-full p-2 rounded bg-white text-black"
+                  placeholder="Tìm kiếm"
+                  onChange={(e) => setSearch(e.target.value)}
+                  value={search}
+                />
+              </div>
+              {search ? <ListGroup /> : <input />}
+              <ListGroup />
+            </div>
+            <ChatMessage />
+            <InforChat />
+          </>
+        )}
       </div>
     </div>
   );

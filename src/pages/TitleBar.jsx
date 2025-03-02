@@ -12,8 +12,12 @@
 // }
 // export default TitleBar;
 import { UserIcon, UserPlusIcon} from "@heroicons/react/24/outline";
-
-const TitleBar = ({ name }) => {
+import { useState } from "react";
+import FriendRequestModal from "../components/FriendRequestModal";
+import CreateGroupModal from "../components/CreateGroupModal";
+const TitleBar = ({ name,id }) => {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [isGroupModalOpen, setGroupModalOpen] = useState(false);
   return (
     <div className="flex items-center justify-between p-4 bg-white shadow-md">
       {/* Avatar + Tên */}
@@ -31,15 +35,19 @@ const TitleBar = ({ name }) => {
       {/* Các nút thao tác */}
       <div className="flex space-x-2">
         {/* Nút Thêm Bạn */}
-        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition">
+        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition" onClick={()=>{
+          setModalOpen(true)
+        }}>
           <UserPlusIcon className="w-5 h-5 text-gray-700" />
         </button>
 
         {/* Nút Thêm Vào Nhóm */}
-        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition">
+        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition" onClick={() => setGroupModalOpen(true)}>
           <UserIcon className="w-5 h-5 text-gray-700" />
         </button>
       </div>
+      <FriendRequestModal isOpen={isModalOpen} closeModal={() => setModalOpen(false)} />
+      <CreateGroupModal isOpen={isGroupModalOpen} id={id} closeModal={() => setGroupModalOpen(false)} />
     </div>
   );
 };

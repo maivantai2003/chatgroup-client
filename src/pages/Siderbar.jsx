@@ -2,8 +2,8 @@ import { useState } from "react";
 import { UserIcon, UsersIcon, UserPlusIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
-const Sidebar = () => {
-  const [activeTab, setActiveTab] = useState("message");
+const Sidebar = ({ activeTab, setActiveTab }) => {
+  //const [activeTab, setActiveTab] = useState("message");
   const navigate=useNavigate()
   const handleLogout = () => {
     navigate("/login")
