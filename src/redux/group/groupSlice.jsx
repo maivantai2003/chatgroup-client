@@ -10,6 +10,7 @@ export const CreateGroup=createAsyncThunk("group/CreateGroup",async(groupDto)=>{
 })
 const initialState={
     listGroup:[],
+    listGroupUser:[],
     group:null
 }
 const groupSlice=createSlice({
@@ -18,7 +19,7 @@ const groupSlice=createSlice({
     reducers:{},
     extraReducers:(builder)=>{
         builder.addCase(GetAllGroupById.fulfilled,(state,action)=>{
-            state.listGroup=action.payload
+            state.listGroupUser=action.payload
         }),
         builder.addCase(CreateGroup.fulfilled,(state,action)=>{
             state.listGroup.push(action.payload)

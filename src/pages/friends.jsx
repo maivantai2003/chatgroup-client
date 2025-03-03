@@ -1,36 +1,9 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector, useStore } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { GetFriendRequest, UpdateFriend } from "../redux/friend/friendSlice";
 import { GetAllUser } from "../redux/user/userSlice";
-
-// const friendRequests = [
-//   { name: "Nguyễn Văn A", image: "https://via.placeholder.com/50" },
-//   { name: "Trần Thị B", image: "https://via.placeholder.com/50" },
-// ];
-
-// const friends = [
-//   {
-//     name: "Mai Trung Chính",
-//     groups: 3,
-//     image: "https://via.placeholder.com/50",
-//   },
-//   {
-//     name: "Trần Khánh Duy",
-//     groups: 3,
-//     image: "https://via.placeholder.com/50",
-//   },
-//   { name: "Duy Thuần", groups: 2, image: "https://via.placeholder.com/50" },
-//   {
-//     name: "Nguyễn Thị Anh Thư",
-//     groups: 2,
-//     image: "https://via.placeholder.com/50",
-//   },
-//   { name: "Phạm Hoàng Ý", groups: 2, image: "https://via.placeholder.com/50" },
-//   { name: "Lê Long Hoàng", groups: 1, image: "https://via.placeholder.com/50" },
-//   { name: "Trí", groups: 2, image: "https://via.placeholder.com/50" },
-//   { name: "Tứ", groups: 1, image: "https://via.placeholder.com/50" },
-// ];
+import { toast } from "react-toastify";
 
 const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   const dispatch = useDispatch();
@@ -44,13 +17,19 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
       friendId: friendId,
       status: 1,
     };
-    var result=await dispatch(
-      UpdateFriend({
-        id: id,
-        friendDto: friendDto,
-      })
-    );
-    console.log(result)
+    try{
+      var result=await dispatch(
+        UpdateFriend({
+          id: id,
+          friendDto: friendDto,
+        })
+      );
+      toast.success("Kết bạn thành công")
+    }catch(ex){
+      toast.error("Kết bạn không thành công")
+      console.log(ex)
+    }
+    
   };
   return (
     <div className="bg-white shadow-md rounded-lg p-4 flex items-center justify-between">
@@ -76,7 +55,18 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   );
 };
 
-const FriendSuggestion = ({ userId, userName, avatar }) => {
+const FriendSuggestion = ({ userId, userName, avatar,id }) => {
+  const dispatch=useDispatch()
+  const handleRequestFriend=(userId,id)=>{
+    console.log(userId,id)
+    let friendDto = {
+      userId: id,
+      friendId: userId,
+      status: 0,
+    };
+    console.log(friendDto)
+
+  }
   return (
     <div className="bg-white shadow-md rounded-lg p-4 flex flex-col items-center">
       <img src={avatar} alt={userName} className="w-16 h-16 rounded-full mb-2" />
@@ -86,7 +76,7 @@ const FriendSuggestion = ({ userId, userName, avatar }) => {
         <button className="px-4 py-1 bg-gray-300 text-gray-700 rounded-md">
           Bỏ qua
         </button>
-        <button className="px-4 py-1 bg-blue-500 text-white rounded-md">
+        <button className="px-4 py-1 bg-blue-500 text-white rounded-md" onClick={()=>handleRequestFriend(userId,id)}>
           Kết bạn
         </button>
       </div>
@@ -94,7 +84,7 @@ const FriendSuggestion = ({ userId, userName, avatar }) => {
   );
 };
 
-const FriendSuggestions = () => {
+const FriendSuggestions = ({id}) => {
   const [loading, setLoading] = useState(true);
   const friendRequests = useSelector((state) => state.friend.listFriendRequest);
   const users=useSelector((state)=>state.user.listUser)
@@ -102,12 +92,13 @@ const FriendSuggestions = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await dispatch(GetFriendRequest(2));
-      await dispatch(GetAllUser(2))
+      await dispatch(GetFriendRequest(id));
+      await dispatch(GetAllUser(id))
       setLoading(false);
     };
     fetchData();
   }, [dispatch]);
+  console.log(users)
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-xl font-semibold mb-4">Lời mời kết bạn</h2>
@@ -127,7 +118,7 @@ const FriendSuggestions = () => {
       <h2 className="text-xl font-semibold mb-4">Gợi ý kết bạn ({users.length})</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-80">
         {users.map((user, index) => (
-          <FriendSuggestion key={index} {...user} />
+          <FriendSuggestion key={index} {...user} id={id} />
         ))}
       </div>
     </div>

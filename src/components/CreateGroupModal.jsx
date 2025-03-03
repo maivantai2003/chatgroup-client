@@ -5,11 +5,13 @@ import { GetAllFriendById } from "../redux/friend/friendSlice";
 import axios from "axios";
 import config from "../constant/linkApi";
 import { CreateGroup } from "../redux/group/groupSlice";
+import { CreateGroupDetail } from "../redux/groupdetail/groupdetailSlice";
+import { toast } from "react-toastify";
 // const users = Array.from({ length: 20 }, (_, i) => ({
 //   name: `Thành viên ${i + 1}`,
 //   avatar: `https://i.pravatar.cc/40?img=${i + 1}`,
 // }));
-const CreateGroupModal = ({ isOpen, closeModal,id }) => {
+const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -30,7 +32,7 @@ const CreateGroupModal = ({ isOpen, closeModal,id }) => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await dispatch(GetAllFriendById(2));
+      await dispatch(GetAllFriendById(id));
       setLoading(false);
     };
     loadData();
@@ -38,19 +40,23 @@ const CreateGroupModal = ({ isOpen, closeModal,id }) => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     setSelectedImage(URL.createObjectURL(file));
     const formData = new FormData();
     formData.append("file", file);
-  
+
     try {
       setUploading(true);
-      const response = await axios.post(`${config.API_URL}/File/Upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
+      const response = await axios.post(
+        `${config.API_URL}/File/Upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       if (response.status === 200) {
         console.log("Ảnh đã upload:", response.data.url);
         setSelectedImage(response.data.url);
@@ -63,19 +69,44 @@ const CreateGroupModal = ({ isOpen, closeModal,id }) => {
       setUploading(false);
     }
   };
-  const handleCreateGroup=async()=>{
-    const groupDto={
-      groupName:groupName,
-      avatar:selectedImage
-    }
-    //var result=await dispatch(CreateGroup(groupDto)).unwap()
-    // if(result!==null){
-    // }
-    console.log(groupDto)
-    console.log("me: "+id)
-    console.log(selectedUsers)
+  const handleCreateGroup = async () => {
+    try {
+      const groupDto = {
+        groupName: groupName,
+        avatar: selectedImage,
+      };
+      var result = await dispatch(CreateGroup(groupDto)).unwrap();
+      var groupId = result.groupId;
+      if (result !== null) {
+        const groupDetails = [
+          { userId: id, groupId: groupId, role: "Admin" },
+          ...selectedUsers.map((userId) => ({
+            userId: userId,
+            groupId: groupId,
+            role: "Member",
+          })),
+        ];
 
-  }
+        for (const groupDetailDto of groupDetails) {
+          await dispatch(CreateGroupDetail(groupDetailDto));
+        }
+        toast("Tạo nhóm thành công");
+      } else {
+        toast.error("Tạo nhóm không thành công");
+        return;
+      }
+    } catch (ex) {
+      console.log(ex);
+    }
+
+    closeModal();
+    resetModal();
+  };
+  const resetModal = () => {
+    setSelectedUsers([]);
+    setSelectedImage(null);
+    setGroupName("");
+  };
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={closeModal}>
@@ -139,7 +170,9 @@ const CreateGroupModal = ({ isOpen, closeModal,id }) => {
                   onChange={(e) => setGroupName(e.target.value)}
                 />
               </div>
-              {uploading && <p className="text-blue-500 text-sm">Đang tải ảnh...</p>}
+              {uploading && (
+                <p className="text-blue-500 text-sm">Đang tải ảnh...</p>
+              )}
               {/* Thanh tìm kiếm */}
               <div className="mt-3">
                 <input
@@ -193,13 +226,16 @@ const CreateGroupModal = ({ isOpen, closeModal,id }) => {
               {/* Nút hành động */}
               <div className="mt-4 flex justify-end space-x-2">
                 <button
-                  onClick={closeModal}
+                  onClick={() => {
+                    closeModal();
+                    resetModal();
+                  }}
                   className="px-4 py-2 bg-gray-300 rounded-md"
                 >
                   Hủy
                 </button>
                 <button
-                onClick={handleCreateGroup}
+                  onClick={handleCreateGroup}
                   disabled={selectedUsers.length === 0}
                   className={`px-4 py-2 rounded-md ${
                     selectedUsers.length > 0

@@ -1,61 +1,58 @@
 import { useState } from "react";
-import { UserIcon, UsersIcon, UserPlusIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { FaUser, FaUsers, FaUserPlus, FaSignOutAlt } from "react-icons/fa"; // Import các icon từ react-icons/fa
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
-  //const [activeTab, setActiveTab] = useState("message");
-  const navigate=useNavigate()
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    navigate("/login")
+    navigate("/login");
   };
 
   return (
-    <div className="w-1/22 bg-blue-400 text-white flex flex-col h-screen p-2">
-        <button
-        className={`flex items-center p-2 space-x-2 ${
-          activeTab === "message" ? "text-yellow-300" : "text-black"
+    <div className="w-20 bg-blue-500 text-white flex flex-col h-screen p-2 items-center space-y-6">
+      <button
+        className={`p-2 rounded-full ${
+          activeTab === "message" ? "text-yellow-300" : "text-white"
         }`}
         onClick={() => setActiveTab("message")}
       >
-        <UsersIcon className="w-5 h-5" />
-        {/* <span className="text-sm">Tin nhắn</span> */}
+        <FaUsers className="w-6 h-6" />
       </button>
+
       <button
-        className={`flex items-center p-2 space-x-2 ${
-          activeTab === "friends" ? "text-yellow-300" : "text-black"
+        className={`p-2 rounded-full ${
+          activeTab === "friends" ? "text-yellow-300" : "text-white"
         }`}
         onClick={() => setActiveTab("friends")}
       >
-        <UserIcon className="w-5 h-5" />
-        {/* <span className="text-sm">Bạn bè</span> */}
+        <FaUser className="w-6 h-6" />
       </button>
 
       <button
-        className={`flex items-center p-2 space-x-2 ${
-          activeTab === "groups" ? "text-yellow-300" : "text-black"
+        className={`p-2 rounded-full ${
+          activeTab === "groups" ? "text-yellow-300" : "text-white"
         }`}
         onClick={() => setActiveTab("groups")}
       >
-        <UsersIcon className="w-5 h-5" />
-        {/* <span className="text-sm">Nhóm</span> */}
+        <FaUsers className="w-6 h-6" />
       </button>
 
       <button
-        className={`flex items-center p-2 space-x-2 ${
-          activeTab === "requests" ? "text-yellow-300" : "text-black"
+        className={`p-2 rounded-full ${
+          activeTab === "requests" ? "text-yellow-300" : "text-white"
         }`}
         onClick={() => setActiveTab("requests")}
       >
-        <UserPlusIcon className="w-5 h-5" />
-        {/* <span className="text-sm">Lời mời</span> */}
+        <FaUserPlus className="w-6 h-6" />
       </button>
+
       {/* Nút Đăng xuất */}
       <button
-        className="flex items-center p-2 space-x-2 text-black hover:text-red-500 mt-auto"
+        className="p-2 rounded-full text-white hover:text-red-500 mt-auto"
         onClick={handleLogout}
       >
-        <ArrowRightOnRectangleIcon className="w-5 h-5" />
-        <span className="text-sm">logout</span>
+        <FaSignOutAlt className="w-6 h-6" />
       </button>
     </div>
   );

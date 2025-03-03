@@ -20,8 +20,9 @@ const LoginForm = () => {
         userName: data.userName
       };
       console.log(authRequest)
-      const result=await dispatch(login(authRequest))
+      const result=await dispatch(login(authRequest)).unwrap()
       console.log(result)
+      localStorage.setItem("accessToken",result.accessToken)
       // console.log(authRequest);
       if (result!==null) {
         setErrorMessage(null);

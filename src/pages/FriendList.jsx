@@ -28,7 +28,7 @@ const FriendList = ({ id }) => {
     friend.userName.toLowerCase().includes(search.toLowerCase())
   );
   return (
-    <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg p-4">
+    <div className="max-w-4xl w-full mx-auto bg-white shadow-lg rounded-lg p-4">
       {/* Header */}
       <div className="flex justify-between items-center border-b pb-3">
         <h2 className="text-lg font-semibold">Bạn bè ({friends.length})</h2>

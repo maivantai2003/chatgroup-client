@@ -46,7 +46,7 @@ const TitleBar = ({ name,id }) => {
           <UserIcon className="w-5 h-5 text-gray-700" />
         </button>
       </div>
-      <FriendRequestModal isOpen={isModalOpen} closeModal={() => setModalOpen(false)} />
+      <FriendRequestModal isOpen={isModalOpen} id={id} closeModal={() => setModalOpen(false)} />
       <CreateGroupModal isOpen={isGroupModalOpen} id={id} closeModal={() => setGroupModalOpen(false)} />
     </div>
   );

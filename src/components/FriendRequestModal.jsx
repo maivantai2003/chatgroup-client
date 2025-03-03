@@ -1,12 +1,23 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { GetAllUser } from "../redux/user/userSlice";
 
-const friends = Array.from({ length: 20 }, (_, i) => ({
-  name: `Người bạn ${i + 1}`,
-  avatar: `https://i.pravatar.cc/40?img=${i + 1}`,
-}));
-
-const FriendRequestModal = ({ isOpen, closeModal }) => {
+const FriendRequestModal = ({ isOpen, closeModal, id }) => {
+  const listFriendRequest = useSelector(
+    (state) => state.friend.listFriendRequest
+  );
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      await dispatch(GetAllUser(id));
+      setLoading(false);
+    };
+    fetchData()
+  }, [dispatch]);
+  console.log(listFriendRequest)
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={closeModal}>
@@ -35,7 +46,10 @@ const FriendRequestModal = ({ isOpen, closeModal }) => {
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white bg-opacity-80 p-6 text-left shadow-xl backdrop-blur-lg transition-all">
-              <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
+              <Dialog.Title
+                as="h3"
+                className="text-lg font-semibold text-gray-900"
+              >
                 Thêm bạn
               </Dialog.Title>
 
@@ -50,11 +64,18 @@ const FriendRequestModal = ({ isOpen, closeModal }) => {
 
               {/* Danh sách bạn bè có scroll */}
               <div className="mt-4 max-h-60 overflow-y-auto space-y-2">
-                {friends.map((friend, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded-md">
+                {listFriendRequest.map((friend, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 border rounded-md"
+                  >
                     <div className="flex items-center space-x-3">
-                      <img src={friend.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
-                      <span className="text-gray-700">{friend.name}</span>
+                      <img
+                        src={friend.avatar}
+                        alt="Avatar"
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <span className="text-gray-700">{friend.userName}</span>
                     </div>
                     <button className="px-3 py-1 bg-blue-500 text-white rounded-md">
                       Kết bạn
@@ -65,7 +86,10 @@ const FriendRequestModal = ({ isOpen, closeModal }) => {
 
               {/* Nút đóng */}
               <div className="mt-4 flex justify-end">
-                <button onClick={closeModal} className="px-4 py-2 bg-gray-300 rounded-md">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-gray-300 rounded-md"
+                >
                   Đóng
                 </button>
               </div>

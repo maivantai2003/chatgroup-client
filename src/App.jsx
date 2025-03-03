@@ -13,6 +13,7 @@ import Sidebar from "./pages/Siderbar";
 import FriendSuggestions from "./pages/friends";
 import FriendList from "./pages/FriendList";
 import GroupList from "./pages/GroupList";
+import { jwtDecode } from "jwt-decode";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -40,20 +41,24 @@ function App() {
 const MainLayout = () => {
   const [search,setSearch]=useState("")
   const [activeTab, setActiveTab] = useState("message");
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    var userId = Number(jwtDecode(token).userId);
+  }
   return (
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex h-screen w-full">
         {activeTab === "requests" ? (
-          <FriendSuggestions />
+          <FriendSuggestions id={userId} />
         ) : activeTab === "friends" ? (
-          <FriendList id={2} />
+          <FriendList id={userId} />
         ) :activeTab === "groups" ? (
-          <GroupList />
+          <GroupList id={userId} />
         ) : (
           <>
             <div className="w-1/4 bg-blue-600 text-black flex flex-col">
-              <TitleBar name={"Mai Văn Tài"} id={2} />
+              <TitleBar name={"Mai Văn Tài"} id={userId} />
               <div className="p-4">
                 <input
                   className="w-full p-2 rounded bg-white text-black"
