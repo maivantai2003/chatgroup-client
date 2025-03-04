@@ -1,23 +1,25 @@
-// const TitleBar=({name})=>{
-//     return <div className="flex items-center p-4">
-//     <img
-//       alt="User avatar"
-//       className="rounded-full"
-//       height="40"
-//       src="https://storage.googleapis.com/a1aa/image/hpZhmsnlmmhMuDK-hctvwQqwNT_PXKlCqSxqX3YEwmo.jpg"
-//       width="40"
-//     />
-//     <span className="ml-2">{name}</span>
-//   </div>
-// }
-// export default TitleBar;
 import { UserIcon, UserPlusIcon} from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import FriendRequestModal from "../components/FriendRequestModal";
 import CreateGroupModal from "../components/CreateGroupModal";
-const TitleBar = ({ name,id }) => {
+import { useDispatch, useSelector } from "react-redux";
+import EditProfileModal from "../components/EditProfileModal";
+import { GetUser } from "../redux/user/userSlice";
+const TitleBar = ({ name,id,avatar }) => {
+  const dispatch = useDispatch();
   const [isModalOpen, setModalOpen] = useState(false);
   const [isGroupModalOpen, setGroupModalOpen] = useState(false);
+  const [isEditProfileOpen, setEditProfileOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const user=useSelector((state)=>state.user.user)
+  const handleEditProfile = useCallback(async () => {
+    if (!user || user.id !== id) {
+      setIsLoading(true);
+      await dispatch(GetUser(id));
+      setIsLoading(false);
+    }
+    setEditProfileOpen(true);
+  }, [dispatch, user, id]);
   return (
     <div className="flex items-center justify-between p-4 bg-white shadow-md">
       {/* Avatar + Tên */}
@@ -26,8 +28,9 @@ const TitleBar = ({ name,id }) => {
           alt="User avatar"
           className="rounded-full"
           height="40"
-          src="https://storage.googleapis.com/a1aa/image/hpZhmsnlmmhMuDK-hctvwQqwNT_PXKlCqSxqX3YEwmo.jpg"
+          src={avatar?avatar:"https://storage.googleapis.com/a1aa/image/hpZhmsnlmmhMuDK-hctvwQqwNT_PXKlCqSxqX3YEwmo.jpg"}
           width="40"
+          onClick={handleEditProfile}
         />
         <span className="text-gray-900 font-medium">{name}</span>
       </div>
@@ -48,6 +51,10 @@ const TitleBar = ({ name,id }) => {
       </div>
       <FriendRequestModal isOpen={isModalOpen} id={id} closeModal={() => setModalOpen(false)} />
       <CreateGroupModal isOpen={isGroupModalOpen} id={id} closeModal={() => setGroupModalOpen(false)} />
+      {isLoading && <p className="text-gray-500 text-sm">Đang tải...</p>}
+      {isEditProfileOpen && user && (
+        <EditProfileModal isOpen={isEditProfileOpen} closeModal={() => setEditProfileOpen(false)} user={user} />
+      )}
     </div>
   );
 };

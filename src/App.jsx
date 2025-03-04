@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 //import SearchInput from "./components/SearchInput";
 import ChatMessage from "./pages/ChatMessage";
@@ -8,12 +8,13 @@ import LoginForm from "./pages/Login";
 import TitleBar from "./pages/TitleBar";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Register from "./pages/Register";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "./pages/Siderbar";
 import FriendSuggestions from "./pages/friends";
 import FriendList from "./pages/FriendList";
 import GroupList from "./pages/GroupList";
 import { jwtDecode } from "jwt-decode";
+import { GetAllConversation } from "./redux/conversation/conversationSlice";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -43,7 +44,12 @@ const MainLayout = () => {
   const [activeTab, setActiveTab] = useState("message");
   const token = localStorage.getItem("accessToken");
   if (token) {
-    var userId = Number(jwtDecode(token).userId);
+    var user=jwtDecode(token).userInfor
+    localStorage.setItem("user",user)
+    var userInfor=JSON.parse(localStorage.getItem("user"))
+    var userId = userInfor.UserId
+    var avatar = userInfor.Avatar
+    var userName=userInfor.UserName
   }
   return (
     <div className="bg-gray-100 flex h-screen">
@@ -58,7 +64,7 @@ const MainLayout = () => {
         ) : (
           <>
             <div className="w-1/4 bg-blue-600 text-black flex flex-col">
-              <TitleBar name={"Mai Văn Tài"} id={userId} />
+              <TitleBar name={userName} id={userId} avatar={avatar} />
               <div className="p-4">
                 <input
                   className="w-full p-2 rounded bg-white text-black"
@@ -67,8 +73,8 @@ const MainLayout = () => {
                   value={search}
                 />
               </div>
-              {search ? <ListGroup /> : <input />}
-              <ListGroup />
+              {/* {search ? <ListGroup /> : <input />} */}
+              <ListGroup id={userId} />
             </div>
             <ChatMessage />
             <InforChat />

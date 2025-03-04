@@ -4,14 +4,15 @@ import friendReducer from "./friend/friendSlice"
 import groupReducer from "./group/groupSlice"
 import groupdetailReducer from "./groupdetail/groupdetailSlice"
 import userReducer from "./user/userSlice"
+import conversationReducer from "./conversation/conversationSlice"
 const store=configureStore({
     reducer:{
         auth:authReducer,
         friend:friendReducer,
         group:groupReducer,
         groupdetail:groupdetailReducer,
-        user:userReducer
-
+        user:userReducer,
+        conversation:conversationReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

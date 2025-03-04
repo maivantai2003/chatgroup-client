@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { GetAllUser } from "../redux/user/userSlice";
 
 const FriendRequestModal = ({ isOpen, closeModal, id }) => {
-  const listFriendRequest = useSelector(
-    (state) => state.friend.listFriendRequest
+  const listUser = useSelector(
+    (state) => state.user.listUser
   );
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -17,7 +17,6 @@ const FriendRequestModal = ({ isOpen, closeModal, id }) => {
     };
     fetchData()
   }, [dispatch]);
-  console.log(listFriendRequest)
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={closeModal}>
@@ -64,7 +63,7 @@ const FriendRequestModal = ({ isOpen, closeModal, id }) => {
 
               {/* Danh sách bạn bè có scroll */}
               <div className="mt-4 max-h-60 overflow-y-auto space-y-2">
-                {listFriendRequest.map((friend, index) => (
+                {listUser.map((friend, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-2 border rounded-md"

@@ -21,6 +21,13 @@ export const UpdateFriend = createAsyncThunk(
     return response;
   }
 );
+export const AddFriend = createAsyncThunk(
+  "friend/AddFriend",
+  async (friendDto) => {
+    const response = await friendService.AddFriend(friendDto);
+    return response;
+  }
+);
 const initialState = {
   listFriend: [],
   listFriendRequest: [],
@@ -54,7 +61,10 @@ const friendSlice = createSlice({
             state.listFriend.push(updatedFriend);
           }
         }
-      });
+      })
+      // builder.addCase(AddFriend.fulfilled,(state,action)=>{
+      //   state.listFriendRequest.push(action.payload)
+      // })
   },
 });
 export default friendSlice.reducer;

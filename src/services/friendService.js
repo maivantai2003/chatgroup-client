@@ -11,6 +11,10 @@ const friendService = {
   UpdateFriend:async(id,friendDto)=>{
     const response=await axiosInstance.put("Friend/UpdateFriend/"+id,friendDto)
     return response.data
+  },
+  AddFriend:async(friendDto)=>{
+    const response=await axiosInstance.post("Friend/AddFriend",friendDto)
+    return response.data
   }
 };
 
