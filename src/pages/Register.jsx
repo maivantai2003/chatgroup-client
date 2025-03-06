@@ -76,7 +76,7 @@ const RegisterForm = () => {
             avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1741155183/ocivujn3qq5pxv6ngnau.jpg",
             conversationName:"Cloud của tôi",
             userSend:"Cloud",
-            type:"user",
+            type:"cloud",
             content:"Chào mừng bạn đến cloud"
           }
           var resultConversation=await dispatch(CreateConversation(conversationDto)).unwrap()

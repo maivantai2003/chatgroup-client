@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import GroupInfo from "./GroupInfor";
 import UserInfo from "./UserInfor";
+import CloudInfo from "./CloudInfor";
 
 const InforChat = ({ conversation }) => {
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,8 @@ const InforChat = ({ conversation }) => {
     <div className="w-1/4 bg-white p-4">
       {conversation.type === "group" ? (
         <GroupInfo conversation={conversation} />
+      ) : conversation.type === "cloud" ? (
+        <CloudInfo conversation={conversation} />
       ) : (
         <UserInfo conversation={conversation} />
       )}

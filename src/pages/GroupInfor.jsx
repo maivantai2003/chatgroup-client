@@ -20,7 +20,7 @@ const GroupInfo = ({ conversation }) => {
         />
         <div className="font-bold mt-2 flex items-center">
           {conversation.conversationName}
-          <i className="fas fa-pen ml-2 cursor-pointer text-gray-500"></i>
+          {/* <i className="fas fa-pen ml-2 cursor-pointer text-gray-500"></i> */}
         </div>
       </div>
       <div className="flex justify-around mt-4">

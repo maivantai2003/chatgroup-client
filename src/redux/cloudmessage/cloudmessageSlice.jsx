@@ -8,6 +8,13 @@ export const CreateCloudMessage = createAsyncThunk(
     return response;
   }
 );
+export const GetCloudMessagesById=createAsyncThunk(
+  "cloudmessage/GetCloudMessagesById",
+  async (id)=>{
+    const response=await cloudmessageService.GetCloudMessagesById(id)
+    return response
+  }
+)
 ;
 
 const initialState = {
@@ -22,6 +29,9 @@ const cloudmessageSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(CreateCloudMessage.fulfilled, (state, action) => {
       state.listCloudMessage.push(action.payload);
+    }),
+    builder.addCase(GetCloudMessagesById.fulfilled, (state, action) => {
+      state.listCloudMessage=action.payload
     })
   },
 });
