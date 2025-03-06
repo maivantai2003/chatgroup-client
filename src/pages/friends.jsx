@@ -9,15 +9,17 @@ import {
 import { GetAllUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
+import { CreateConversation } from "../redux/conversation/conversationSlice";
 
 const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  var userInfor = JSON.parse(localStorage.getItem("user"));
   const handleRejectFriend = async (id, friendId, userId) => {
     console.log(id, friendId, userId);
   };
-  const handleAcceptFriend = async (id, friendId, userId) => {
-    setLoading(true);
+  const handleAcceptFriend = async (id, friendId, userId,avatar,userName) => {
+    //setLoading(true);
     console.log(id, friendId, userId);
     let friendDto = {
       userId: userId,
@@ -31,6 +33,40 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
           friendDto: friendDto,
         })
       );
+      if(result!==null){
+        //user
+        let conversationDtoUser={
+          id:userId,
+          userId:friendId,
+          avatar:avatar,
+          conversationName:userName,
+          userSend:"Bạn",
+          type:"user",
+          content:"Đã trở thành bạn bè với "+userName
+        }
+        //friend
+        let conversationDtoFriend={
+          id:friendId,
+          userId:userId,
+          avatar:userInfor.Avatar,
+          conversationName:userInfor.UserName,
+          userSend:"Bạn",
+          type:"user",
+          content:"Đã trở thành bạn bè "+userInfor.UserName
+        }
+        var resultConversationUser=await dispatch(CreateConversation(conversationDtoUser)).unwrap()
+        if(resultConversationUser!==null){
+          var resultConversationFriend=await dispatch(CreateConversation(conversationDtoFriend)).unwrap()
+          if(resultConversationFriend===null){
+            toast.error("Lỗi")
+            return
+          }
+        }else{
+          toast.error("Lỗi")
+          return
+        }
+        
+      }
       toast.success("Kết bạn thành công");
     } catch (ex) {
       toast.error("Kết bạn không thành công");
@@ -53,7 +89,7 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
         </button>
         <button
           className="px-4 py-1 bg-blue-500 text-white rounded-md"
-          onClick={() => handleAcceptFriend(id, friendId, userId)}
+          onClick={() => handleAcceptFriend(id, friendId, userId,avatar,userName)}
           disabled={loading}
         >
           {loading ? <Loading /> : "Chấp nhận"}

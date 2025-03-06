@@ -7,10 +7,7 @@ import config from "../constant/linkApi";
 import { CreateGroup } from "../redux/group/groupSlice";
 import { CreateGroupDetail } from "../redux/groupdetail/groupdetailSlice";
 import { toast } from "react-toastify";
-// const users = Array.from({ length: 20 }, (_, i) => ({
-//   name: `Thành viên ${i + 1}`,
-//   avatar: `https://i.pravatar.cc/40?img=${i + 1}`,
-// }));
+import { CreateConversation } from "../redux/conversation/conversationSlice";
 const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,8 +73,8 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
         avatar: selectedImage,
       };
       var result = await dispatch(CreateGroup(groupDto)).unwrap();
-      var groupId = result.groupId;
-      if (result !== null) {
+      if (result !== null && result.groupId> 0) {
+        var groupId = result.groupId;
         const groupDetails = [
           { userId: id, groupId: groupId, role: "Admin" },
           ...selectedUsers.map((userId) => ({
@@ -86,10 +83,22 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
             role: "Member",
           })),
         ];
-
-        for (const groupDetailDto of groupDetails) {
-          await dispatch(CreateGroupDetail(groupDetailDto));
-        }
+        await Promise.all(groupDetails.map((groupDetailDto)=>dispatch(CreateGroupDetail(groupDetailDto))))
+        console.log(groupDetails);
+        // for (const groupDetailDto of groupDetails) {
+        //   await dispatch(CreateGroupDetail(groupDetailDto));
+        // }
+        var listConversation=groupDetails.map((conversation)=>({
+          id:groupId,
+          userId:conversation.userId,
+          avatar:result.avatar,
+          conversationName:result.groupName,
+          userSend:"",
+          type:"group",
+          content:`${conversation.userId === id ? "Bạn đã tạo nhóm "+result.groupName : "Bạn đã được thêm vào nhóm "+result.groupName}`
+        }))
+        await Promise.all(listConversation.map((conversationDto)=>dispatch(CreateConversation(conversationDto))))
+        console.log(listConversation)
         toast("Tạo nhóm thành công");
       } else {
         toast.error("Tạo nhóm không thành công");

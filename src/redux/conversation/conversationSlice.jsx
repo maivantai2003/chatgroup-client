@@ -44,13 +44,18 @@ const conversationSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(GetAllConversation.fulfilled, (state, action) => {
-      state.listConversation = action.payload;
+      state.listConversation = action.payload.sort(
+        (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
+      );
     }),
     builder.addCase(GetAllConversationById.fulfilled, (state, action) => {
       state.conversation = action.payload;
     }),
     builder.addCase(CreateConversation.fulfilled, (state, action) => {
       state.listConversation.push(action.payload);
+      state.listConversation.sort(
+        (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
+      );
     }),
     builder.addCase(UpdateConversation.fulfilled, (state, action) => {
       const index = state.listConversation.findIndex(

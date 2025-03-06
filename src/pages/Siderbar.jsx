@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { FaUser, FaUsers, FaUserPlus, FaSignOutAlt } from "react-icons/fa"; // Import các icon từ react-icons/fa
+import { FaUser, FaUsers, FaUserPlus, FaSignOutAlt, FaRegComment } from "react-icons/fa"; // Import các icon từ react-icons/fa
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    localStorage.clear()
     navigate("/login");
   };
 
@@ -17,7 +18,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         }`}
         onClick={() => setActiveTab("message")}
       >
-        <FaUsers className="w-6 h-6" />
+        <FaRegComment className="w-6 h-6" />
       </button>
 
       <button

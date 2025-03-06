@@ -5,6 +5,7 @@ import groupReducer from "./group/groupSlice"
 import groupdetailReducer from "./groupdetail/groupdetailSlice"
 import userReducer from "./user/userSlice"
 import conversationReducer from "./conversation/conversationSlice"
+import cloudmessageReducer from "./cloudmessage/cloudmessageSlice"
 const store=configureStore({
     reducer:{
         auth:authReducer,
@@ -12,7 +13,8 @@ const store=configureStore({
         group:groupReducer,
         groupdetail:groupdetailReducer,
         user:userReducer,
-        conversation:conversationReducer
+        conversation:conversationReducer,
+        cloudmessage:cloudmessageReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

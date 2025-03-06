@@ -5,6 +5,7 @@ import CreateGroupModal from "../components/CreateGroupModal";
 import { useDispatch, useSelector } from "react-redux";
 import EditProfileModal from "../components/EditProfileModal";
 import { GetUser } from "../redux/user/userSlice";
+import { FaLayerGroup, FaUsers } from "react-icons/fa";
 const TitleBar = ({ name,id,avatar }) => {
   const dispatch = useDispatch();
   const [isModalOpen, setModalOpen] = useState(false);
@@ -46,7 +47,7 @@ const TitleBar = ({ name,id,avatar }) => {
 
         {/* Nút Thêm Vào Nhóm */}
         <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition" onClick={() => setGroupModalOpen(true)}>
-          <UserIcon className="w-5 h-5 text-gray-700" />
+          <FaUsers className="w-5 h-5 text-gray-700" />
         </button>
       </div>
       <FriendRequestModal isOpen={isModalOpen} id={id} closeModal={() => setModalOpen(false)} />
