@@ -64,39 +64,34 @@ import Header from "./Header";
 import SelectMethod from "./SelectMethod";
 import { useEffect } from "react";
 import { GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
+import UserMessages from "../components/UserMessages";
+import GroupMessages from "../components/GroupMessages";
+import CloudMessages from "../components/CloudMessages";
 //import MessageItem from "./MessageItem";
 
 const ChatMessage = ({ conversation }) => {
-  const listCloudMessage=useSelector((state)=>state.cloudmessage.listCloudMessage)
-  const dispatch=useDispatch()
-  useEffect(()=>{
-    const fetchData=async()=>{
-      await dispatch(GetCloudMessagesById(conversation.userId))
-    }
-    fetchData()
-  },[dispatch, conversation.type, conversation.userId])
+  
   const renderMessages = () => {
     switch (conversation.type) {
-      case "user":
-        return <UserMessages conversationId={conversation.conversationId} />;
-      case "group":
-        return <GroupMessages conversationId={conversation.conversationId} />;
+      // case "user":
+      //   return <UserMessages conversationId={conversation.conversationId} />;
+      // case "group":
+      //   return <GroupMessages conversationId={conversation.conversationId} />;
       case "cloud":
-        return <CloudMessages userId={conversation.userId} />;
+        return <CloudMessages {...conversation} />;
       default:
-        return <p>Không có tin nhắn</p>;
+        return <p className="text-center bg-white text-gray-400 text-xs">Không có tin nhắn</p>;
     }
   };
   return (
     <div className="flex-1 flex flex-col h-full">
-      <Header avatar={conversation.avatar} name={conversation.conversationName} />
-      <div className="flex-1 p-4 overflow-y-auto">
-        {/* {conversation.messages.map((msg, index) => (
-          <MessageItem key={index} message={msg} />
-        ))} */}
-      </div>
+      <Header
+        avatar={conversation.avatar}
+        name={conversation.conversationName}
+      />
+      <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">
-        <SelectMethod name={conversation.conversationName}/>
+        <SelectMethod {...conversation} />
       </div>
     </div>
   );

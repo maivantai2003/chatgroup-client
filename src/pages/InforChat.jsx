@@ -9,7 +9,7 @@ const InforChat = ({ conversation }) => {
 
   useEffect(() => {
     if (conversation) {
-      setTimeout(() => setLoading(false), 1000);
+      setTimeout(() => setLoading(false), 10);
     }
   }, [conversation]);
 
@@ -21,7 +21,7 @@ const InforChat = ({ conversation }) => {
     <div className="w-1/4 bg-white p-4">
       {conversation.type === "group" ? (
         <GroupInfo conversation={conversation} />
-      ) : conversation.type === "cloud" ? (
+      ) : conversation.type === "cloud" ? (  
         <CloudInfo conversation={conversation} />
       ) : (
         <UserInfo conversation={conversation} />

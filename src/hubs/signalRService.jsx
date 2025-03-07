@@ -13,7 +13,7 @@ class SignalRService {
       .withUrl(`${config.HUB_URL}`, {
        // accessTokenFactory: () => token, // Truyền token nếu cần
       })
-      .withAutomaticReconnect() // Tự động reconnect nếu mất kết nối
+      .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
       .build();
 

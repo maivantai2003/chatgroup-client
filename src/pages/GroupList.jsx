@@ -103,7 +103,7 @@ export default function GroupList({ id }) {
           <ul className="space-y-2">
             {filteredGroups.map((group) => (
               <li
-                key={group.id}
+                key={group.groupId}
                 className="p-3 border rounded flex items-center justify-between relative"
               >
                 <div className="flex items-center space-x-3">
