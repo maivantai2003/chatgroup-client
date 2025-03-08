@@ -4,6 +4,9 @@ import { FaRemoveFormat, FaTrash, FaUser } from "react-icons/fa";
 import { CreateCloudMessage } from "../redux/cloudmessage/cloudmessageSlice";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
+import { UpdateConversation } from "../redux/conversation/conversationSlice";
+import axios from "axios";
+import config from "../constant/linkApi";
 const fileIcons = {
   pdf: "fas fa-file-pdf text-red-500",
   doc: "fas fa-file-word text-blue-500",
@@ -19,26 +22,59 @@ const fileIcons = {
 };
 const imageExtensions = ["jpg", "jpeg", "png", "gif"];
 
-const SelectMethod = ({ userId, conversationName, type }) => {
+const SelectMethod = ({ userId, conversationName, type, conversationId }) => {
   const [message, setMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const pickerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const dispatch=useDispatch()
-  const handleSendMessage =async () => {
+  const dispatch = useDispatch();
+  const handleSendMessage = async () => {
     if (message.trim() !== "" || selectedFiles.length > 0) {
+      console.log(message)
+      let uploadedFiles = [];
+      if (selectedFiles.length > 0) {
+        const uploadPromises = selectedFiles.map((file) =>
+          uploadFileToCloudinary(file)
+        );
+        uploadedFiles = await Promise.all(uploadPromises)
+        uploadedFiles = uploadedFiles.filter((file) => file !== null);
+      }
+      console.log(uploadedFiles)
       let cloudMessageDto = {
         userId: userId,
         content: message,
-        type: selectedFiles.length === 0 ? "text" : "file"
-      }
-      var result=await dispatch(CreateCloudMessage(cloudMessageDto))
-      if(result!==null && result.cloudMessageId>0){
-        toast.success("Gửi tin nhắn thành công")
-      }else{
-        toast.error("Gửi tin nhắn không thành công")
-        console.log(result)
+        type: selectedFiles.length === 0 ? "text" : "file",
+      };
+      try {
+        var result = await dispatch(
+          CreateCloudMessage(cloudMessageDto)
+        ).unwrap();
+        if (result !== null && result.cloudMessageId > 0) {
+          let conversationUpdateDto = {
+            conversationId: conversationId,
+            userSend: "Bạn",
+            content: message,
+          };
+          var resultUpdateConversation = await dispatch(
+            UpdateConversation({
+              id: conversationId,
+              conversationUpdateDto: conversationUpdateDto,
+            })
+          ).unwrap();
+          console.log(resultUpdateConversation);
+          if (
+            resultUpdateConversation !== null &&
+            resultUpdateConversation.conversationId > 0
+          ) {
+            toast.success("Cập nhật conversation thành công");
+          }
+        } else {
+          toast.error("Gửi tin nhắn không thành công");
+          console.log(result);
+        }
+      } catch (ex) {
+        console.log(ex);
       }
       console.log("Gửi tin nhắn:", message);
       console.log("Gửi file:", selectedFiles);
@@ -73,7 +109,35 @@ const SelectMethod = ({ userId, conversationName, type }) => {
     }));
     setSelectedFiles((prevFiles) => [...prevFiles, ...filesWithPreview]);
   };
-
+  const uploadFileToCloudinary = async (file) => {
+    var fileDetail=file.file
+    const formData = new FormData();
+    formData.append("file", fileDetail);
+    const fileInfo = {
+      TenFile: fileDetail.name,
+      KichThuocFile: formatFileSize(fileDetail.size),
+      LoaiFile: fileDetail.name.split(".").pop(),
+    };
+    try {
+      const response = await axios.post( `${config.API_URL}/File/Upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return {
+        ...fileInfo,
+        DuongDan: response.data.url,
+      };
+    } catch (error) {
+      console.error("Lỗi upload file:", error);
+      return null;
+    }
+  };
+  const formatFileSize = (size) => {
+    if (size === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(size) / Math.log(k));
+    return parseFloat((size / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
   const handleDragOver = (event) => {
     event.preventDefault();
   };
@@ -131,6 +195,12 @@ const SelectMethod = ({ userId, conversationName, type }) => {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
           className="flex-1 p-2 rounded bg-white outline-none border border-transparent focus:ring-0 focus:border-transparent"
           placeholder={`Nhập @, tin nhắn tới ${conversationName}`}
         />

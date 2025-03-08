@@ -16,7 +16,7 @@ const ListGroup = ({id, onSelectConversation}) => {
     }
     fectchData()
   },[dispatch,id])
-  const filteredConversations = listConversation.filter((conv) => conv.userId === id);
+  const filteredConversations = listConversation.filter((conv) => conv.userId === id)
   return (
     <div className="flex-1 overflow-y-auto">
       {loading ? (

@@ -27,8 +27,8 @@ export const CreateConversation = createAsyncThunk(
 
 export const UpdateConversation = createAsyncThunk(
   "conversation/UpdateConversation",
-  async ({ id, conversationDto }) => {
-    const response = await conversationService.UpdateConversation(id, conversationDto);
+  async ({ id, conversationUpdateDto }) => {
+    const response = await conversationService.UpdateConversation(id, conversationUpdateDto);
     return response;
   }
 );
@@ -62,7 +62,14 @@ const conversationSlice = createSlice({
         (conv) => conv.conversationId === action.payload.conversationId
       );
       if (index !== -1) {
-        state.listConversation[index] = action.payload;
+        Object.assign(state.listConversation[index], {
+          lastMessage: action.payload.lastMessage,
+          userSend: action.payload.userSend,
+          content: action.payload.content,
+        });
+        state.listConversation.sort(
+          (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
+        );
       }
     });
   },

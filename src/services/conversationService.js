@@ -12,8 +12,8 @@ const conversationService = {
     const response=await axiosInstance.get("Conversation/GetAllConversation/"+id)
     return response.data
   },
-  UpdateConversation:async(id,conversationDto)=>{
-    const response=await axiosInstance.put("Conversation/UpdateConversation/"+id,conversationDto)
+  UpdateConversation:async(id,conversationUpdateDto)=>{
+    const response=await axiosInstance.put("Conversation/UpdateConversation/"+id,conversationUpdateDto)
     return response.data
   }
 };

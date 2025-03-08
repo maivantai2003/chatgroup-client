@@ -17,14 +17,13 @@ const ListGroupItem = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeAgo(getTimeAgo(lastMessage));
-    }, 60000); // 60s
+    }, 60000);
 
     return () => clearInterval(interval);
-  }, [lastMessage]);
+  }, [lastMessage,id]);
   return (
     <div className={`p-2 ${isSelected ? "bg-gray-200" : ""}`} onClick={onClick}>
       <div className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
-        {/* Ảnh đại diện tròn */}
         <img
           src={avatar}
           alt={conversationName}
