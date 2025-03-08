@@ -27,8 +27,8 @@ export const CreateConversation = createAsyncThunk(
 
 export const UpdateConversation = createAsyncThunk(
   "conversation/UpdateConversation",
-  async ({ id, conversationUpdateDto }) => {
-    const response = await conversationService.UpdateConversation(id, conversationUpdateDto);
+  async (conversationUpdateDto) => {
+    const response = await conversationService.UpdateConversation(conversationUpdateDto);
     return response;
   }
 );
@@ -59,7 +59,9 @@ const conversationSlice = createSlice({
     }),
     builder.addCase(UpdateConversation.fulfilled, (state, action) => {
       const index = state.listConversation.findIndex(
-        (conv) => conv.conversationId === action.payload.conversationId
+        (conv) => conv.id === action.payload.id &&
+        conv.userId === action.payload.userId &&
+        conv.type === action.payload.type
       );
       if (index !== -1) {
         Object.assign(state.listConversation[index], {

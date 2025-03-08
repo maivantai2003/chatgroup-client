@@ -6,13 +6,12 @@ import { Provider } from 'react-redux'
 import store from './redux/store.js'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
-import { SignalRProvider } from './context/SignalRContext.jsx'
+//import { SignalRProvider } from './context/SignalRContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-      <SignalRProvider>
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -26,7 +25,6 @@ createRoot(document.getElementById('root')).render(
         theme="colored" 
          />
       <App />
-      </SignalRProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>,

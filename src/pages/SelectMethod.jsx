@@ -22,7 +22,8 @@ const fileIcons = {
 };
 const imageExtensions = ["jpg", "jpeg", "png", "gif"];
 
-const SelectMethod = ({ userId, conversationName, type, conversationId }) => {
+const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => {
+  console.log(userId,id,type)
   const [message, setMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -52,15 +53,14 @@ const SelectMethod = ({ userId, conversationName, type, conversationId }) => {
         ).unwrap();
         if (result !== null && result.cloudMessageId > 0) {
           let conversationUpdateDto = {
-            conversationId: conversationId,
+            userId:userId,
+            id:id,
+            type:type,
             userSend: "Bạn",
             content: message,
           };
           var resultUpdateConversation = await dispatch(
-            UpdateConversation({
-              id: conversationId,
-              conversationUpdateDto: conversationUpdateDto,
-            })
+            UpdateConversation(conversationUpdateDto)
           ).unwrap();
           console.log(resultUpdateConversation);
           if (

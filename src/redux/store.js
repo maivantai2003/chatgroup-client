@@ -7,6 +7,7 @@ import userReducer from "./user/userSlice"
 import conversationReducer from "./conversation/conversationSlice"
 import cloudmessageReducer from "./cloudmessage/cloudmessageSlice"
 import cloudmessagefileReducer from "./cloudmessagefile/cloudmessagefileSlice"
+import fileReducer from "./file/fileSlice"
 const store=configureStore({
     reducer:{
         auth:authReducer,
@@ -16,7 +17,9 @@ const store=configureStore({
         user:userReducer,
         conversation:conversationReducer,
         cloudmessage:cloudmessageReducer,
-        cloudmessagefile:cloudmessagefileReducer
+        cloudmessagefile:cloudmessagefileReducer,
+        file:fileReducer
+        
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
