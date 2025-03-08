@@ -12,7 +12,6 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-      <SignalRProvider>
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -26,7 +25,6 @@ createRoot(document.getElementById('root')).render(
         theme="colored" 
          />
       <App />
-      </SignalRProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>,
