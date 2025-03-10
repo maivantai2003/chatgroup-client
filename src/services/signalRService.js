@@ -1,66 +1,58 @@
 import * as signalR from "@microsoft/signalr";
 import config from "../constant/linkApi";
 
-class SignalRService {
-  constructor() {
-    this.connection = null;
-  }
+const SignalRService = (function () {
+  let connection = null;
 
-  async startConnection() {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      console.warn("Không có token, không thể kết nối SignalR.");
-      return;
+  const startConnection = async () => {
+    if (!connection) {
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl(`${config.HUB_URL}`, {
+          accessTokenFactory: () => localStorage.getItem("accessToken"),
+        })
+        .withAutomaticReconnect([0, 2000, 5000, 10000])
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+      connection.onclose(async (error) => {
+        console.log("SignalR Disconnected", error);
+        setTimeout(async () => {
+          console.log("Attempting to reconnect...");
+          await startConnection();
+        }, 5000);
+      });
     }
-  
-    if (this.connection) {
-      if (this.connection.state === signalR.HubConnectionState.Connected || 
-          this.connection.state === signalR.HubConnectionState.Connecting) {
-        console.log("🔄 SignalR đã kết nối hoặc đang kết nối, không cần kết nối lại.");
-        return;
+
+    if (connection.state === signalR.HubConnectionState.Disconnected) {
+      let attempts = 0;
+      while (attempts < 5) { // Thử lại tối đa 5 lần
+        try {
+          await connection.start();
+          console.log("SignalR Connected");
+          return;
+        } catch (err) {
+          attempts++;
+          console.error(`SignalR Connection Error (Attempt ${attempts}):`, err);
+          await new Promise((resolve) => setTimeout(resolve, 5000)); // Chờ 5s trước khi thử lại
+        }
       }
     }
-    
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${config.HUB_URL}`, { accessTokenFactory: () => token })
-      .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Information)
-      .build();
-  
-    try {
-      await this.connection.start();
-      console.log("🔗 SignalR Connected");
-    } catch (err) {
-      console.error("❌ SignalR Connection Error:", err);
-    }
-  }
+  };
 
-  onEvent(eventName, callback) {
-    if (this.connection) {
-      this.connection.off(eventName);
-      this.connection.on(eventName, callback);
+  const stopConnection = async () => {
+    if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
+      await connection.stop();
+      console.log("SignalR Connection Stopped");
     }
-  }
+  };
 
-  offEvent(eventName) {
-    if (this.connection) {
-      this.connection.off(eventName);
-    }
-  }
+  const getConnection = () => connection;
 
-  async sendMessage(method, ...args) {
-    if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
-      await this.connection.invoke(method, ...args);
-    }
-  }
+  return {
+    startConnection,
+    stopConnection,
+    getConnection,
+  };
+})();
 
-  stopConnection() {
-    if (this.connection) {
-      this.connection.stop();
-      console.log("🔌 SignalR Disconnected");
-    }
-  }
-}
-
-const signalRService = new SignalRService();
-export default signalRService;
+export default SignalRService;

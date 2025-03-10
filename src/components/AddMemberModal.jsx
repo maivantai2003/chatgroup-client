@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { FaUserPlus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,8 +6,7 @@ import { GetAllFriendById } from "../redux/friend/friendSlice";
 import { CreateGroupDetail } from "../redux/groupdetail/groupdetailSlice";
 import { CreateConversation, UpdateConversation } from "../redux/conversation/conversationSlice";
 import { GetGroupById } from "../redux/group/groupSlice";
-import { useSignalR } from "../context/SignalRContext";
-
+import { SignalRContext } from "../context/SignalRContext";
 const AddMemberModal = ({
   isOpen,
   onClose,
@@ -21,8 +20,7 @@ const AddMemberModal = ({
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  //const connection=useSignalR()
-  console.log(groupMembers)
+  const connection=useContext(SignalRContext)
   useEffect(() => {
     if (isOpen) {
       const fetchData = async () => {
@@ -72,61 +70,68 @@ const AddMemberModal = ({
           role: "Member",
         })),
       ];
-      if (groupDetails.length > 0) {
-        await Promise.all(
-          groupDetails.map((groupDetailDto) =>
-            dispatch(CreateGroupDetail(groupDetailDto))
-          )
-        );
+      if(connection){
+        for(let i=0;i<groupDetails.length;i++){
+          connection.invoke("AddMemberToGroup",groupDetails[i].userId+"")
+          console.log(groupDetails[i].userId+"")
+        } 
       }
-      var listConversation = groupDetails.map((conversation) => ({
-        id: groupId,
-        userId: conversation.userId,
-        avatar: avatar,
-        conversationName: groupName,
-        userSend: "",
-        type: "group",
-        content: `${"Bạn đã được thêm vào nhóm " + groupName}`,
-      }));
-      await Promise.all(
-        listConversation.map((conversationDto) =>
-          dispatch(CreateConversation(conversationDto))
-        )
-      );
-      console.log(listConversation);
-      if (groupMembers.length > 0) {
-        let listConversation = groupMembers.map((member) => ({
-          userId: member.userId,
-          id: groupId,
-          type: "group",
-          userSend: "",
-          content:
-            selectedMembers.map((member) => member.name).join(", ") +
-            " được thêm vào nhóm",
-        }));
-        await Promise.all(
-          listConversation.map((conversationUpdateDto) =>
-            dispatch(UpdateConversation(conversationUpdateDto))
-          )
-        );
-        console.log(listConversation)
-      }
-      setSelectedMembers([]);
-      await dispatch(GetGroupById(groupId))
-      // if (connection) {
+      // await Promise.all(groupMembers.map((member)=>{
+      //   if(connection){
+      //     connection.invoke("AddMemberToGroup",member.userId+"")
+      //   }
+      // }))
+      // await Promise.all(selectedMembers.map((member=>{
+      //   if(connection){
+      //     connection.invoke("AddMemberToGroup",member.id+"")
+      //   }
+      // })))
+      //
+      // if (groupDetails.length > 0) {
       //   await Promise.all(
-      //     selectedMembers.map(async (member) => {
-      //       try {
-      //         await connection.invoke("AddMemberToGroup", member.id.toString());
-      //       } catch (err) {
-      //         console.error(`Lỗi khi gửi thông báo cho ${member.name}:`, err);
-      //       }
-      //     })
+      //     groupDetails.map((groupDetailDto) =>
+      //       dispatch(CreateGroupDetail(groupDetailDto))
+      //     )
       //   );
       // }
-      onClose();
+      // var listConversation = groupDetails.map((conversation) => ({
+      //   id: groupId,
+      //   userId: conversation.userId,
+      //   avatar: avatar,
+      //   conversationName: groupName,
+      //   userSend: "",
+      //   type: "group",
+      //   content: `${"Bạn đã được thêm vào nhóm " + groupName}`,
+      // }));
+      // await Promise.all(
+      //   listConversation.map((conversationDto) =>
+      //     dispatch(CreateConversation(conversationDto))
+      //   )
+      // );
+      // console.log(listConversation);
+      // if (groupMembers.length > 0) {
+      //   let listConversation = groupMembers.map((member) => ({
+      //     userId: member.userId,
+      //     id: groupId,
+      //     type: "group",
+      //     userSend: "",
+      //     content:
+      //       selectedMembers.map((member) => member.name).join(", ") +
+      //       " được thêm vào nhóm",
+      //   }));
+      //   await Promise.all(
+      //     listConversation.map((conversationUpdateDto) =>
+      //       dispatch(UpdateConversation(conversationUpdateDto))
+      //     )
+      //   );
+      //   console.log(listConversation)
+
+      // }
+      // setSelectedMembers([]);
+      // await dispatch(GetGroupById(groupId))
+      // onClose();
     } catch (ex) {
-      console.error("Lỗi khi thêm thành viên vào nhóm:", error);
+      console.error("Lỗi khi thêm thành viên vào nhóm:", ex);
     }
   };
   return (

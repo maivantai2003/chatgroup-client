@@ -8,8 +8,6 @@ import {
 } from "react-icons/fa"; // Import các icon từ react-icons/fa
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useSignalR } from "../context/SignalRContext";
-import signalRService from "../services/signalRService";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();

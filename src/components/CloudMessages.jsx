@@ -44,7 +44,12 @@ const CloudMessages = ({ userId, type }) => {
     <div className="flex flex-col space-y-2 p-4">
       {Object.keys(groupedMessages).map((date, index) => (
         <div key={index + 1}>
-          <div className="text-center text-gray-500 text-sm my-2">{date}</div>
+          {/* <div className="text-center text-gray-500 text-sm my-2">{date}</div> */}
+          <div className="flex justify-center my-2">
+  <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full shadow-sm">
+    {date}
+  </div>
+</div>
 
           {groupedMessages[date].map((msg) => (
             <div

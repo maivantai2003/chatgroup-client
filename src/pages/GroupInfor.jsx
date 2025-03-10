@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetGroupById } from "../redux/group/groupSlice";
-import { FaSignOutAlt, FaUsers } from "react-icons/fa";
+import { FaFile, FaSignOutAlt, FaUsers } from "react-icons/fa";
 import AddMemberModal from "../components/AddMemberModal";
-import { useSignalR } from "../context/SignalRContext";
+import { SignalRContext } from "../context/SignalRContext";
+import MediaViewer from "../components/MediaView";
 
 const GroupInfo = ({ conversation }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenMedia, setIsOpenMedia] = useState(false);
   const groupDetail = useSelector((state) => state.group.group);
   const [loading, setLoading] = useState(false);
+  const connection=useContext(SignalRContext)
   const prevId = useRef(null);
-  const connection=useSignalR()
   useEffect(() => {
     if (!conversation?.id || prevId.current === conversation.id) return;
     const fectchData = async () => {
@@ -25,16 +27,15 @@ const GroupInfo = ({ conversation }) => {
     prevId.current = conversation.id;
   }, [dispatch, conversation.id,conversation.userId]);
   useEffect(()=>{
-    if (connection) {
-          connection.on("MemberToGroup", () => {
-            console.log("New message received in conversation");
-            dispatch(GetGroupById(conversation.id));
-          });
-          return () => {
-            connection.off("MemberToGroup");
-          };
-        }
-  },[connection,dispatch, conversation.id,conversation.userId])
+    if(connection){
+      connection.on("MemberToGroup",()=>{
+        alert("GroupInfor")
+        setLoading(true);
+        dispatch(GetGroupById(conversation.id))
+        setLoading(false);
+      })
+    }
+  },[connection])
   if (loading) {
     return <div className="text-center font-bold">Đang tải dữ liệu...</div>;
   }
@@ -108,6 +109,12 @@ const GroupInfo = ({ conversation }) => {
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">File</div>
+        <button onClick={() => setIsOpenMedia(true)} className="p-2 bg-blue-500 text-white rounded">
+        <FaFile /> File
+      </button>
+
+      {/* Truyền trạng thái và hàm đóng mở xuống MediaViewer */}
+      {isOpenMedia && <MediaViewer onClose={() => setIsOpenMedia(false)} groupName={conversation.conversationName} />}
         {/* {conversation.files.map((file, index) => (
           <div
             key={index}
