@@ -108,7 +108,7 @@ export default function GroupList({ id }) {
               >
                 <div className="flex items-center space-x-3">
                   <img
-                    src={group.avatar?group.avatar:"../assets/images/defaultBackground.jpg"}
+                    src={group.avatar!==null?group.avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
                     alt={group.groupName}
                     className="w-10 h-10 rounded-full border"
                   />

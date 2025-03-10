@@ -27,7 +27,7 @@ const UserInfo = ({ conversation }) => {
           <span className="text-xs">Tạo nhóm</span>
         </button>
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <div className="flex items-center p-2 border-b">
           <i className="fas fa-clock text-xl text-gray-600"></i>
           <span className="ml-2 text-sm">Danh sách nhắc hẹn</span>
@@ -36,8 +36,8 @@ const UserInfo = ({ conversation }) => {
           <i className="fas fa-users text-xl text-gray-600"></i>
           <span className="ml-2 text-sm">9 nhóm chung</span>
         </div>
-      </div>
-
+      </div> */}
+      <div className="h-[4px] bg-gray-200 my-4"></div>
       {/* Ảnh/Video */}
       <div className="mt-4">
         <div className="font-bold">Ảnh/Video</div>
@@ -61,7 +61,7 @@ const UserInfo = ({ conversation }) => {
         </div>
         <button className="mt-2 text-blue-500">Xem tất cả</button>
       </div>
-
+      <div className="h-[4px] bg-gray-200 my-4"></div>
       {/* File */}
       <div className="mt-4">
         <div className="font-bold">File</div>

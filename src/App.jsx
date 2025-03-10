@@ -16,10 +16,11 @@ import GroupList from "./pages/GroupList";
 import { jwtDecode } from "jwt-decode";
 import ImageSlider from "./components/ImageSlider";
 import { FaRemoveFormat, FaSearch } from "react-icons/fa";
+import { SignalRProvider, useSignalR } from "./context/SignalRContext";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
-    <Routes>
+      <Routes>
       {/* {!isAuthenticated ? (
           <>
             <Route path="/login" element={<LoginForm />} />
@@ -57,6 +58,7 @@ const MainLayout = () => {
     navigate("/login");
   }
   return (
+    <SignalRProvider>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex h-screen w-full">
@@ -112,6 +114,7 @@ const MainLayout = () => {
         )}
       </div>
     </div>
+    </SignalRProvider>
   );
 };
 export default App;

@@ -8,6 +8,10 @@ export const CreateGroup=createAsyncThunk("group/CreateGroup",async(groupDto)=>{
     const response=await groupService.CreateGroup(groupDto)
     return response
 })
+export const GetGroupById=createAsyncThunk("group/GetGroupById",async(id)=>{
+    const response=await groupService.GetGroupById(id)
+    return response
+})
 const initialState={
     listGroup:[],
     listGroupUser:[],
@@ -23,6 +27,9 @@ const groupSlice=createSlice({
         }),
         builder.addCase(CreateGroup.fulfilled,(state,action)=>{
             state.listGroup.push(action.payload)
+        }),
+        builder.addCase(GetGroupById.fulfilled,(state,action)=>{
+            state.group=action.payload
         })
     }
 })

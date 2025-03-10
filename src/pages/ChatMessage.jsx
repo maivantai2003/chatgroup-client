@@ -86,7 +86,7 @@ const ChatMessage = ({ conversation }) => {
   return (
     <div className="flex-1 flex flex-col h-full">
       <Header
-        avatar={conversation.avatar}
+        avatar={conversation.avatar!==null?conversation.avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
         name={conversation.conversationName}
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>

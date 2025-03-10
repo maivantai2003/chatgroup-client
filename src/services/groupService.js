@@ -7,6 +7,10 @@ const groupService = {
   CreateGroup:async(groupDto)=>{
     const response=await axiosInstance.post("Group/CreateGroup",groupDto)
     return response.data
+  },
+  GetGroupById:async (id)=>{
+    const respone=await axiosInstance.get("Group/GetGroupById/"+id)
+    return respone.data
   }
 };
 

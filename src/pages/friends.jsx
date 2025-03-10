@@ -10,10 +10,11 @@ import { GetAllUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
-
+import {useSignalR} from "../context/SignalRContext"
 const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const connection=useSignalR()
   var userInfor = JSON.parse(localStorage.getItem("user"));
   const handleRejectFriend = async (id, friendId, userId) => {
     console.log(id, friendId, userId);
@@ -60,6 +61,9 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
           if(resultConversationFriend===null){
             toast.error("Lỗi")
             return
+          }
+          if(connection){
+            await connection.invoke("AcceptFriend",userId+"").catch((err) => console.error("Error calling AcceptFriend:", err));
           }
         }else{
           toast.error("Lỗi")

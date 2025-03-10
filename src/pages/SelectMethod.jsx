@@ -57,7 +57,7 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
             id:id,
             type:type,
             userSend: "Bạn",
-            content: message,
+            content: message!==""?message:"Bạn đã gửi file",
           };
           var resultUpdateConversation = await dispatch(
             UpdateConversation(conversationUpdateDto)

@@ -32,6 +32,7 @@ const CloudInfo = ({ conversation }) => {
         </div> */}
   
         {/* Ảnh/Video */}
+        <div className="h-[4px] bg-gray-200 my-4"></div>
         <div className="mt-4">
           <div className="font-bold">Ảnh/Video</div>
           <div className="grid grid-cols-3 gap-2 mt-2">
@@ -54,7 +55,7 @@ const CloudInfo = ({ conversation }) => {
           </div>
           <button className="mt-2 text-blue-500">Xem tất cả</button>
         </div>
-  
+        <div className="h-[4px] bg-gray-200 my-4"></div>
         {/* File */}
         <div className="mt-4">
           <div className="font-bold">File</div>

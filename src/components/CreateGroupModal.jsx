@@ -84,10 +84,7 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
           })),
         ];
         await Promise.all(groupDetails.map((groupDetailDto)=>dispatch(CreateGroupDetail(groupDetailDto))))
-        console.log(groupDetails);
-        // for (const groupDetailDto of groupDetails) {
-        //   await dispatch(CreateGroupDetail(groupDetailDto));
-        // }
+        console.log(groupDetails)
         var listConversation=groupDetails.map((conversation)=>({
           id:groupId,
           userId:conversation.userId,

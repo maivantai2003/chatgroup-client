@@ -1,48 +1,52 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import SignalRService from "../hubs/signalRService";
-import { useSelector } from "react-redux"; // Nếu dùng Redux để lấy token
+import * as signalR from "@microsoft/signalr";
+import config from "../constant/linkApi";
 
-const SignalRContext = createContext();
+const SignalRContext = createContext(null);
 
 export const SignalRProvider = ({ children }) => {
-  const [isConnected, setIsConnected] = useState(false);
-  //const user = useSelector((state) => state.auth.user); // Lấy token từ Redux
   const [connection, setConnection] = useState(null);
+  
   useEffect(() => {
-    // if (user?.token) {
-    //   SignalRService.startConnection(user.token).then(() => {
-    //     setIsConnected(true);
-    //   });
-    // }
-    const startSignalR = async () => {
-        try {
-          if (!connection) {
-            const conn = await SignalRService.startConnection();
-            setIsConnected(true);
-            setConnection(conn);
-          }
-        } catch (error) {
-          console.error("SignalR connection error:", error);
-          setIsConnected(false);
-        }
-      };
-  
-      startSignalR();
-  
-      return () => {
-        if (connection) {
-          SignalRService.stopConnection();
-        }
-      };
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.warn("❌ No access token found. Skipping SignalR connection.");
+      return;
+    }
+
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl(`${config.HUB_URL}`, {
+        transport: signalR.HttpTransportType.WebSockets,
+        accessTokenFactory: () => localStorage.getItem("accessToken"),
+      })
+      .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.Information)
+      .build();
+
+    newConnection
+      .start()
+      .then(() => {
+        console.log("✅ SignalR Connected");
+        setConnection(newConnection);
+      })
+      .catch((err) => console.error("❌ SignalR Connection Error:", err));
+
+    // Cleanup khi component unmount
+    return () => {
+      if (newConnection) {
+        newConnection.stop();
+        console.log("🔴 SignalR Disconnected");
+      }
+    };
   }, []);
 
-  return (
-    <SignalRContext.Provider value={{ isConnected, connection }}>
-      {children}
-    </SignalRContext.Provider>
-  );
+  return <SignalRContext.Provider value={connection}>{children}</SignalRContext.Provider>;
 };
 
 export const useSignalR = () => {
-  return useContext(SignalRContext);
+  const connection = useContext(SignalRContext);
+  if (!connection) {
+    console.warn("⚠️ useSignalR must be used within a SignalRProvider");
+  }
+  return connection;
 };

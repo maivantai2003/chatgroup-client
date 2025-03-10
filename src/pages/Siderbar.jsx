@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa"; // Import các icon từ react-icons/fa
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useSignalR } from "../context/SignalRContext";
+import signalRService from "../services/signalRService";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
@@ -62,7 +64,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       {/* Nút Đăng xuất */}
       <button
         className="p-2 rounded-full text-white hover:text-red-500 mt-auto"
-        onClick={handleLogout}
+        onClick={()=>{
+          handleLogout()
+        }}
       >
         <FaSignOutAlt className="w-6 h-6" />
       </button>

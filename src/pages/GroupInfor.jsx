@@ -1,4 +1,43 @@
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { GetGroupById } from "../redux/group/groupSlice";
+import { FaSignOutAlt, FaUsers } from "react-icons/fa";
+import AddMemberModal from "../components/AddMemberModal";
+import { useSignalR } from "../context/SignalRContext";
+
 const GroupInfo = ({ conversation }) => {
+  const dispatch = useDispatch();
+  const [isOpen, setIsOpen] = useState(false);
+  const groupDetail = useSelector((state) => state.group.group);
+  const [loading, setLoading] = useState(false);
+  const prevId = useRef(null);
+  const connection=useSignalR()
+  useEffect(() => {
+    if (!conversation?.id || prevId.current === conversation.id) return;
+    const fectchData = async () => {
+      if (conversation?.id) {
+        setLoading(true);
+        await dispatch(GetGroupById(conversation.id));
+        setLoading(false);
+      }
+    };
+    fectchData();
+    prevId.current = conversation.id;
+  }, [dispatch, conversation.id,conversation.userId]);
+  useEffect(()=>{
+    if (connection) {
+          connection.on("MemberToGroup", () => {
+            console.log("New message received in conversation");
+            dispatch(GetGroupById(conversation.id));
+          });
+          return () => {
+            connection.off("MemberToGroup");
+          };
+        }
+  },[connection,dispatch, conversation.id,conversation.userId])
+  if (loading) {
+    return <div className="text-center font-bold">Đang tải dữ liệu...</div>;
+  }
   return (
     <div>
       <div className="font-bold text-center">Thông tin nhóm</div>
@@ -14,7 +53,11 @@ const GroupInfo = ({ conversation }) => {
             ))}
         </div> */}
         <img
-          src={conversation.avatar}
+          src={
+            conversation.avatar !== null
+              ? conversation.avatar
+              : "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"
+          }
           className="w-16 h-16 rounded-full"
           alt="Avatar"
         />
@@ -33,19 +76,21 @@ const GroupInfo = ({ conversation }) => {
           <span className="text-xs">Ghim hội thoại</span>
         </button>
         <button className="flex flex-col items-center">
-          <i className="fas fa-user-plus text-lg"></i>
+          <i className="fas fa-user-plus text-lg" onClick={()=>setIsOpen(true)}></i>
           <span className="text-xs">Thêm thành viên</span>
         </button>
       </div>
+      <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">Thành viên nhóm</div>
         <div className="flex items-center justify-between mt-2">
-          {/* <span>{conversation.members.length} thành viên</span>
-            <a href={conversation.groupLink} className="text-blue-500">
-              Link tham gia nhóm
-            </a> */}
+          <div className="flex items-center gap-2">
+            <FaUsers className="w-6 h-6" />
+            <span>{groupDetail?.userNumber} thành viên</span>
+          </div>
         </div>
       </div>
+      <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">Ảnh/Video</div>
         <div className="grid grid-cols-3 gap-1 mt-2">
@@ -60,6 +105,7 @@ const GroupInfo = ({ conversation }) => {
         </div>
         <button className="mt-2 text-blue-500">Xem tất cả</button>
       </div>
+      <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">File</div>
         {/* {conversation.files.map((file, index) => (
@@ -81,6 +127,23 @@ const GroupInfo = ({ conversation }) => {
         ))} */}
         <button className="mt-2 text-blue-500">Xem tất cả</button>
       </div>
+      <div className="h-[4px] bg-gray-200 my-4"></div>
+      <div className="mt-4">
+      <button className="flex items-center text-red-500 hover:text-red-700 font-semibold">
+        <FaSignOutAlt className="w-5 h-5 mr-2" />
+        Rời nhóm
+      </button>
+    </div>
+    <AddMemberModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        userId={conversation.userId || null}
+        groupId={conversation.id || null}
+        groupName={conversation.conversationName || null}
+        avatar={conversation?.avatar || "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
+        //onAddMembers={handleAddMembers}
+        groupMembers={groupDetail?.groupDetailUsers || []}
+      />
     </div>
   );
 };
