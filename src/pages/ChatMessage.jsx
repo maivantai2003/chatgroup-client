@@ -73,10 +73,10 @@ const ChatMessage = ({ conversation }) => {
   
   const renderMessages = () => {
     switch (conversation.type) {
-      // case "user":
-      //   return <UserMessages conversationId={conversation.conversationId} />;
-      // case "group":
-      //   return <GroupMessages conversationId={conversation.conversationId} />;
+      case "user":
+        return <UserMessages {...conversation} />;
+      case "group":
+        return <GroupMessages {...conversation} />;
       case "cloud":
         return <CloudMessages {...conversation} />;
       default:
