@@ -32,7 +32,10 @@ export const UpdateConversation = createAsyncThunk(
     return response;
   }
 );
-
+export const UpdateConversationInfor=createAsyncThunk("conversation/UpdateConversationInfor",async(conversation)=>{
+  const response=await conversationService.UpdateConversationInfor(conversation)
+  return response
+})
 const initialState = {
   listConversation: [],
   conversation: null,

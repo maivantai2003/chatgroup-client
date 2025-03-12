@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { UpdateConversation } from "../redux/conversation/conversationSlice";
 import axios from "axios";
 import config from "../constant/linkApi";
+import { formatFileSize } from "../helpers/formatFileSize";
 const fileIcons = {
   pdf: "fas fa-file-pdf text-red-500",
   doc: "fas fa-file-word text-blue-500",
@@ -32,16 +33,76 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
   const dispatch = useDispatch();
   const handleSendMessage = async () => {
     if (message.trim() !== "" || selectedFiles.length > 0) {
+      if(type==="cloud"){
+        await handleSendCloudMessage()
+      }else if(type==="user"){
+        console.log("user")
+        await handleSendUserMessage()
+      }else{
+        console.log("group")
+        await handleSendGroupMessage()
+      }
+      // console.log(message)
+      // let uploadedFiles = [];
+      // if (selectedFiles.length > 0) {
+      //   const uploadPromises = selectedFiles.map((file) =>
+      //     uploadFileToCloudinary(file)
+      //   );
+      //   uploadedFiles = await Promise.all(uploadPromises)
+      //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
+      // }
+      // console.log(uploadedFiles)
+      // let cloudMessageDto = {
+      //   userId: userId,
+      //   content: message,
+      //   type: selectedFiles.length === 0 ? "text" : "file",
+      // };
+      // try {
+      //   var result = await dispatch(
+      //     CreateCloudMessage(cloudMessageDto)
+      //   ).unwrap();
+      //   if (result !== null && result.cloudMessageId > 0) {
+      //     let conversationUpdateDto = {
+      //       userId:userId,
+      //       id:id,
+      //       type:type,
+      //       userSend: "Bạn",
+      //       content: message!==""?message:"Bạn đã gửi file",
+      //     };
+      //     var resultUpdateConversation = await dispatch(
+      //       UpdateConversation(conversationUpdateDto)
+      //     ).unwrap();
+      //     console.log(resultUpdateConversation);
+      //     if (
+      //       resultUpdateConversation !== null &&
+      //       resultUpdateConversation.conversationId > 0
+      //     ) {
+      //       toast.success("Cập nhật conversation thành công");
+      //     }
+      //   } else {
+      //     toast.error("Gửi tin nhắn không thành công");
+      //     console.log(result);
+      //   }
+      // } catch (ex) {
+      //   console.log(ex);
+      // }
+      console.log("Gửi tin nhắn:", message);
+      console.log("Gửi file:", selectedFiles);
+      //setMessage("");
+      setSelectedFiles([]);
+    }
+  };
+  const handleSendCloudMessage=async ()=>{
       console.log(message)
       let uploadedFiles = [];
-      if (selectedFiles.length > 0) {
-        const uploadPromises = selectedFiles.map((file) =>
-          uploadFileToCloudinary(file)
-        );
-        uploadedFiles = await Promise.all(uploadPromises)
-        uploadedFiles = uploadedFiles.filter((file) => file !== null);
-      }
-      console.log(uploadedFiles)
+      // if (selectedFiles.length > 0) {
+      //   const uploadPromises = selectedFiles.map((file) =>
+      //     uploadFileToCloudinary(file)
+      //   );
+      //   uploadedFiles = await Promise.all(uploadPromises)
+      //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
+      // }
+      // console.log(uploadedFiles)
       let cloudMessageDto = {
         userId: userId,
         content: message,
@@ -51,7 +112,7 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
         var result = await dispatch(
           CreateCloudMessage(cloudMessageDto)
         ).unwrap();
-        if (result !== null && result.cloudMessageId > 0) {
+        if (result !== null) {
           let conversationUpdateDto = {
             userId:userId,
             id:id,
@@ -62,27 +123,45 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
           var resultUpdateConversation = await dispatch(
             UpdateConversation(conversationUpdateDto)
           ).unwrap();
-          console.log(resultUpdateConversation);
-          if (
-            resultUpdateConversation !== null &&
-            resultUpdateConversation.conversationId > 0
-          ) {
+          if (resultUpdateConversation !== null) {
             toast.success("Cập nhật conversation thành công");
           }
         } else {
           toast.error("Gửi tin nhắn không thành công");
           console.log(result);
         }
-      } catch (ex) {
-        console.log(ex);
+      }catch(ex){
+        console.log(ex)
       }
-      console.log("Gửi tin nhắn:", message);
-      console.log("Gửi file:", selectedFiles);
-      setMessage("");
-      setSelectedFiles([]);
+  }
+  const handleSendUserMessage=async()=>{
+    let userMessageDto={
+      senderId:userId,
+      receiverId:id,
+      messageType:message.trim()!==""?"text":"file",
+      content:message
     }
-  };
-
+    if(userMessageDto!==null){
+      console.log(userMessageDto)
+    }else{
+      toast.error("Gửi tin nhắn không thành công")
+      return
+    }
+  }
+  const handleSendGroupMessage=async()=>{
+    let groupMessageDto={
+      senderId:userId,
+      groupId:id,
+      messageType:message.trim()!==""?"text":"file",
+      content:message
+    }
+    if(groupMessageDto!==null){
+      console.log(groupMessageDto)
+    }else{
+      toast.error("Gửi tin nhắn không thành công")
+      return
+    }
+  }
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     const filesWithPreview = files.map((file) => ({
@@ -130,13 +209,6 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
       console.error("Lỗi upload file:", error);
       return null;
     }
-  };
-  const formatFileSize = (size) => {
-    if (size === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(size) / Math.log(k));
-    return parseFloat((size / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
   const handleDragOver = (event) => {
     event.preventDefault();
