@@ -36,6 +36,8 @@ export const UpdateConversationInfor=createAsyncThunk("conversation/UpdateConver
   const response=await conversationService.UpdateConversationInfor(conversation)
   return response
 })
+const sortConversations = (list) =>
+  [...list].sort((a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0));
 const initialState = {
   listConversation: [],
   conversation: null,
@@ -44,21 +46,33 @@ const initialState = {
 const conversationSlice = createSlice({
   name: "conversation",
   initialState,
-  reducers: {},
+  reducers: {
+    updateConversationInState: (state, action) => {
+      const { id, userId, type, lastMessage, userSend, content } = action.payload;
+      const index = state.listConversation.findIndex(
+        (conv) => conv.id === id && conv.userId === userId && conv.type === type
+      );
+      if (index !== -1) {
+        Object.assign(state.listConversation[index], {
+          lastMessage: lastMessage,
+          userSend: userSend,
+          content: content,
+        });
+        const updatedConversation = state.listConversation.splice(index, 1)[0];
+        state.listConversation.unshift(updatedConversation);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(GetAllConversation.fulfilled, (state, action) => {
-      state.listConversation = action.payload.sort(
-        (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
-      );
+      state.listConversation = sortConversations(action.payload)
     }),
     builder.addCase(GetAllConversationById.fulfilled, (state, action) => {
       state.conversation = action.payload;
     }),
     builder.addCase(CreateConversation.fulfilled, (state, action) => {
       state.listConversation.push(action.payload);
-      state.listConversation.sort(
-        (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
-      );
+      state.listConversation=sortConversations(state.listConversation)
     }),
     builder.addCase(UpdateConversation.fulfilled, (state, action) => {
       const index = state.listConversation.findIndex(
@@ -72,12 +86,10 @@ const conversationSlice = createSlice({
           userSend: action.payload.userSend,
           content: action.payload.content,
         });
-        state.listConversation.sort(
-          (a, b) => new Date(b.lastMessage || 0) - new Date(a.lastMessage || 0)
-        );
+        state.listConversation=sortConversations(state.listConversation)
       }
     });
   },
 });
-
+export const {updateConversationInState}=conversationSlice.actions;
 export default conversationSlice.reducer;

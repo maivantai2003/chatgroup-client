@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GetAllUserMessage } from "../redux/usermessage/usermessageSlice";
+import {
+  GetAllUserMessage,
+  receiveUserMessage,
+} from "../redux/usermessage/usermessageSlice";
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate"; // Sử dụng hàm nhóm tin nhắn theo ngày
+import { SignalRContext } from "../context/SignalRContext";
 
 const UserMessages = ({ userId, id, type, avatar }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+  const connection = useContext(SignalRContext);
   const listUserMessage = useSelector(
     (state) => state.usermessage.listUserMessage
   );
@@ -19,10 +24,24 @@ const UserMessages = ({ userId, id, type, avatar }) => {
     };
     fetchData();
   }, [dispatch, userId, id, type]);
+  useEffect(() => {
+    if (connection) {
+      connection.on("ReceiveUserMessage", (userMessage) => {
+        dispatch(receiveUserMessage(userMessage));
+        console.log(userMessage);
+      });
+    }
+    return () => {
+      connection.off("ReceiveUserMessage");
+    };
+  }, [connection,dispatch,id]);
+  const filteredMessages = listUserMessage.filter(
+    (msg) =>
+      (msg.senderId === userId && msg.receiverId === id) ||
+      (msg.senderId === id && msg.receiverId === userId)
+  );
 
-  // Nhóm tin nhắn theo ngày
-  const groupedMessages = groupMessagesByDate(listUserMessage);
-
+  const groupedMessages = groupMessagesByDate(filteredMessages);
   return (
     <div className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto">
       {loading ? (
@@ -38,11 +57,10 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                 {date}
               </div>
             </div>
-
             {/* Hiển thị tin nhắn trong ngày */}
             {groupedMessages[date].map((msg) => (
               <div
-                key={msg.id}
+                key={msg.userMessageId}
                 className={`flex items-end space-x-2 ${
                   msg.senderId === userId ? "justify-end" : "justify-start"
                 } mb-2`}
@@ -55,7 +73,6 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 )}
-
                 {/* Nội dung tin nhắn */}
                 <div
                   className={`p-3 max-w-xs md:max-w-md rounded-lg border shadow-sm ${

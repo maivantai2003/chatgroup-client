@@ -23,7 +23,14 @@ const initialState = {
 const groupmessageSlice = createSlice({
   name: "groupmessage",
   initialState,
-  reducers: {},
+  reducers: {
+    addGroupMessageInstance:(state,action)=>{
+      state.listGroupMessage.push(action.payload)
+    },
+    addGroupMessageRecevie:(state,action)=>{
+      state.listGroupMessage.push(action.payload)
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(AddGroupMessage.fulfilled, (state, action) => {
@@ -34,4 +41,5 @@ const groupmessageSlice = createSlice({
       });
   },
 });
+export const {addGroupMessageInstance,addGroupMessageRecevie}=groupmessageSlice.actions;
 export default groupmessageSlice.reducer;

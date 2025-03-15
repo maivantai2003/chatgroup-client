@@ -48,6 +48,7 @@ const MainLayout = () => {
   const navigate = useNavigate();
   if (token !== null) {
     var user = jwtDecode(token).userInfor;
+    //console.log(jwtDecode(token))
     localStorage.setItem("user", user);
     var userInfor = JSON.parse(localStorage.getItem("user"));
     var userId = userInfor.UserId;

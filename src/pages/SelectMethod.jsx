@@ -1,13 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { FaRemoveFormat, FaTrash, FaUser } from "react-icons/fa";
 import { CreateCloudMessage } from "../redux/cloudmessage/cloudmessageSlice";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import { UpdateConversation } from "../redux/conversation/conversationSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  UpdateConversation,
+  updateConversationInState,
+} from "../redux/conversation/conversationSlice";
 import axios from "axios";
 import config from "../constant/linkApi";
 import { formatFileSize } from "../helpers/formatFileSize";
+import {
+  addUserMessage,
+  CreateUserMessage,
+} from "../redux/usermessage/usermessageSlice";
+import {
+  AddGroupMessage,
+  addGroupMessageInstance,
+} from "../redux/groupmessage/groupmessageSlice";
+import { SignalRContext } from "../context/SignalRContext";
 const fileIcons = {
   pdf: "fas fa-file-pdf text-red-500",
   doc: "fas fa-file-word text-blue-500",
@@ -23,145 +35,220 @@ const fileIcons = {
 };
 const imageExtensions = ["jpg", "jpeg", "png", "gif"];
 
-const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => {
-  console.log(userId,id,type)
+const SelectMethod = ({
+  userId,
+  id,
+  conversationName,
+  type,
+  conversationId,
+}) => {
   const [message, setMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const pickerRef = useRef(null);
   const fileInputRef = useRef(null);
   const dispatch = useDispatch();
+  var userInfor = JSON.parse(localStorage.getItem("user"));
+  var userName = userInfor.UserName;
+  const connection = useContext(SignalRContext);
   const handleSendMessage = async () => {
-    if (message.trim() !== "" || selectedFiles.length > 0) {
-      if(type==="cloud"){
-        await handleSendCloudMessage()
-      }else if(type==="user"){
-        console.log("user")
-        await handleSendUserMessage()
-      }else{
-        console.log("group")
-        await handleSendGroupMessage()
+    try {
+      if (message.trim() !== "" || selectedFiles.length > 0) {
+        if (type === "cloud") {
+          await handleSendCloudMessage();
+        } else if (type === "user") {
+          console.log("user");
+          await handleSendUserMessage();
+        } else {
+          console.log("group");
+          await handleSendGroupMessage();
+        }
+
+        console.log("Gửi tin nhắn:", message);
+        console.log("Gửi file:", selectedFiles);
+        setMessage("");
+        setSelectedFiles([]);
       }
-      // console.log(message)
-      // let uploadedFiles = [];
-      // if (selectedFiles.length > 0) {
-      //   const uploadPromises = selectedFiles.map((file) =>
-      //     uploadFileToCloudinary(file)
-      //   );
-      //   uploadedFiles = await Promise.all(uploadPromises)
-      //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
-      // }
-      // console.log(uploadedFiles)
-      // let cloudMessageDto = {
-      //   userId: userId,
-      //   content: message,
-      //   type: selectedFiles.length === 0 ? "text" : "file",
-      // };
-      // try {
-      //   var result = await dispatch(
-      //     CreateCloudMessage(cloudMessageDto)
-      //   ).unwrap();
-      //   if (result !== null && result.cloudMessageId > 0) {
-      //     let conversationUpdateDto = {
-      //       userId:userId,
-      //       id:id,
-      //       type:type,
-      //       userSend: "Bạn",
-      //       content: message!==""?message:"Bạn đã gửi file",
-      //     };
-      //     var resultUpdateConversation = await dispatch(
-      //       UpdateConversation(conversationUpdateDto)
-      //     ).unwrap();
-      //     console.log(resultUpdateConversation);
-      //     if (
-      //       resultUpdateConversation !== null &&
-      //       resultUpdateConversation.conversationId > 0
-      //     ) {
-      //       toast.success("Cập nhật conversation thành công");
-      //     }
-      //   } else {
-      //     toast.error("Gửi tin nhắn không thành công");
-      //     console.log(result);
-      //   }
-      // } catch (ex) {
-      //   console.log(ex);
-      // }
-      console.log("Gửi tin nhắn:", message);
-      console.log("Gửi file:", selectedFiles);
-      //setMessage("");
-      setSelectedFiles([]);
+    } catch (ex) {
+      console.log(ex);
+    }
+    // console.log(message)
+    // let uploadedFiles = [];
+    // if (selectedFiles.length > 0) {
+    //   const uploadPromises = selectedFiles.map((file) =>
+    //     uploadFileToCloudinary(file)
+    //   );
+    //   uploadedFiles = await Promise.all(uploadPromises)
+    //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
+    // }
+    // console.log(uploadedFiles)
+    // let cloudMessageDto = {
+    //   userId: userId,
+    //   content: message,
+    //   type: selectedFiles.length === 0 ? "text" : "file",
+    // };
+    // try {
+    //   var result = await dispatch(
+    //     CreateCloudMessage(cloudMessageDto)
+    //   ).unwrap();
+    //   if (result !== null && result.cloudMessageId > 0) {
+    //     let conversationUpdateDto = {
+    //       userId:userId,
+    //       id:id,
+    //       type:type,
+    //       userSend: "Bạn",
+    //       content: message!==""?message:"Bạn đã gửi file",
+    //     };
+    //     var resultUpdateConversation = await dispatch(
+    //       UpdateConversation(conversationUpdateDto)
+    //     ).unwrap();
+    //     console.log(resultUpdateConversation);
+    //     if (
+    //       resultUpdateConversation !== null &&
+    //       resultUpdateConversation.conversationId > 0
+    //     ) {
+    //       toast.success("Cập nhật conversation thành công");
+    //     }
+    //   } else {
+    //     toast.error("Gửi tin nhắn không thành công");
+    //     console.log(result);
+    //   }
+    // } catch (ex) {
+    //   console.log(ex);
+    // }
+  };
+  const handleSendCloudMessage = async () => {
+    console.log(message);
+    let uploadedFiles = [];
+    // if (selectedFiles.length > 0) {
+    //   const uploadPromises = selectedFiles.map((file) =>
+    //     uploadFileToCloudinary(file)
+    //   );
+    //   uploadedFiles = await Promise.all(uploadPromises)
+    //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
+    // }
+    // console.log(uploadedFiles)
+    // cloudMessageDto
+    let cloudMessageDto = {
+      userId: userId,
+      content: message,
+      type: selectedFiles.length === 0 ? "text" : "file",
+    };
+    try {
+      //addCloudMessage in DB
+      var result = await dispatch(CreateCloudMessage(cloudMessageDto)).unwrap();
+      if (result !== null) {
+        let conversationUpdateDto = {
+          userId: userId,
+          id: id,
+          type: type,
+          userSend: "Bạn",
+          content: message !== "" ? message : "Bạn đã gửi file",
+        };
+        //updateConversation
+        var resultUpdateConversation = await dispatch(
+          UpdateConversation(conversationUpdateDto)
+        ).unwrap();
+        if (resultUpdateConversation !== null) {
+          toast.success("Cập nhật conversation thành công");
+        }
+      } else {
+        toast.error("Gửi tin nhắn không thành công");
+        console.log(result);
+      }
+    } catch (ex) {
+      console.log(ex);
     }
   };
-  const handleSendCloudMessage=async ()=>{
-      console.log(message)
-      let uploadedFiles = [];
-      // if (selectedFiles.length > 0) {
-      //   const uploadPromises = selectedFiles.map((file) =>
-      //     uploadFileToCloudinary(file)
-      //   );
-      //   uploadedFiles = await Promise.all(uploadPromises)
-      //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
-      // }
-      // console.log(uploadedFiles)
-      let cloudMessageDto = {
-        userId: userId,
-        content: message,
-        type: selectedFiles.length === 0 ? "text" : "file",
-      };
-      try {
-        var result = await dispatch(
-          CreateCloudMessage(cloudMessageDto)
-        ).unwrap();
-        if (result !== null) {
-          let conversationUpdateDto = {
-            userId:userId,
-            id:id,
-            type:type,
+  const handleSendUserMessage = async () => {
+    //userMessageDto
+    let userMessageDto = {
+      senderId: userId,
+      receiverId: id,
+      messageType: message.trim() !== "" ? "text" : "file",
+      content: message,
+    };
+    if (userMessageDto !== null) {
+      //addUserMessage
+      var result = await dispatch(CreateUserMessage(userMessageDto)).unwrap();
+      if (result !== null) {
+        //updateConversationUser
+        await dispatch(
+          UpdateConversation({
+            userId: userId,
+            id: id,
+            type: type,
             userSend: "Bạn",
-            content: message!==""?message:"Bạn đã gửi file",
-          };
-          var resultUpdateConversation = await dispatch(
-            UpdateConversation(conversationUpdateDto)
-          ).unwrap();
-          if (resultUpdateConversation !== null) {
-            toast.success("Cập nhật conversation thành công");
+            content: message !== "" ? message : "Bạn đã gửi file",
+          })
+        );
+        //updateConversationFriend
+        var resultUpdateFriend=await dispatch(UpdateConversation(
+          {
+            userId: id,
+            id: userId,
+            type: type,
+            userSend: userName,
+            content: message !== "" ? message : userName + " đã gửi file",
           }
-        } else {
+        )).unwrap()
+        //sendMessageFriend and updateConversationFriend
+        if(connection){
+          console.log("sendMessage")
+          await connection.invoke("SendUserMessage", id.toString(), result, resultUpdateFriend);
+        }else{
           toast.error("Gửi tin nhắn không thành công");
-          console.log(result);
+          return
         }
-      }catch(ex){
-        console.log(ex)
+      } else {
+        toast.error("Gửi tin nhắn không thành công");
+        return
       }
-  }
-  const handleSendUserMessage=async()=>{
-    let userMessageDto={
-      senderId:userId,
-      receiverId:id,
-      messageType:message.trim()!==""?"text":"file",
-      content:message
+      console.log(result)
+      console.log(resultUpdateFriend)
+    } else {
+      toast.error("Vui lòng nhập nội dung tin nhắn");
+      return;
     }
-    if(userMessageDto!==null){
-      console.log(userMessageDto)
-    }else{
-      toast.error("Gửi tin nhắn không thành công")
-      return
+  };
+  const handleSendGroupMessage = async () => {
+    let groupMessageDto = {
+      senderId: userId,
+      groupId: id,
+      messageType: message.trim() !== "" ? "text" : "file",
+      content: message,
+    };
+    if (groupMessageDto !== null) {
+      // var result=await dispatch(AddGroupMessage(groupMessageDto))
+      // if(result!==null){
+      // }
+      var groupMessage = {
+        groupedMessageId: 3,
+        senderId: 2,
+        senderName: "Admin_test_2",
+        senderAvatar:
+          "https://res.cloudinary.com/dktn4yfpi/raw/upload/v1741512224/kaj0cpmcteebcnd2etbj.jfif",
+        groupId: 1,
+        replyToMessageId: null,
+        content: "Chào tất cả",
+        messageType: "text",
+        createAt: "2025-03-12T13:34:27.7187708",
+        status: 1,
+      };
+      dispatch(addGroupMessageInstance(groupMessage));
+      if (connection) {
+        try {
+          connection.invoke("SendGroupMessage", id.toString(), groupMessage);
+        } catch (error) {
+          console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
+          toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
+        }
+      }
+    } else {
+      toast.error("Gửi tin nhắn không thành công");
+      return;
     }
-  }
-  const handleSendGroupMessage=async()=>{
-    let groupMessageDto={
-      senderId:userId,
-      groupId:id,
-      messageType:message.trim()!==""?"text":"file",
-      content:message
-    }
-    if(groupMessageDto!==null){
-      console.log(groupMessageDto)
-    }else{
-      toast.error("Gửi tin nhắn không thành công")
-      return
-    }
-  }
+  };
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     const filesWithPreview = files.map((file) => ({
@@ -189,7 +276,7 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
     setSelectedFiles((prevFiles) => [...prevFiles, ...filesWithPreview]);
   };
   const uploadFileToCloudinary = async (file) => {
-    var fileDetail=file.file
+    var fileDetail = file.file;
     const formData = new FormData();
     formData.append("file", fileDetail);
     const fileInfo = {
@@ -198,9 +285,13 @@ const SelectMethod = ({ userId, id,conversationName, type, conversationId }) => 
       LoaiFile: fileDetail.name.split(".").pop(),
     };
     try {
-      const response = await axios.post( `${config.API_URL}/File/Upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        `${config.API_URL}/File/Upload`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       return {
         ...fileInfo,
         DuongDan: response.data.url,

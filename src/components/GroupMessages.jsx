@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { GetAllGroupMessage } from "../redux/groupmessage/groupmessageSlice";
+import { addGroupMessageRecevie, GetAllGroupMessage } from "../redux/groupmessage/groupmessageSlice";
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
+import { SignalRContext } from "../context/SignalRContext";
 
 const GroupMessages = ({ userId, id }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-
+  const connection = useContext(SignalRContext);
   const listGroupMessage = useSelector(
     (state) => state.groupmessage.listGroupMessage
   );
@@ -19,7 +20,26 @@ const GroupMessages = ({ userId, id }) => {
     };
     fetchData();
   }, [dispatch, id]);
+  useEffect(() => {
+    if (connection && connection.state === "Connected") {
+      connection
+        .invoke("JoinGroup", id + "")
+        .catch((err) => console.error("Error joining group:", err));
 
+      connection.on("UserJoin", (value) => {
+        console.log(value);
+      });
+      connection.on("ReceiveGroupMessage",(groupMessage)=>{
+        console.log(groupMessage)
+        dispatch(addGroupMessageRecevie(groupMessage))
+      })
+      
+    }
+    return () => {
+      connection.off("UserJoin");
+      connection.off("ReceiveGroupMessage")
+    };
+  }, [connection,id]);
   const groupedMessages = groupMessagesByDate(listGroupMessage);
 
   return (
