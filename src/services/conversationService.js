@@ -19,6 +19,10 @@ const conversationService = {
   UpdateConversationInfor:async(conversation)=>{
     const respone=await axiosInstance.put("Conversation/UpdateConversationInfor",conversation)
     return respone.data
+  },
+  UpdateConversationGroup:async(conversationUpdateGroupDto)=>{
+    const respone=await axiosInstance.put("Conversation/UpdateConversationGroup",conversationUpdateGroupDto)
+    return respone.data
   }
 };
 

@@ -1,10 +1,11 @@
 import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import Link từ react-router-dom
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
+import { SignalRContext } from "../context/SignalRContext";
 
 const LoginForm = () => {
   const { signIn } = useAuth();
@@ -13,6 +14,7 @@ const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const dispatch=useDispatch()
   const navigate=useNavigate()
+  const connection=useContext(SignalRContext)
   const onSubmit = async (data) => {
     try {
       let authRequest = {
@@ -22,6 +24,12 @@ const LoginForm = () => {
       console.log(authRequest)
       const result=await dispatch(login(authRequest)).unwrap()
       localStorage.setItem("accessToken",result.accessToken)
+      window.dispatchEvent(new Event("storage"));
+      if(connection){
+        connection.on("CheckConnection",(value)=>{
+          console.log(value)
+        })
+      }
       // console.log(authRequest);
       if (result!==null) {
         setErrorMessage(null);

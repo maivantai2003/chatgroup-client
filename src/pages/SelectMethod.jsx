@@ -47,10 +47,25 @@ const SelectMethod = ({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const pickerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
   var userName = userInfor.UserName;
   const connection = useContext(SignalRContext);
+  useEffect(()=>{
+    setMessage("")
+  },[])
+  useEffect(() => {
+    if (connection) {
+      connection.on("ReceiveHoverUserMessage", (value) => {
+        setTypingUser(value);
+      });
+      return () => {
+        connection.off("ReceiveHoverUserMessage");
+      };
+    }
+  }, [connection, id]);
   const handleSendMessage = async () => {
     try {
       if (message.trim() !== "" || selectedFiles.length > 0) {
@@ -183,29 +198,34 @@ const SelectMethod = ({
           })
         );
         //updateConversationFriend
-        var resultUpdateFriend=await dispatch(UpdateConversation(
-          {
+        var resultUpdateFriend = await dispatch(
+          UpdateConversation({
             userId: id,
             id: userId,
             type: type,
             userSend: userName,
             content: message !== "" ? message : userName + " đã gửi file",
-          }
-        )).unwrap()
+          })
+        ).unwrap();
         //sendMessageFriend and updateConversationFriend
-        if(connection){
-          console.log("sendMessage")
-          await connection.invoke("SendUserMessage", id.toString(), result, resultUpdateFriend);
-        }else{
+        if (connection) {
+          console.log("sendMessage");
+          await connection.invoke(
+            "SendUserMessage",
+            id.toString(),
+            result,
+            resultUpdateFriend
+          );
+        } else {
           toast.error("Gửi tin nhắn không thành công");
-          return
+          return;
         }
       } else {
         toast.error("Gửi tin nhắn không thành công");
-        return
+        return;
       }
-      console.log(result)
-      console.log(resultUpdateFriend)
+      console.log(result);
+      console.log(resultUpdateFriend);
     } else {
       toast.error("Vui lòng nhập nội dung tin nhắn");
       return;
@@ -219,29 +239,32 @@ const SelectMethod = ({
       content: message,
     };
     if (groupMessageDto !== null) {
-      // var result=await dispatch(AddGroupMessage(groupMessageDto))
-      // if(result!==null){
-      // }
-      var groupMessage = {
-        groupedMessageId: 3,
-        senderId: 2,
-        senderName: "Admin_test_2",
-        senderAvatar:
-          "https://res.cloudinary.com/dktn4yfpi/raw/upload/v1741512224/kaj0cpmcteebcnd2etbj.jfif",
-        groupId: 1,
-        replyToMessageId: null,
-        content: "Chào tất cả",
-        messageType: "text",
-        createAt: "2025-03-12T13:34:27.7187708",
-        status: 1,
-      };
-      dispatch(addGroupMessageInstance(groupMessage));
-      if (connection) {
-        try {
-          connection.invoke("SendGroupMessage", id.toString(), groupMessage);
-        } catch (error) {
-          console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
-          toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
+      // // var result=await dispatch(AddGroupMessage(groupMessageDto))
+      // // if(result!==null){
+      // // }
+      // var groupMessage = {
+      //   groupedMessageId: 3,
+      //   senderId: 2,
+      //   senderName: "Admin_test_2",
+      //   senderAvatar:
+      //     "https://res.cloudinary.com/dktn4yfpi/raw/upload/v1741512224/kaj0cpmcteebcnd2etbj.jfif",
+      //   groupId: 1,
+      //   replyToMessageId: null,
+      //   content: "Chào tất cả",
+      //   messageType: "text",
+      //   createAt: "2025-03-12T13:34:27.7187708",
+      //   status: 1,
+      // };
+      // dispatch(addGroupMessageInstance(groupMessage));
+      var result = await dispatch(AddGroupMessage(groupMessageDto)).unwrap();
+      if (result != null) {
+        if (connection) {
+          try {
+            connection.invoke("SendGroupMessage", id.toString(), result);
+          } catch (error) {
+            console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
+            toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
+          }
         }
       }
     } else {
@@ -346,18 +369,36 @@ const SelectMethod = ({
     const ext = fileName.split(".").pop().toLowerCase();
     return fileIcons[ext] || fileIcons.default;
   };
-
+  const handleTypingUser = (id) => {
+    if (connection) {
+      try {
+        if (userName !== null && userName !== undefined) {
+          connection.invoke("HoverSendUserMessage", id.toString(), userName);
+        }
+      } catch (error) {
+        console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
+        toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
+      }
+    }
+  };
   return (
     <div
       className="p-4 bg-gray-200 flex flex-col sticky bottom-0 w-full"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
+      {typingUser && <p className="text-gray-500 text-sm">{typingUser} ...</p>}
       <div className="flex items-center">
         <input
           type="text"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            const newMessage = e.target.value.trim();
+            if (newMessage !== "" && newMessage !== message.trim()) {
+              handleTypingUser(id);
+            }
+            setMessage(e.target.value);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

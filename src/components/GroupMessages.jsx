@@ -21,7 +21,7 @@ const GroupMessages = ({ userId, id }) => {
     fetchData();
   }, [dispatch, id]);
   useEffect(() => {
-    if (connection && connection.state === "Connected") {
+    if (connection) {
       connection
         .invoke("JoinGroup", id + "")
         .catch((err) => console.error("Error joining group:", err));
@@ -36,8 +36,10 @@ const GroupMessages = ({ userId, id }) => {
       
     }
     return () => {
-      connection.off("UserJoin");
-      connection.off("ReceiveGroupMessage")
+      if(connection){
+        connection.off("UserJoin");
+        connection.off("ReceiveGroupMessage")
+      }
     };
   }, [connection,id]);
   const groupedMessages = groupMessagesByDate(listGroupMessage);

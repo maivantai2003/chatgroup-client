@@ -1,17 +1,19 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetAllUserMessage,
   receiveUserMessage,
 } from "../redux/usermessage/usermessageSlice";
 import { formatTime } from "../helpers/formatTime";
-import { groupMessagesByDate } from "../helpers/groupMessageByDate"; // Sử dụng hàm nhóm tin nhắn theo ngày
+import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import { SignalRContext } from "../context/SignalRContext";
 
 const UserMessages = ({ userId, id, type, avatar }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const connection = useContext(SignalRContext);
+  const messagesEndRef = useRef(null);
+  const containerRef = useRef(null);
   const listUserMessage = useSelector(
     (state) => state.usermessage.listUserMessage
   );
@@ -30,11 +32,24 @@ const UserMessages = ({ userId, id, type, avatar }) => {
         dispatch(receiveUserMessage(userMessage));
         console.log(userMessage);
       });
+      connection.on("CheckUser", (value) => {
+        console.log(value);
+      });
     }
     return () => {
-      connection.off("ReceiveUserMessage");
+      if (connection) {
+        connection.off("ReceiveUserMessage");
+        connection.off("CheckUser");
+      }
     };
-  }, [connection,dispatch,id]);
+  }, [connection, dispatch, id]);
+  useEffect(() => {
+    if (messagesEndRef.current && containerRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 300); // Delay nhẹ để cuộn mượt hơn
+    }
+  }, [listUserMessage]);
   const filteredMessages = listUserMessage.filter(
     (msg) =>
       (msg.senderId === userId && msg.receiverId === id) ||

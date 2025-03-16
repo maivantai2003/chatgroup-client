@@ -2,7 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import ListGroupItem from "../components/ListGroupItem";
 import { useDispatch, useSelector } from "react-redux";
-import { GetAllConversation, updateConversationInState } from "../redux/conversation/conversationSlice";
+import {
+  GetAllConversation,
+  updateConversationInState,
+} from "../redux/conversation/conversationSlice";
 import { SignalRContext } from "../context/SignalRContext";
 const ListGroup = ({ id, onSelectConversation }) => {
   const [loading, setLoading] = useState(true);
@@ -21,6 +24,7 @@ const ListGroup = ({ id, onSelectConversation }) => {
     fectchData();
   }, [dispatch, id]);
   useEffect(() => {
+    console.log("Conection ... ... ...");
     if (connection) {
       connection.on("MemberToGroup", async () => {
         console.log("ListGroup");
@@ -33,17 +37,17 @@ const ListGroup = ({ id, onSelectConversation }) => {
         await dispatch(GetAllConversation(id));
         setLoading(false);
       });
-      connection.on("UpdateConversationUser",(conversation)=>{
-        console.log(conversation)
-        dispatch(updateConversationInState(conversation))
-      })
+      connection.on("UpdateConversationUser", (conversation) => {
+        console.log(conversation);
+        dispatch(updateConversationInState(conversation));
+      });
       return () => {
         connection.off("MemberToGroup");
         connection.off("ReceiveAcceptFriend");
-        connection.off("UpdateConversationUser")
+        connection.off("UpdateConversationUser");
       };
     }
-  }, [connection,id,dispatch]);
+  }, [connection, id, dispatch]);
   const filteredConversations = listConversation.filter(
     (conv) => conv.userId === id
   );
