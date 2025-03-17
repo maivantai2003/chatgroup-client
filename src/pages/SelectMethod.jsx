@@ -49,20 +49,26 @@ const SelectMethod = ({
   const fileInputRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
+  const [typingGroup, setTypingGroup] = useState(null);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
   var userName = userInfor.UserName;
   const connection = useContext(SignalRContext);
-  useEffect(()=>{
-    setMessage("")
-  },[])
   useEffect(() => {
     if (connection) {
-      connection.on("ReceiveHoverUserMessage", (value) => {
-        setTypingUser(value);
+      connection.on("ReceiveHoverUserMessage", (id,value) => {
+        if(userId.toString()!==id){
+          setTypingUser(value);
+        }
+      });
+      connection.on("ReceiveHoverGroupMessage", (id,value) => {
+        if(userId.toString()!==id){
+          setTypingGroup(value);
+        }
       });
       return () => {
         connection.off("ReceiveHoverUserMessage");
+        connection.off("ReceiveHoverGroupMessage");
       };
     }
   }, [connection, id]);
@@ -176,6 +182,7 @@ const SelectMethod = ({
     }
   };
   const handleSendUserMessage = async () => {
+    handleStopTyping(id)
     //userMessageDto
     let userMessageDto = {
       senderId: userId,
@@ -232,6 +239,7 @@ const SelectMethod = ({
     }
   };
   const handleSendGroupMessage = async () => {
+    handleStopTyping(id)
     let groupMessageDto = {
       senderId: userId,
       groupId: id,
@@ -373,11 +381,36 @@ const SelectMethod = ({
     if (connection) {
       try {
         if (userName !== null && userName !== undefined) {
-          connection.invoke("HoverSendUserMessage", id.toString(), userName);
+          if (type === "user") {
+            connection.invoke(
+              "HoverSendUserMessage",
+              id.toString(),
+              userName + " đang soạn tin"
+            );
+          } else {
+            connection.invoke(
+              "HoverSendGroupMessage",
+              id.toString(),userId.toString(),
+              userName + " đang soạn tin"
+            );
+          }
         }
       } catch (error) {
         console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
         toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
+      }
+    }
+  };
+  const handleStopTyping = (id) => {
+    if (connection) {
+      try {
+        if (type === "user") {
+          connection.invoke("HoverSendUserMessage", id.toString(), null);
+        } else {
+          connection.invoke("HoverSendGroupMessage", id.toString(),userId.toString(), null);
+        }
+      } catch (error) {
+        console.error("Lỗi khi gửi tín hiệu dừng gõ:", error);
       }
     }
   };
@@ -387,7 +420,13 @@ const SelectMethod = ({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {typingUser && <p className="text-gray-500 text-sm">{typingUser} ...</p>}
+      {type === "user"
+        ? typingUser && (
+            <p className="text-gray-500 text-sm">{typingUser} ...</p>
+          )
+        : typingGroup && (
+            <p className="text-gray-500 text-sm">{typingGroup} ...</p>
+          )}
       <div className="flex items-center">
         <input
           type="text"
@@ -396,6 +435,8 @@ const SelectMethod = ({
             const newMessage = e.target.value.trim();
             if (newMessage !== "" && newMessage !== message.trim()) {
               handleTypingUser(id);
+            } else {
+              handleStopTyping(id);
             }
             setMessage(e.target.value);
           }}

@@ -47,9 +47,9 @@ const UserMessages = ({ userId, id, type, avatar }) => {
     if (messagesEndRef.current && containerRef.current) {
       setTimeout(() => {
         messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 300); // Delay nhẹ để cuộn mượt hơn
+      }, 100); // Giảm delay để mượt hơn
     }
-  }, [listUserMessage]);
+  }, [listUserMessage]); // Theo dõi khi danh sách tin nhắn thay đổi
   const filteredMessages = listUserMessage.filter(
     (msg) =>
       (msg.senderId === userId && msg.receiverId === id) ||
@@ -58,7 +58,7 @@ const UserMessages = ({ userId, id, type, avatar }) => {
 
   const groupedMessages = groupMessagesByDate(filteredMessages);
   return (
-    <div className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto">
+    <div className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto" ref={containerRef}>
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -106,6 +106,7 @@ const UserMessages = ({ userId, id, type, avatar }) => {
           </div>
         ))
       )}
+      <div ref={messagesEndRef}></div>
     </div>
   );
 };

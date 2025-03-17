@@ -15,10 +15,10 @@ const ListGroupItem = ({
 }) => {
   const [timeAgo, setTimeAgo] = useState(getTimeAgo(lastMessage));
   useEffect(() => {
+    setTimeAgo(getTimeAgo(lastMessage));
     const interval = setInterval(() => {
       setTimeAgo(getTimeAgo(lastMessage));
-    }, 60000);
-
+    }, 10000);
     return () => clearInterval(interval);
   }, [lastMessage,id]);
   return (
