@@ -21,6 +21,7 @@ import {
   addGroupMessageInstance,
 } from "../redux/groupmessage/groupmessageSlice";
 import { SignalRContext } from "../context/SignalRContext";
+import { GetGroupById } from "../redux/group/groupSlice";
 const fileIcons = {
   pdf: "fas fa-file-pdf text-red-500",
   doc: "fas fa-file-word text-blue-500",
@@ -51,10 +52,12 @@ const SelectMethod = ({
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
   const [typingGroup, setTypingGroup] = useState(null);
+  const [listGroupUser, setListGroupUser] = useState(null);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
   var userName = userInfor.UserName;
   const connection = useContext(SignalRContext);
+  const groupUsers = useSelector((state) => state.group.group);
   useEffect(() => {
     if (connection) {
       connection.on("ReceiveHoverUserMessage", (value) => {
@@ -63,8 +66,8 @@ const SelectMethod = ({
         // }
         setTypingUser(value);
       });
-      connection.on("ReceiveHoverGroupMessage", (id,value) => {
-        if(userId.toString()!==id){
+      connection.on("ReceiveHoverGroupMessage", (id, value) => {
+        if (userId.toString() !== id) {
           setTypingGroup(value);
         }
       });
@@ -74,6 +77,15 @@ const SelectMethod = ({
       };
     }
   }, [connection, id]);
+  useEffect(() => {
+    if (type === "group") {
+      const fetchData = async () => {
+        //await dispatch(GetGroupById(id))
+        setListGroupUser(groupUsers);
+      };
+      fetchData();
+    }
+  }, [type, id, dispatch, groupUsers]);
   const handleSendMessage = async () => {
     try {
       if (message.trim() !== "" || selectedFiles.length > 0) {
@@ -184,7 +196,7 @@ const SelectMethod = ({
     }
   };
   const handleSendUserMessage = async () => {
-    handleStopTyping(id)
+    handleStopTyping(id);
     //userMessageDto
     let userMessageDto = {
       senderId: userId,
@@ -241,7 +253,8 @@ const SelectMethod = ({
     }
   };
   const handleSendGroupMessage = async () => {
-    handleStopTyping(id)
+    console.log(listGroupUser.groupDetailUsers)
+    handleStopTyping(id);
     let groupMessageDto = {
       senderId: userId,
       groupId: id,
@@ -251,18 +264,41 @@ const SelectMethod = ({
     if (groupMessageDto !== null) {
       var result = await dispatch(AddGroupMessage(groupMessageDto)).unwrap();
       if (result != null) {
-        let conversationUpdateGroupDto={
-          id:id,
-          type:type,
-          userSend:userName,
-          content:message
-        }
-        var resultConversationUpdateGroup=await dispatch(UpdateConversationGroup(conversationUpdateGroupDto)).unwrap()
-        console.log(resultConversationUpdateGroup)
+        let conversationUpdateGroupDto = {
+          id: id,
+          type: type,
+          userId:userId,
+          userSend: "Bạn",
+          content: message,
+        };
+        var resultConversationUpdateGroup = await dispatch(
+          UpdateConversationGroup(conversationUpdateGroupDto)
+        ).unwrap();
+        console.log(resultConversationUpdateGroup);
         if (connection) {
           try {
             //id group, id user gửi tin nhắn trong nhóm
-            connection.invoke("SendGroupMessage", id.toString(),userId.toString(), result,resultConversationUpdateGroup);
+            connection.invoke(
+              "SendGroupMessage",
+              id.toString(),
+              userId.toString(),
+              result
+            );
+            listGroupUser.groupDetailUsers
+            .filter(user => user.userId !== userId)
+            .forEach(member=>{
+              connection.invoke(
+                "SendConversationGroup",
+                member.userId.toString(),
+                {
+                  id: id,
+                  type: type,
+                  userId:member.userId,
+                  userSend: userName,
+                  content: message,
+                }
+            );
+            })
           } catch (error) {
             console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
             toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
@@ -384,7 +420,8 @@ const SelectMethod = ({
           } else {
             connection.invoke(
               "HoverSendGroupMessage",
-              id.toString(),userId.toString(),
+              id.toString(),
+              userId.toString(),
               userName + " đang soạn tin"
             );
           }
@@ -401,7 +438,12 @@ const SelectMethod = ({
         if (type === "user") {
           connection.invoke("HoverSendUserMessage", id.toString(), null);
         } else {
-          connection.invoke("HoverSendGroupMessage", id.toString(),userId.toString(), null);
+          connection.invoke(
+            "HoverSendGroupMessage",
+            id.toString(),
+            userId.toString(),
+            null
+          );
         }
       } catch (error) {
         console.error("Lỗi khi gửi tín hiệu dừng gõ:", error);

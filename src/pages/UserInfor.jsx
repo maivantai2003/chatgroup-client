@@ -14,7 +14,7 @@ const UserInfo = ({ conversation }) => {
           alt="Avatar"
         />
         <div className="font-bold mt-2 flex items-center">
-          {conversation.userName}
+          {conversation.conversationName}
           {/* <i className="fas fa-pen ml-2 cursor-pointer text-gray-500"></i> */}
         </div>
       </div>

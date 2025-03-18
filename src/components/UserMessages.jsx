@@ -7,6 +7,7 @@ import {
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import { SignalRContext } from "../context/SignalRContext";
+import FileMessage from "./FileMessage";
 
 const UserMessages = ({ userId, id, type, avatar }) => {
   const dispatch = useDispatch();
@@ -46,7 +47,10 @@ const UserMessages = ({ userId, id, type, avatar }) => {
   useEffect(() => {
     if (messagesEndRef.current && containerRef.current) {
       setTimeout(() => {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
       }, 100); // Giảm delay để mượt hơn
     }
   }, [listUserMessage]); // Theo dõi khi danh sách tin nhắn thay đổi
@@ -57,7 +61,10 @@ const UserMessages = ({ userId, id, type, avatar }) => {
   );
   const groupedMessages = groupMessagesByDate(filteredMessages);
   return (
-    <div className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto" ref={containerRef}>
+    <div
+      className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto"
+      ref={containerRef}
+    >
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -96,6 +103,14 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
+                  {/* Nếu có file đính kèm */}
+                  {msg.files && msg.files.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {msg.files.map((file, index) => (
+                        <FileMessage key={index} file={file} />
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 text-right mt-1">
                     {formatTime(msg.createAt)}
                   </p>

@@ -39,14 +39,14 @@ const TitleBar = ({ name,id,avatar }) => {
       {/* Các nút thao tác */}
       <div className="flex space-x-2">
         {/* Nút Thêm Bạn */}
-        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition" onClick={()=>{
+        <button className="p-2 hover:bg-gray-200 transition" onClick={()=>{
           setModalOpen(true)
         }}>
           <UserPlusIcon className="w-5 h-5 text-gray-700" />
         </button>
 
         {/* Nút Thêm Vào Nhóm */}
-        <button className="p-2 rounded-full border border-gray-300 hover:bg-gray-200 transition" onClick={() => setGroupModalOpen(true)}>
+        <button className="p-2 hover:bg-gray-200 transition" onClick={() => setGroupModalOpen(true)}>
           <FaUsers className="w-5 h-5 text-gray-700" />
         </button>
       </div>

@@ -83,13 +83,25 @@ const conversationSlice = createSlice({
         state.listConversation.unshift(updatedConversation);
       }
     },updateConversationGroupInState: (state, action) => {
-      const { id, type, userSend, content } = action.payload;
-        state.listConversation = state.listConversation.map(conv =>
-          conv.id === id && conv.type === type
-            ? { ...conv, lastMessage:new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(), userSend, content }
-            : conv
-        );
-        state.listConversation = sortConversations(state.listConversation);
+      const { id, type,userId, userSend, content } = action.payload;
+      const index = state.listConversation.findIndex(
+        (conv) => conv.id === id && conv.userId === userId && conv.type === type
+      );
+      if (index !== -1) {
+        Object.assign(state.listConversation[index], {
+          lastMessage: new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(),
+          userSend: userSend,
+          content: content,
+        });
+        const updatedConversation = state.listConversation.splice(index, 1)[0];
+        state.listConversation.unshift(updatedConversation);
+      }
+        // state.listConversation = state.listConversation.map(conv =>
+        //   conv.id === id && conv.type === type
+        //     ? { ...conv, lastMessage:new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(), userSend, content }
+        //     : conv
+        // );
+        // state.listConversation = sortConversations(state.listConversation);
     },
   },
   extraReducers: (builder) => {
