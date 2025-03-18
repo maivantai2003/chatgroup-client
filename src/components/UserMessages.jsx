@@ -78,13 +78,14 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                 {date}
               </div>
             </div>
+  
             {/* Hiển thị tin nhắn trong ngày */}
             {groupedMessages[date].map((msg) => (
               <div
                 key={msg.userMessageId}
                 className={`flex items-end space-x-2 ${
                   msg.senderId === userId ? "justify-end" : "justify-start"
-                } mb-2`}
+                } mb-3`}
               >
                 {/* Avatar nếu là tin nhắn của người khác */}
                 {msg.senderId !== userId && (
@@ -94,6 +95,7 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 )}
+  
                 {/* Nội dung tin nhắn */}
                 <div
                   className={`p-3 max-w-xs md:max-w-md rounded-lg border shadow-sm ${
@@ -102,15 +104,19 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                       : "bg-gray-100 border-gray-300 text-black"
                   }`}
                 >
-                  <p className="text-sm">{msg.content}</p>
+                  {/* Kiểm tra nếu tin nhắn có nội dung */}
+                  {msg.content && <p className="text-sm">{msg.content}</p>}
+  
                   {/* Nếu có file đính kèm */}
                   {msg.files && msg.files.length > 0 && (
-                    <div className="mt-2 space-y-1">
+                    <div className="mt-2 space-y-2">
                       {msg.files.map((file, index) => (
                         <FileMessage key={index} file={file} />
                       ))}
                     </div>
                   )}
+  
+                  {/* Hiển thị thời gian */}
                   <p className="text-xs text-gray-500 text-right mt-1">
                     {formatTime(msg.createAt)}
                   </p>
@@ -120,6 +126,8 @@ const UserMessages = ({ userId, id, type, avatar }) => {
           </div>
         ))
       )}
+  
+      {/* Cuộn xuống tin nhắn cuối cùng */}
       <div ref={messagesEndRef}></div>
     </div>
   );

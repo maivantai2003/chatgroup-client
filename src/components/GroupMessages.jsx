@@ -4,6 +4,7 @@ import { addGroupMessageRecevie, GetAllGroupMessage } from "../redux/groupmessag
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import { SignalRContext } from "../context/SignalRContext";
+import FileMessage from "./FileMessage";
 
 const GroupMessages = ({ userId, id }) => {
   const dispatch = useDispatch();
@@ -73,9 +74,7 @@ const GroupMessages = ({ userId, id }) => {
             {groupedMessages[date].map((msg) => (
               <div
                 key={msg.groupedMessageId}
-                className={`flex items-end ${
-                  msg.senderId === userId ? "justify-end" : "justify-start"
-                } mb-2`}
+                className={`flex items-end ${msg.senderId === userId ? "justify-end" : "justify-start"} mb-2`}
               >
                 {/* Avatar cho tin nhắn người khác */}
                 {msg.senderId !== userId && (
@@ -87,18 +86,21 @@ const GroupMessages = ({ userId, id }) => {
                 )}
                 {/* Nội dung tin nhắn */}
                 <div
-                  className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border border-blue-300 ${
-                    msg.senderId === userId
-                      ? "bg-blue-100 text-black"
-                      : "bg-gray-200 text-black"
-                  }`}
+                  className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${msg.senderId === userId ? "bg-blue-100 border-blue-300 text-black" : "bg-gray-200 border-gray-300 text-black"}`}
                 >
                   {msg.senderId !== userId && (
                     <p className="text-xs font-bold text-gray-600">
                       {msg.senderName}
                     </p>
                   )}
-                  <p className="text-sm">{msg.content}</p>
+                  {msg.content && <p className="text-sm">{msg.content}</p>}
+                  {msg.files && msg.files.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {msg.files.map((file, index) => (
+                        <FileMessage key={index} file={file} />
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-gray-400 text-right">
                     {formatTime(msg.createAt)}
                   </p>
@@ -108,6 +110,8 @@ const GroupMessages = ({ userId, id }) => {
           </div>
         ))
       )}
+      {/* Cuộn xuống tin nhắn cuối cùng */}
+      <div ref={messagesEndRef}></div>
     </div>
   );
 };

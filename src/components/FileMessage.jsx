@@ -76,7 +76,7 @@ import {
   
   const FileMessage = ({ file }) => {
     return (
-      <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-between w-80 mb-2">
+      <div className="bg-blue-100 p-3 rounded-lg flex items-center justify-between w-80 mb-2">
         <div className="flex items-center">
           {isImage(file) ? (
             <img

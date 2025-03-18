@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import cloudmessageFileService from "../../services/cloudmessagefileService";
 export const GetAllCloudMessageFiles = createAsyncThunk(
-  "cloudmessageFile/GetAllCloudMessageFiles",
-  async () => {
-    const response = await cloudmessageFileService.GetAllCloudMessageFiles();
+  "cloudmessageFile/GetAllCloudMessageFile",
+  async (id) => {
+    const response = await cloudmessageFileService.GetAllCloudMessageFile(id)
     return response;
   }
 )
@@ -39,7 +39,6 @@ export const DeleteCloudMessageFile = createAsyncThunk(
 const initialState = {
   listCloudMessageFiles: [],
   cloudMessageFile: null,
-  loading: false,
   error: null,
 };
 
@@ -48,17 +47,8 @@ const cloudmessageFileSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder
-      .addCase(GetAllCloudMessageFiles.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(GetAllCloudMessageFiles.fulfilled, (state, action) => {
-        state.loading = false;
+    builder.addCase(GetAllCloudMessageFiles.fulfilled, (state, action) => {
         state.listCloudMessageFiles = action.payload;
-      })
-      .addCase(GetAllCloudMessageFiles.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
       })
       .addCase(GetCloudMessageFileById.fulfilled, (state, action) => {
         state.cloudMessageFile = action.payload;
