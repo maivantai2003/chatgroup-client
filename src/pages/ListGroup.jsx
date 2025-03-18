@@ -4,6 +4,7 @@ import ListGroupItem from "../components/ListGroupItem";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetAllConversation,
+  updateConversationGroupInState,
   updateConversationInState,
 } from "../redux/conversation/conversationSlice";
 import { SignalRContext } from "../context/SignalRContext";
@@ -41,10 +42,15 @@ const ListGroup = ({ id, onSelectConversation }) => {
         console.log(conversation);
         dispatch(updateConversationInState(conversation));
       });
+      connection.on("UpdateConversationGroup",(conversation)=>{
+        console.log(conversation)
+        dispatch(updateConversationGroupInState(conversation))
+      })
       return () => {
         connection.off("MemberToGroup");
         connection.off("ReceiveAcceptFriend");
         connection.off("UpdateConversationUser");
+        connection.off("UpdateConversationGroup")
       };
     }
   }, [connection, id, dispatch]);

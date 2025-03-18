@@ -55,7 +55,6 @@ const UserMessages = ({ userId, id, type, avatar }) => {
       (msg.senderId === userId && msg.receiverId === id) ||
       (msg.senderId === id && msg.receiverId === userId)
   );
-
   const groupedMessages = groupMessagesByDate(filteredMessages);
   return (
     <div className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto" ref={containerRef}>

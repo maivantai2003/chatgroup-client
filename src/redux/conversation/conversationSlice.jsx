@@ -82,6 +82,14 @@ const conversationSlice = createSlice({
         const updatedConversation = state.listConversation.splice(index, 1)[0];
         state.listConversation.unshift(updatedConversation);
       }
+    },updateConversationGroupInState: (state, action) => {
+      const { id, type, userSend, content } = action.payload;
+        state.listConversation = state.listConversation.map(conv =>
+          conv.id === id && conv.type === type
+            ? { ...conv, lastMessage:new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(), userSend, content }
+            : conv
+        );
+        state.listConversation = sortConversations(state.listConversation);
     },
   },
   extraReducers: (builder) => {
@@ -112,23 +120,16 @@ const conversationSlice = createSlice({
         }
       }),
       builder.addCase(UpdateConversationGroup.fulfilled, (state, action) => {
-        const updatedConversations = new Map(
-          action.payload.map((conv) => [`${conv.id}-${conv.type}`, conv])
-        );
-        state.listConversation = state.listConversation.map((conv) =>
-          updatedConversations.has(`${conv.id}-${conv.type}`)
-            ? {
-                ...conv,
-                userSend: updatedConversations.get(`${conv.id}-${conv.type}`)
-                  .userSend,
-                lastMessage: new Date().toISOString(),
-              }
+        const { id, type, userSend, content } = action.payload;
+      
+        state.listConversation = state.listConversation.map(conv =>
+          conv.id === id && conv.type === type
+            ? { ...conv, lastMessage:new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString(), userSend, content }
             : conv
         );
         state.listConversation = sortConversations(state.listConversation);
-      }),
-      builder.addCase(UpdateConversationInfor.fulfilled, (state, action) => {});
+      });      
   },
 });
-export const { updateConversationInState } = conversationSlice.actions;
+export const { updateConversationInState,updateConversationGroupInState } = conversationSlice.actions;
 export default conversationSlice.reducer;

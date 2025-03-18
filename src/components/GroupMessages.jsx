@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addGroupMessageRecevie, GetAllGroupMessage } from "../redux/groupmessage/groupmessageSlice";
 import { formatTime } from "../helpers/formatTime";
@@ -9,6 +9,8 @@ const GroupMessages = ({ userId, id }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const connection = useContext(SignalRContext);
+  const messagesEndRef = useRef(null);
+  const containerRef = useRef(null);
   const listGroupMessage = useSelector(
     (state) => state.groupmessage.listGroupMessage
   );
@@ -29,9 +31,11 @@ const GroupMessages = ({ userId, id }) => {
       connection.on("UserJoin", (value) => {
         console.log(value);
       });
-      connection.on("ReceiveGroupMessage",(groupMessage)=>{
+      connection.on("ReceiveGroupMessage",(id,groupMessage)=>{
         console.log(groupMessage)
-        dispatch(addGroupMessageRecevie(groupMessage))
+        if(id!==userId.toString()){
+          dispatch(addGroupMessageRecevie(groupMessage))
+        }
       })
       
     }
@@ -42,10 +46,17 @@ const GroupMessages = ({ userId, id }) => {
       }
     };
   }, [connection,id]);
+  useEffect(() => {
+    if (messagesEndRef.current && containerRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 100); // Giảm delay để mượt hơn
+    }
+  }, [listGroupMessage]);
   const groupedMessages = groupMessagesByDate(listGroupMessage);
 
   return (
-    <div className="flex flex-col p-4 space-y-3 bg-gray-100 h-screen overflow-y-auto">
+    <div className="flex flex-col p-4 space-y-3 bg-gray-100 h-screen overflow-y-auto" ref={containerRef}>
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>

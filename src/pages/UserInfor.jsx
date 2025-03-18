@@ -1,4 +1,9 @@
+import { FaFile } from "react-icons/fa";
+import MediaViewer from "../components/MediaView";
+import { useState } from "react";
+
 const UserInfo = ({ conversation }) => {
+  const [isOpenMedia, setIsOpenMedia] = useState(false);
   return (
     <div>
       <div className="font-bold text-center">Thông tin hội thoại</div>
@@ -65,6 +70,9 @@ const UserInfo = ({ conversation }) => {
       {/* File */}
       <div className="mt-4">
         <div className="font-bold">File</div>
+        <button onClick={() => setIsOpenMedia(true)} className="p-2 bg-blue-500 text-white rounded">
+                <FaFile /> File
+              </button>
         <div className="mt-2 flex items-center justify-between p-2 bg-gray-100 rounded">
           <div className="flex items-center">
             <i className="fas fa-file-word text-blue-500 text-xl"></i>
@@ -78,6 +86,8 @@ const UserInfo = ({ conversation }) => {
           <i className="fas fa-check-circle text-green-500"></i>
         </div>
       </div>
+            {isOpenMedia && <MediaViewer onClose={() => setIsOpenMedia(false)} groupName={conversation.conversationName} />}
+      
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import {
   UpdateConversation,
+  UpdateConversationGroup,
   updateConversationInState,
 } from "../redux/conversation/conversationSlice";
 import axios from "axios";
@@ -56,10 +57,11 @@ const SelectMethod = ({
   const connection = useContext(SignalRContext);
   useEffect(() => {
     if (connection) {
-      connection.on("ReceiveHoverUserMessage", (id,value) => {
-        if(userId.toString()!==id){
-          setTypingUser(value);
-        }
+      connection.on("ReceiveHoverUserMessage", (value) => {
+        // if(userId.toString()===id){
+        //   setTypingUser(value);
+        // }
+        setTypingUser(value);
       });
       connection.on("ReceiveHoverGroupMessage", (id,value) => {
         if(userId.toString()!==id){
@@ -247,28 +249,20 @@ const SelectMethod = ({
       content: message,
     };
     if (groupMessageDto !== null) {
-      // // var result=await dispatch(AddGroupMessage(groupMessageDto))
-      // // if(result!==null){
-      // // }
-      // var groupMessage = {
-      //   groupedMessageId: 3,
-      //   senderId: 2,
-      //   senderName: "Admin_test_2",
-      //   senderAvatar:
-      //     "https://res.cloudinary.com/dktn4yfpi/raw/upload/v1741512224/kaj0cpmcteebcnd2etbj.jfif",
-      //   groupId: 1,
-      //   replyToMessageId: null,
-      //   content: "Chào tất cả",
-      //   messageType: "text",
-      //   createAt: "2025-03-12T13:34:27.7187708",
-      //   status: 1,
-      // };
-      // dispatch(addGroupMessageInstance(groupMessage));
       var result = await dispatch(AddGroupMessage(groupMessageDto)).unwrap();
       if (result != null) {
+        let conversationUpdateGroupDto={
+          id:id,
+          type:type,
+          userSend:userName,
+          content:message
+        }
+        var resultConversationUpdateGroup=await dispatch(UpdateConversationGroup(conversationUpdateGroupDto)).unwrap()
+        console.log(resultConversationUpdateGroup)
         if (connection) {
           try {
-            connection.invoke("SendGroupMessage", id.toString(), result);
+            //id group, id user gửi tin nhắn trong nhóm
+            connection.invoke("SendGroupMessage", id.toString(),userId.toString(), result,resultConversationUpdateGroup);
           } catch (error) {
             console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
             toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
