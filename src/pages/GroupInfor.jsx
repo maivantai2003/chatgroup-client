@@ -5,40 +5,74 @@ import { FaFile, FaSignOutAlt, FaUsers } from "react-icons/fa";
 import AddMemberModal from "../components/AddMemberModal";
 import { SignalRContext } from "../context/SignalRContext";
 import MediaViewer from "../components/MediaView";
+import { GetAllGroupMessageFile } from "../redux/groupmessagefile/groupmessagefileSlice";
+import FileItem from "../components/FileItem";
 
 const GroupInfo = ({ conversation }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenMedia, setIsOpenMedia] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const groupDetail = useSelector((state) => state.group.group);
-  const [loading, setLoading] = useState(false);
-  const connection=useContext(SignalRContext)
+  const listGroupMessageFile = useSelector(
+    (state) => state.groupmessagefile.listGroupMessageFile
+  );
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const connection = useContext(SignalRContext);
   const prevId = useRef(null);
   useEffect(() => {
     if (!conversation?.id || prevId.current === conversation.id) return;
     const fectchData = async () => {
       if (conversation?.id) {
-        setLoading(true);
+        setLoadingMembers(true);
         await dispatch(GetGroupById(conversation.id));
-        setLoading(false);
+        setLoadingMembers(false);
       }
     };
     fectchData();
     prevId.current = conversation.id;
-  }, [dispatch, conversation.id,conversation.userId]);
-  useEffect(()=>{
-    if(connection){
-      connection.on("MemberToGroup",()=>{
-        alert("GroupInfor")
-        setLoading(true);
-        dispatch(GetGroupById(conversation.id))
-        setLoading(false);
-      })
+  }, [dispatch, conversation.id]);
+  useEffect(() => {
+    if (!conversation?.id) return;
+    const fetchGroupFiles = async () => {
+      setLoadingFiles(true);
+      await dispatch(GetAllGroupMessageFile(conversation.id));
+      setLoadingFiles(false);
+    };
+
+    fetchGroupFiles();
+  }, [dispatch, conversation.id]);
+  useEffect(() => {
+    if (connection) {
+      connection.on("MemberToGroup", () => {
+        alert("GroupInfor");
+        dispatch(GetGroupById(conversation.id));
+      });
     }
-  },[connection])
-  if (loading) {
-    return <div className="text-center font-bold">Đang tải dữ liệu...</div>;
-  }
+  }, [connection])
+  console.log(listGroupMessageFile);
+  const mediaItems = listGroupMessageFile.filter((file) =>
+    ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp4", "mov", "avi"].includes(
+      file.typeFile.toLowerCase()
+    )
+  );
+
+  // Lọc danh sách file không phải ảnh/video
+  const files = listGroupMessageFile.filter(
+    (file) =>
+      ![
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+        "svg",
+        "mp4",
+        "mov",
+        "avi",
+      ].includes(file.typeFile.toLowerCase())
+  );
   return (
     <div>
       <div className="font-bold text-center">Thông tin nhóm</div>
@@ -77,80 +111,125 @@ const GroupInfo = ({ conversation }) => {
           <span className="text-xs">Ghim hội thoại</span>
         </button>
         <button className="flex flex-col items-center">
-          <i className="fas fa-user-plus text-lg" onClick={()=>setIsOpen(true)}></i>
+          <i
+            className="fas fa-user-plus text-lg"
+            onClick={() => setIsOpen(true)}
+          ></i>
           <span className="text-xs">Thêm thành viên</span>
         </button>
       </div>
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">Thành viên nhóm</div>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2">
-            <FaUsers className="w-6 h-6" />
-            <span>{groupDetail?.userNumber} thành viên</span>
+        {loadingMembers ? (
+          <p className="text-gray-500 text-sm">Đang tải danh sách thành viên...</p>
+        ) : (
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center gap-2">
+              <FaUsers className="w-6 h-6" />
+              <span>{groupDetail?.userNumber} thành viên</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">Ảnh/Video</div>
         <div className="grid grid-cols-3 gap-1 mt-2">
-          {/* {conversation.media.map((item, index) => (
-            <img
-              key={index}
-              src={item}
-              className="w-20 h-20 object-cover rounded"
-              alt="Media"
-            />
-          ))} */}
+          {mediaItems.length > 0 ? (
+            <>
+              {mediaItems.slice(0, 6).map((media, index) => {
+                const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(
+                  media.fileUrl
+                );
+                const isVideo = /\.(mp4|mov|avi)$/i.test(media.fileUrl);
+
+                return isImage ? (
+                  <img
+                    key={index}
+                    src={media.fileUrl}
+                    className="w-20 h-20 rounded object-cover cursor-pointer"
+                    alt="media"
+                    onClick={() => {
+                      setSelectedIndex(index);
+                      setIsOpenMedia(true);
+                    }}
+                  />
+                ) : isVideo ? (
+                  <video
+                    key={index}
+                    className="w-20 h-20 rounded cursor-pointer"
+                    onClick={() => {
+                      setSelectedIndex(index);
+                      setIsOpenMedia(true);
+                    }}
+                  >
+                    <source src={media.fileUrl} type="video/mp4" />
+                    Trình duyệt không hỗ trợ video.
+                  </video>
+                ) : null;
+              })}
+              {mediaItems.length > 6 && (
+                <button
+                  onClick={() => setIsOpenMedia(true)}
+                  className="mt-2 text-blue-500"
+                >
+                  Xem tất cả
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="text-gray-500 text-sm">Chưa có ảnh hoặc video nào</p>
+          )}
         </div>
-        <button className="mt-2 text-blue-500">Xem tất cả</button>
       </div>
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">File</div>
-        <button onClick={() => setIsOpenMedia(true)} className="p-2 bg-blue-500 text-white rounded">
-        <FaFile /> File
-      </button>
-
-      {/* Truyền trạng thái và hàm đóng mở xuống MediaViewer */}
-      {isOpenMedia && <MediaViewer onClose={() => setIsOpenMedia(false)} groupName={conversation.conversationName} />}
-        {/* {conversation.files.map((file, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-2 bg-gray-100 rounded mt-2"
-          >
-            <div className="flex items-center">
-              <i className={`fas fa-file-${file.type} text-blue-500`}></i>
-              <div className="ml-2">
-                <div className="text-sm">{file.name}</div>
-                <div className="text-xs text-gray-600">
-                  {file.size} KB · {file.date}
-                </div>
-              </div>
-            </div>
-            <i className="fas fa-check-circle text-green-500"></i>
+        {loadingFiles ? (
+          <p className="text-gray-500 text-sm">Đang tải...</p>
+        ) : (
+          <div className="mt-2">
+            {files.length > 0 ? (
+              <>
+                {files.slice(0, 3).map((file, index) => (
+                  <FileItem key={index} file={file} />
+                ))}
+              </>
+            ) : (
+              <p className="text-gray-500 text-sm">Chưa có file nào</p>
+            )}
           </div>
-        ))} */}
-        <button className="mt-2 text-blue-500">Xem tất cả</button>
+        )}
       </div>
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
-      <button className="flex items-center text-red-500 hover:text-red-700 font-semibold">
-        <FaSignOutAlt className="w-5 h-5 mr-2" />
-        Rời nhóm
-      </button>
-    </div>
-    <AddMemberModal
+        <button className="flex items-center text-red-500 hover:text-red-700 font-semibold">
+          <FaSignOutAlt className="w-5 h-5 mr-2" />
+          Rời nhóm
+        </button>
+      </div>
+      <AddMemberModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         userId={conversation.userId || null}
         groupId={conversation.id || null}
         groupName={conversation.conversationName || null}
-        avatar={conversation?.avatar || "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
+        avatar={
+          conversation?.avatar ||
+          "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"
+        }
         //onAddMembers={handleAddMembers}
         groupMembers={groupDetail?.groupDetailUsers || []}
       />
+      {isOpenMedia && (
+        <MediaViewer
+          onClose={() => setIsOpenMedia(false)}
+          groupName={conversation.conversationName}
+          mediaItems={mediaItems}
+          selectedIndex={selectedIndex}
+        />
+      )}
     </div>
   );
 };

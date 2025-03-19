@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
+import FileMessage from "./FileMessage";
 import { ThumbsUp, MessageCircle, MoreHorizontal, Smile } from "lucide-react"; // Import icon
 const reactions = ["👍", "❤️", "🤣", "😲", "😭", "😡"];
 const CloudMessages = ({ userId, type }) => {
@@ -15,6 +16,8 @@ const CloudMessages = ({ userId, type }) => {
   const [showReactions, setShowReactions] = useState(null);
   const [messageReactions, setMessageReactions] = useState({});
   const [loading,setLoading]=useState(true)
+  const messagesEndRef = useRef(null);
+  const containerRef = useRef(null);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -23,7 +26,16 @@ const CloudMessages = ({ userId, type }) => {
     };
     fetchData();
   }, [dispatch, userId, type]);
-
+  useEffect(() => {
+    if (messagesEndRef.current && containerRef.current) {
+      setTimeout(() => {
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
+    }
+  }, [listCloudMessage]);
   const filteredCloudMessages = listCloudMessage.filter(
     (conv) => conv.userId === userId
   );
@@ -44,7 +56,7 @@ const CloudMessages = ({ userId, type }) => {
     });
   };
   return (
-    <div className="flex flex-col space-y-2 p-4">
+    <div className="flex flex-col space-y-2 p-4 min-h-screen overflow-y-auto" ref={containerRef}>
       {loading ? (
         // Hiển thị spinner khi loading
         <div className="flex justify-center items-center h-screen">
@@ -85,7 +97,16 @@ const CloudMessages = ({ userId, type }) => {
                 </div>
 
                 <div className="bg-blue-100 border border-blue-300 rounded-lg p-2 max-w-xs relative ml-2">
-                  <p className="text-gray-900">{msg.content}</p>
+                  {/* <p className="text-gray-900">{msg.content}</p> */}
+                  {msg.content && <p className="text-sm">{msg.content}</p>}
+
+                  {msg.files && msg.files.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {msg.files.map((file, index) => (
+                        <FileMessage key={index} file={file} />
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 text-left">
                     {formatTime(msg.createAt)}
                   </p>

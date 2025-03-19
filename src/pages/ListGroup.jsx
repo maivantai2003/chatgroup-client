@@ -3,11 +3,13 @@ import Avatar from "../components/Avatar";
 import ListGroupItem from "../components/ListGroupItem";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  addConversatioInState,
   GetAllConversation,
   updateConversationGroupInState,
   updateConversationInState,
 } from "../redux/conversation/conversationSlice";
 import { SignalRContext } from "../context/SignalRContext";
+import { distance } from "framer-motion";
 const ListGroup = ({ id, onSelectConversation }) => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -33,24 +35,23 @@ const ListGroup = ({ id, onSelectConversation }) => {
         await dispatch(GetAllConversation(id));
         setLoading(false);
       });
-      connection.on("ReceiveAcceptFriend", async () => {
-        setLoading(true);
-        await dispatch(GetAllConversation(id));
-        setLoading(false);
-      });
       connection.on("UpdateConversationUser", (conversation) => {
         console.log(conversation);
         dispatch(updateConversationInState(conversation));
       });
-      connection.on("UpdateConversationGroup",(conversation)=>{
-        console.log(conversation)
-        dispatch(updateConversationGroupInState(conversation))
+      connection.on("UpdateConversationGroup", (conversation) => {
+        console.log(conversation);
+        dispatch(updateConversationGroupInState(conversation));
+      });
+      connection.on("ReceiveAcceptFriend",(conversation)=>{
+        console.log(connection)
+        dispatch(addConversatioInState(conversation))
       })
       return () => {
         connection.off("MemberToGroup");
         connection.off("ReceiveAcceptFriend");
         connection.off("UpdateConversationUser");
-        connection.off("UpdateConversationGroup")
+        connection.off("UpdateConversationGroup");
       };
     }
   }, [connection, id, dispatch]);
@@ -60,7 +61,9 @@ const ListGroup = ({ id, onSelectConversation }) => {
   return (
     <div className="flex-1 overflow-y-auto">
       {loading ? (
-        <p>Đang tải dữ liệu...</p>
+        <div className="flex justify-center items-center h-screen">
+          <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
       ) : filteredConversations.length > 0 ? (
         filteredConversations.map((conversation) => (
           <ListGroupItem

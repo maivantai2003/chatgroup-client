@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -10,10 +10,12 @@ import { GetAllUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
+import { SignalRContext } from "../context/SignalRContext";
 //import {useSignalR} from "../context/SignalRContext"
 const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const connection=useContext(SignalRContext)
   //const connection=useSignalR()
   var userInfor = JSON.parse(localStorage.getItem("user"));
   const handleRejectFriend = async (id, friendId, userId) => {
@@ -62,9 +64,9 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
             toast.error("Lỗi")
             return
           }
-          // if(connection){
-          //   await connection.invoke("AcceptFriend",userId+"").catch((err) => console.error("Error calling AcceptFriend:", err));
-          // }
+          if(connection){
+            await connection.invoke("AcceptFriend",userId.toString(),resultConversationFriend).catch((err) => console.error("Error calling AcceptFriend:", err));
+          }
         }else{
           toast.error("Lỗi")
           return

@@ -22,7 +22,7 @@ const ListGroupItem = ({
     return () => clearInterval(interval);
   }, [lastMessage,id]);
   return (
-    <div className={`p-2 ${isSelected ? "bg-gray-200" : ""}`} onClick={onClick}>
+    <div className={`p-2 ${isSelected ? "bg-blue-100" : ""}`} onClick={onClick}>
       <div className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
         <img
           src={avatar!==null?avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}

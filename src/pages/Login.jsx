@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
 import { SignalRContext } from "../context/SignalRContext";
+import { jwtDecode } from "jwt-decode";
 
 const LoginForm = () => {
   const { signIn } = useAuth();
@@ -25,10 +26,17 @@ const LoginForm = () => {
       const result=await dispatch(login(authRequest)).unwrap()
       localStorage.setItem("accessToken",result.accessToken)
       window.dispatchEvent(new Event("storage"));
+      const token = localStorage.getItem("accessToken");
+      var user = jwtDecode(token).userInfor;
+      localStorage.setItem("user", user);
+      var userInfor = JSON.parse(localStorage.getItem("user"));
+      var userId = userInfor.UserId;
+      console.log(userId)
       if(connection){
         connection.on("CheckConnection",(value)=>{
           console.log(value)
         })
+        connection.invoke("LoadRequestFriend",userId.toString())
       }
       // console.log(authRequest);
       if (result!==null) {

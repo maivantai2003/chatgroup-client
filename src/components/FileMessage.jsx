@@ -38,39 +38,39 @@ import {
   const getFileIcon = (fileType) => {
     switch (fileType.toLowerCase()) {
       case "pdf":
-        return <FaRegFilePdf className="text-red-500 text-xl mr-3" />;
+        return <FaRegFilePdf className="text-red-500 text-3xl mr-3" />;
       case "doc":
       case "docx":
-        return <FaRegFileWord className="text-blue-500 text-xl mr-3" />;
+        return <FaRegFileWord className="text-blue-500 text-3xl mr-3" />;
       case "xls":
       case "xlsx":
-        return <FaRegFileExcel className="text-green-500 text-xl mr-3" />;
+        return <FaRegFileExcel className="text-green-500 text-3xl mr-3" />;
       case "ppt":
       case "pptx":
-        return <FaRegFilePowerpoint className="text-orange-500 text-xl mr-3" />;
+        return <FaRegFilePowerpoint className="text-orange-500 text-3xl mr-3" />;
       case "zip":
       case "rar":
       case "7z":
-        return <FaRegFileArchive className="text-purple-500 text-xl mr-3" />;
+        return <FaRegFileArchive className="text-purple-500 text-3xl mr-3" />;
       case "mp3":
       case "wav":
       case "flac":
-        return <FaRegFileAudio className="text-yellow-500 text-xl mr-3" />;
+        return <FaRegFileAudio className="text-yellow-500 text-3xl mr-3" />;
       case "mp4":
       case "avi":
       case "mkv":
-        return <FaRegFileVideo className="text-indigo-500 text-xl mr-3" />;
+        return <FaRegFileVideo className="text-indigo-500 text-3xl mr-3" />;
       case "jpg":
       case "jpeg":
       case "png":
       case "gif":
       case "svg":
       case "webp":
-        return <FaRegFileImage className="text-teal-500 text-xl mr-3" />;
+        return <FaRegFileImage className="text-teal-500 text-3xl mr-3" />;
       case "zalo":
-        return <SiZalo className="text-blue-500 text-xl mr-3" />;
+        return <SiZalo className="text-blue-500 text-3xl mr-3" />;
       default:
-        return <FaRegFileAlt className="text-gray-500 text-xl mr-3" />;
+        return <FaRegFileAlt className="text-gray-500 text-3xl mr-3" />;
     }
   };
   

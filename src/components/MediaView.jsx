@@ -2,40 +2,51 @@ import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { X, Maximize, Minimize } from "lucide-react";
 
-const mediaItems = [
-  { id: 1, type: "image", src: "https://res.cloudinary.com/dktn4yfpi/image/upload/v1741507105/ygoiuqqyj4gqs4dutocn.png" },
-  { id: 2, type: "video", src: "https://www.w3schools.com/html/mov_bbb.mp4" },
-  { id: 3, type: "image", src: "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740119533/lmqqpoakr4do1fdsgxse.jpg" },
-];
-
-export default function MediaViewer({ onClose, groupName }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+export default function MediaViewer({
+  onClose,
+  groupName,
+  mediaItems,
+  selectedIndex,
+}) {
+  const [currentIndex, setCurrentIndex] = useState(selectedIndex);
   const [isFullScreen, setIsFullScreen] = useState(true);
 
   const handleNext = () => {
-    setSelectedIndex((prev) => (prev + 1) % mediaItems.length);
+    setCurrentIndex((prev) => (prev + 1) % mediaItems.length);
   };
 
   const handlePrev = () => {
-    setSelectedIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + mediaItems.length) % mediaItems.length
+    );
   };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "ArrowLeft" || event.key === "ArrowUp") handlePrev(); // Xử lý quay lại
-      if (event.key === "ArrowRight" || event.key === "ArrowDown") handleNext(); // Xử lý tiếp theo
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") handlePrev();
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") handleNext();
     };
-  
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
-    <Dialog open={true} onClose={onClose} className="fixed inset-0 flex items-center justify-center bg-black/50">
+    <Dialog
+      open={true}
+      onClose={onClose}
+      className="fixed inset-0 flex items-center justify-center bg-black/50"
+    >
       <div
-        className={`bg-gray-800 rounded-lg relative flex flex-col transition-all ${
+        className={`bg-gray-800 rounded-lg flex flex-col transition-all ${
           isFullScreen ? "w-[90vw] h-[90vh]" : "w-[60vw] h-[60vh]"
         }`}
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
       >
         {/* Tiêu đề */}
         <div className="text-center py-2 text-lg font-semibold border-b text-white relative">
@@ -45,10 +56,17 @@ export default function MediaViewer({ onClose, groupName }) {
             className="absolute top-2 right-12 text-white hover:text-gray-400"
             onClick={() => setIsFullScreen(!isFullScreen)}
           >
-            {isFullScreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
+            {isFullScreen ? (
+              <Minimize className="w-6 h-6" />
+            ) : (
+              <Maximize className="w-6 h-6" />
+            )}
           </button>
           {/* Nút đóng */}
-          <button className="absolute top-2 right-2 text-white hover:text-gray-400" onClick={onClose}>
+          <button
+            className="absolute top-2 right-2 text-white hover:text-gray-400"
+            onClick={onClose}
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -59,17 +77,25 @@ export default function MediaViewer({ onClose, groupName }) {
           <div className="w-1/4 bg-gray-900 p-4 overflow-y-auto">
             {mediaItems.map((item, index) => (
               <div
-                key={item.id}
+                key={index}
                 className={`p-2 cursor-pointer border rounded transition ${
-                  index === selectedIndex ? "border-blue-500 bg-gray-700" : "border-gray-600"
+                  index === currentIndex
+                    ? "border-blue-500 bg-gray-700"
+                    : "border-gray-600"
                 }`}
-                onClick={() => setSelectedIndex(index)}
+                onClick={() => setCurrentIndex(index)}
               >
-                {item.type === "image" ? (
-                  <img src={item.src} alt="Thumbnail" className="w-full h-auto object-cover rounded" />
+                {item.typeFile
+                  .toLowerCase()
+                  .match(/(jpg|jpeg|png|gif|webp|svg)/) ? (
+                  <img
+                    src={item.fileUrl}
+                    alt="Thumbnail"
+                    className="w-full h-auto object-cover rounded"
+                  />
                 ) : (
                   <video className="w-full h-auto object-cover rounded">
-                    <source src={item.src} type="video/mp4" />
+                    <source src={item.fileUrl} type="video/mp4" />
                   </video>
                 )}
               </div>
@@ -78,17 +104,27 @@ export default function MediaViewer({ onClose, groupName }) {
 
           {/* Hiển thị nội dung chính */}
           <div className="w-3/4 flex items-center justify-center p-4 relative bg-black">
-            {mediaItems[selectedIndex].type === "image" ? (
-              <img
-                src={mediaItems[selectedIndex].src}
-                alt="Media"
-                className="max-w-full max-h-full object-contain rounded-lg"
-              />
-            ) : (
-              <video controls className="max-w-full max-h-full object-contain rounded-lg">
-                <source src={mediaItems[selectedIndex].src} type="video/mp4" />
-              </video>
-            )}
+            <div className="w-full h-full flex items-center justify-center">
+              {mediaItems[currentIndex].typeFile
+                .toLowerCase()
+                .match(/(jpg|jpeg|png|gif|webp|svg)/) ? (
+                <img
+                  src={mediaItems[currentIndex].fileUrl}
+                  alt="Media"
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <video
+                  controls
+                  className="max-w-full max-h-full object-contain"
+                >
+                  <source
+                    src={mediaItems[currentIndex].fileUrl}
+                    type="video/mp4"
+                  />
+                </video>
+              )}
+            </div>
 
             {/* Nút điều hướng */}
             <button

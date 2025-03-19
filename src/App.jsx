@@ -47,13 +47,13 @@ const MainLayout = () => {
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
   if (token !== null) {
-    var user = jwtDecode(token).userInfor;
-    //console.log(jwtDecode(token))
-    localStorage.setItem("user", user);
+    // var user = jwtDecode(token).userInfor;
+    // localStorage.setItem("user", user);
     var userInfor = JSON.parse(localStorage.getItem("user"));
     var userId = userInfor.UserId;
     var avatar = userInfor.Avatar;
     var userName = userInfor.UserName;
+    console.log("request")
   } else {
     navigate("/login");
   }

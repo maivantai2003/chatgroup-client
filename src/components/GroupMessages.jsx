@@ -57,7 +57,7 @@ const GroupMessages = ({ userId, id }) => {
   const groupedMessages = groupMessagesByDate(listGroupMessage);
 
   return (
-    <div className="flex flex-col p-4 space-y-3 bg-gray-100 h-screen overflow-y-auto" ref={containerRef}>
+    <div className="flex flex-col p-4 space-y-3 bg-gray-100 flex-grow overflow-y-auto" ref={containerRef}>
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>

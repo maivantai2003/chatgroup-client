@@ -102,7 +102,10 @@ const conversationSlice = createSlice({
         //     : conv
         // );
         // state.listConversation = sortConversations(state.listConversation);
-    },
+    },addConversatioInState:(state,action)=>{
+      state.listConversation.push(action.payload);
+        state.listConversation = sortConversations(state.listConversation);
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(GetAllConversation.fulfilled, (state, action) => {
@@ -143,5 +146,5 @@ const conversationSlice = createSlice({
       });      
   },
 });
-export const { updateConversationInState,updateConversationGroupInState } = conversationSlice.actions;
+export const { updateConversationInState,updateConversationGroupInState,addConversatioInState } = conversationSlice.actions;
 export default conversationSlice.reducer;

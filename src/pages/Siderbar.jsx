@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   FaUser,
   FaUsers,
@@ -6,14 +6,28 @@ import {
   FaSignOutAlt,
   FaRegComment,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SignalRService from "../services/signalRService";
+import { SignalRContext } from "../context/SignalRContext";
+import { GetFriendRequest } from "../redux/friend/friendSlice";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const friendRequests = useSelector((state) => state.friend.listFriendRequest);
-
+  const connection=useContext(SignalRContext)
+  const dispatch=useDispatch()
+  useEffect(()=>{
+    if(connection){
+      connection.on("RequestFriend",(id)=>{
+        dispatch(GetFriendRequest(parseInt(id)))
+        console.log("Call API")
+      })
+      return ()=>{
+        connection.off("RequestFriend")
+      }
+    }
+  },[connection,dispatch])
   const handleLogout = async () => {
     await SignalRService.stopConnection();
     localStorage.clear();
