@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
+import { addCloudMessage, GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import FileMessage from "./FileMessage";
 import { ThumbsUp, MessageCircle, MoreHorizontal, Smile } from "lucide-react"; // Import icon
+import { SignalRContext } from "../context/SignalRContext";
 const reactions = ["👍", "❤️", "🤣", "😲", "😭", "😡"];
 const CloudMessages = ({ userId, type }) => {
   const listCloudMessage = useSelector(
@@ -18,6 +19,7 @@ const CloudMessages = ({ userId, type }) => {
   const [loading,setLoading]=useState(true)
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
+  const connection=useContext(SignalRContext)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -36,6 +38,16 @@ const CloudMessages = ({ userId, type }) => {
       }, 100);
     }
   }, [listCloudMessage]);
+  useEffect(()=>{
+    if(connection){
+      connection.on("ReceiveCloudMessage",(cloudmessage)=>{
+        dispatch(addCloudMessage(cloudmessage))
+      })
+      return ()=>{
+        connection.off("ReceiveCloudMessage")
+      }
+    }
+  },[connection,dispatch])
   const filteredCloudMessages = listCloudMessage.filter(
     (conv) => conv.userId === userId
   );

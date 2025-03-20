@@ -43,8 +43,13 @@ const ListGroup = ({ id, onSelectConversation }) => {
         console.log(conversation);
         dispatch(updateConversationGroupInState(conversation));
       });
+      connection.on("UpdateConversationCloud",(conversation)=>{
+        console.log(connection)
+        dispatch(updateConversationInState(conversation))
+      })
       connection.on("ReceiveAcceptFriend",(conversation)=>{
         console.log(connection)
+        console.log(conversation)
         dispatch(addConversatioInState(conversation))
       })
       return () => {
@@ -52,6 +57,7 @@ const ListGroup = ({ id, onSelectConversation }) => {
         connection.off("ReceiveAcceptFriend");
         connection.off("UpdateConversationUser");
         connection.off("UpdateConversationGroup");
+        connection.off("UpdateConversationCloud")
       };
     }
   }, [connection, id, dispatch]);

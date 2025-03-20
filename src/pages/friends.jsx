@@ -108,6 +108,7 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
 const FriendSuggestion = ({ userId, userName, avatar, id }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const connection=useContext(SignalRContext)
   const handleRequestFriend = async (userId, id) => {
     setLoading(true);
     console.log(userId, id);
@@ -120,6 +121,9 @@ const FriendSuggestion = ({ userId, userName, avatar, id }) => {
       var result = await dispatch(AddFriend(friendDto));
       console.log(result);
       if (result !== null) {
+        if(connection){
+          connection.invoke("SendRequestFriend",userId.toString())
+        }
         toast.success("Gửi kết bạn thành công");
         await dispatch(GetFriendRequest(id))
         await dispatch(GetAllUser(id));

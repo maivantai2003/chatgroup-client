@@ -45,7 +45,11 @@ const initialState = {
 const cloudmessageFileSlice = createSlice({
   name: "cloudmessageFile",
   initialState,
-  reducers: {},
+  reducers: {
+    addCloudMessageFileState:(state,action)=>{
+      state.listCloudMessageFiles.push(action.payload);
+    }
+  },
   extraReducers: (builder) => {
     builder.addCase(GetAllCloudMessageFiles.fulfilled, (state, action) => {
         state.listCloudMessageFiles = action.payload;

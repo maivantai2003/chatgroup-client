@@ -7,6 +7,13 @@ export const GetAllGroupMessageFile = createAsyncThunk(
     return response;
   }
 );
+export const AddGroupMessageFile = createAsyncThunk(
+  "groupmessagefile/AddGroupMessageFile",
+  async (groupMessageFileDto) => {
+    const response = await groupmessagefileService.AddGroupMessageFile(groupMessageFileDto)
+    return response;
+  }
+);
 const initialState = {
   listGroupMessageFile: [],
   groupmessageFile: null,
@@ -17,12 +24,17 @@ const groupmessagefileSlice = createSlice({
   name: "groupmessagefile",
   initialState,
   reducers: {
+    addGroupMessageFile:(state,action)=>{
+      state.listGroupMessageFile.push(action.payload)
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(GetAllGroupMessageFile.fulfilled, (state, action) => {
         state.listGroupMessageFile = action.payload;
-      });
+      }).addCase(AddGroupMessageFile.fulfilled,(state,action)=>{
+        state.listGroupMessageFile.push(action.payload)
+      })
   },
 });
 export default groupmessagefileSlice.reducer;

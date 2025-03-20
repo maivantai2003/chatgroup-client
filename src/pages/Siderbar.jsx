@@ -21,7 +21,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     if(connection){
       connection.on("RequestFriend",(id)=>{
         dispatch(GetFriendRequest(parseInt(id)))
-        console.log("Call API")
       })
       return ()=>{
         connection.off("RequestFriend")

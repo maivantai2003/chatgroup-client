@@ -29,6 +29,15 @@ const groupmessageSlice = createSlice({
     },
     addGroupMessageRecevie:(state,action)=>{
       state.listGroupMessage.push(action.payload)
+    },
+    addFilesToGroupMessage:(state,action)=>{
+      const { groupMessageId, files } = action.payload;
+      const message = state.listGroupMessage.find(
+        (msg) => msg.groupMessageId === groupMessageId
+      );
+      if (message) {
+        message.files = message.files ? [...message.files, ...files] : [...files];
+      }
     }
   },
   extraReducers: (builder) => {
@@ -41,5 +50,5 @@ const groupmessageSlice = createSlice({
       });
   },
 });
-export const {addGroupMessageInstance,addGroupMessageRecevie}=groupmessageSlice.actions;
+export const {addGroupMessageInstance,addGroupMessageRecevie,addFilesToGroupMessage}=groupmessageSlice.actions;
 export default groupmessageSlice.reducer;

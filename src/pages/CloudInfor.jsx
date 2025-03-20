@@ -16,14 +16,21 @@ const CloudInfo = ({ conversation }) => {
       await dispatch(GetAllCloudMessageFiles(conversation.userId))
       setLoading(false)
     }
-    //fetchData()
-  },[dispatch,conversation.id, conversation.userId])
+    fetchData()
+  },[dispatch,conversation.id])
   const mediaItems = listCloudMessageFile.filter((file) =>
     ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp4", "mov", "avi"].includes(
       file.typeFile.toLowerCase()
     )
   );
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="loader"></div>
+        <p className="ml-2 text-gray-500">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
   // Lọc danh sách file không phải ảnh/video
   const files = listCloudMessageFile.filter(
     (file) =>

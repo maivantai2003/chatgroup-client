@@ -103,8 +103,9 @@ const conversationSlice = createSlice({
         // );
         // state.listConversation = sortConversations(state.listConversation);
     },addConversatioInState:(state,action)=>{
-      state.listConversation.push(action.payload);
-        state.listConversation = sortConversations(state.listConversation);
+        // state.listConversation.push(action.payload);
+        // state.listConversation = sortConversations(state.listConversation);
+        state.listConversation.unshift(action.payload);
     }
   },
   extraReducers: (builder) => {

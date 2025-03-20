@@ -31,6 +31,15 @@ const usermessageSlice = createSlice({
     receiveUserMessage: (state, action) => {
       state.listUserMessage.push(action.payload);
     },
+    addFilesToUserMessage:(state,action)=>{
+      const { userMessageId, files } = action.payload;
+      const message = state.listUserMessage.find(
+        (msg) => msg.userMessageId === userMessageId
+      );
+      if (message) {
+        message.files = message.files ? [...message.files, ...files] : [...files];
+      }
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(CreateUserMessage.fulfilled, (state, action) => {
@@ -41,5 +50,5 @@ const usermessageSlice = createSlice({
       });
   },
 });
-export const {addUserMessage,receiveUserMessage}=usermessageSlice.actions
+export const {addUserMessage,receiveUserMessage,addFilesToUserMessage}=usermessageSlice.actions
 export default usermessageSlice.reducer;

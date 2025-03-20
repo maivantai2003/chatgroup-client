@@ -10,6 +10,13 @@ export const GetAllUserMessageFile = createAsyncThunk(
     return response;
   }
 );
+export const AddUserMessageFile = createAsyncThunk(
+  "usermessagefile/AddUserMessageFile",
+  async (userMessageFileDto) => {
+    const response = await usermessagefileService.AddUserMessageFile(userMessageFileDto)
+    return response;
+  }
+);
 const initialState = {
   listUserMessageFile: [],
   usermessageFile: null,
@@ -17,11 +24,17 @@ const initialState = {
 const usermessagefileSlice = createSlice({
   name: "usermessagefile",
   initialState,
-  reducers: {},
+  reducers: {
+    addUserMessageFile:(state,action)=>{
+      state.listUserMessageFile.push(action.payload)
+    }
+  },
   extraReducers: (builder) => {
       builder.addCase(GetAllUserMessageFile.fulfilled, (state, action) => {
         state.listUserMessageFile = action.payload;
-      });
+      }).addCase(AddUserMessageFile.fulfilled,(state,action)=>{
+        state.listUserMessageFile.push(action.payload)
+      })
   },
 });
 export default usermessagefileSlice.reducer;
