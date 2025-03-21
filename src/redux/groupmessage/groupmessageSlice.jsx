@@ -31,9 +31,9 @@ const groupmessageSlice = createSlice({
       state.listGroupMessage.push(action.payload)
     },
     addFilesToGroupMessage:(state,action)=>{
-      const { groupMessageId, files } = action.payload;
+      const { groupedMessageId, files } = action.payload;
       const message = state.listGroupMessage.find(
-        (msg) => msg.groupMessageId === groupMessageId
+        (msg) => msg.groupedMessageId === groupedMessageId
       );
       if (message) {
         message.files = message.files ? [...message.files, ...files] : [...files];

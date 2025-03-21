@@ -1,7 +1,10 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { FaRemoveFormat, FaTrash, FaUser } from "react-icons/fa";
-import { addFilesToCloudMessage, CreateCloudMessage } from "../redux/cloudmessage/cloudmessageSlice";
+import {
+  addFilesToCloudMessage,
+  CreateCloudMessage,
+} from "../redux/cloudmessage/cloudmessageSlice";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -156,35 +159,39 @@ const SelectMethod = ({
             setSelectedFiles([]);
             console.log("File upload thành công:", successfulUploads);
             // Save file upload in DB
-            const createFilePromises = successfulUploads.map(file =>
-              dispatch(CreateFile({
-                tenFile: file.TenFile,
-                duongDan: file.DuongDan,
-                kichThuocFile: file.KichThuocFile,
-                loaiFile: file.LoaiFile
-              })).unwrap()
+            const createFilePromises = successfulUploads.map((file) =>
+              dispatch(
+                CreateFile({
+                  tenFile: file.TenFile,
+                  duongDan: file.DuongDan,
+                  kichThuocFile: file.KichThuocFile,
+                  loaiFile: file.LoaiFile,
+                })
+              ).unwrap()
             );
             //Save cloudMessageFile
             const createdFiles = await Promise.all(createFilePromises);
-            const createCloudMessageFile=createdFiles.map(file=>
-              dispatch(AddCloudMessageFile({
-                cloudMessageId:result.cloudMessageId,
-                fileId:file.maFile
-              })).unwrap()
-            )
-            const convertedList = createdFiles.map(file => ({
+            const createCloudMessageFile = createdFiles.map((file) =>
+              dispatch(
+                AddCloudMessageFile({
+                  cloudMessageId: result.cloudMessageId,
+                  fileId: file.maFile,
+                })
+              ).unwrap()
+            );
+            const convertedList = createdFiles.map((file) => ({
               fileId: file.maFile,
               fileName: file.tenFile,
               fileUrl: file.duongDan,
               typeFile: file.loaiFile,
-              sizeFile: file.kichThuocFile
+              sizeFile: file.kichThuocFile,
             }));
-            let cloudMessageFile={
-              cloudMessageId:result.cloudMessageId,
-              files:convertedList
-            }
-            dispatch(addFilesToCloudMessage(cloudMessageFile))
-            console.log(cloudMessageFile)
+            let cloudMessageFile = {
+              cloudMessageId: result.cloudMessageId,
+              files: convertedList,
+            };
+            dispatch(addFilesToCloudMessage(cloudMessageFile));
+            console.log(cloudMessageFile);
           }
         }
       } else {
@@ -254,38 +261,42 @@ const SelectMethod = ({
           setSelectedFiles([]);
           console.log("File upload thành công:", successfulUploads);
           // Save file upload in DB
-          const createFilePromises = successfulUploads.map(file =>
-            dispatch(CreateFile({
-              tenFile: file.TenFile,
-              duongDan: file.DuongDan,
-              kichThuocFile: file.KichThuocFile,
-              loaiFile: file.LoaiFile
-            })).unwrap()
+          const createFilePromises = successfulUploads.map((file) =>
+            dispatch(
+              CreateFile({
+                tenFile: file.TenFile,
+                duongDan: file.DuongDan,
+                kichThuocFile: file.KichThuocFile,
+                loaiFile: file.LoaiFile,
+              })
+            ).unwrap()
           );
           //Save cloudMessageFile
           const createdFiles = await Promise.all(createFilePromises);
-          console.log(result.userMessageId)
-          const createUserMessageFile=createdFiles.map(file=>
-            dispatch(AddUserMessageFile({
-              userMessageId:result.userMessageId,
-              fileId:file.maFile
-            })).unwrap()
-          )
-          console.log(createUserMessageFile)
-          const convertedList = createdFiles.map(file => ({
+          console.log(result.userMessageId);
+          const createUserMessageFile = createdFiles.map((file) =>
+            dispatch(
+              AddUserMessageFile({
+                userMessageId: result.userMessageId,
+                fileId: file.maFile,
+              })
+            ).unwrap()
+          );
+          console.log(createUserMessageFile);
+          const convertedList = createdFiles.map((file) => ({
             fileId: file.maFile,
             fileName: file.tenFile,
             fileUrl: file.duongDan,
             typeFile: file.loaiFile,
-            sizeFile: file.kichThuocFile
+            sizeFile: file.kichThuocFile,
           }));
-          let userMessageFile={
-            userMessageId:result.userMessageId,
-            files:convertedList
-          }
-          console.log(result)
-          dispatch(addFilesToUserMessage(userMessageFile))
-          console.log(userMessageFile)
+          let userMessageFile = {
+            userMessageId: result.userMessageId,
+            files: convertedList,
+          };
+          console.log(result);
+          dispatch(addFilesToUserMessage(userMessageFile));
+          console.log(userMessageFile);
         }
         //
       } else {
@@ -362,38 +373,42 @@ const SelectMethod = ({
           setSelectedFiles([]);
           console.log("File upload thành công:", successfulUploads);
           // Save file upload in DB
-          const createFilePromises = successfulUploads.map(file =>
-            dispatch(CreateFile({
-              tenFile: file.TenFile,
-              duongDan: file.DuongDan,
-              kichThuocFile: file.KichThuocFile,
-              loaiFile: file.LoaiFile
-            })).unwrap()
+          const createFilePromises = successfulUploads.map((file) =>
+            dispatch(
+              CreateFile({
+                tenFile: file.TenFile,
+                duongDan: file.DuongDan,
+                kichThuocFile: file.KichThuocFile,
+                loaiFile: file.LoaiFile,
+              })
+            ).unwrap()
           );
           //Save cloudMessageFile
           const createdFiles = await Promise.all(createFilePromises);
-          console.log(result.userMessageId)
-          const createGroupMessageFile=createdFiles.map(file=>
-            dispatch(AddGroupMessageFile({
-              groupMessageId:result.groupMessageId,
-              fileId:file.maFile
-            })).unwrap()
-          )
-          console.log(createGroupMessageFile)
-          const convertedList = createdFiles.map(file => ({
+          console.log(result.userMessageId);
+          const createGroupMessageFile = createdFiles.map((file) =>
+            dispatch(
+              AddGroupMessageFile({
+                groupedMessageId: result.groupedMessageId,
+                fileId: file.maFile,
+              })
+            ).unwrap()
+          );
+          console.log(createGroupMessageFile);
+          const convertedList = createdFiles.map((file) => ({
             fileId: file.maFile,
             fileName: file.tenFile,
             fileUrl: file.duongDan,
             typeFile: file.loaiFile,
-            sizeFile: file.kichThuocFile
+            sizeFile: file.kichThuocFile,
           }));
-          let groupMessageFile={
-            groupMessageId:result.groupMessageId,
-            files:convertedList
-          }
-          console.log(result)
-          dispatch(addFilesToGroupMessage(groupMessageFile))
-          console.log(groupMessageFile)
+          let groupMessageFile = {
+            groupedMessageId: result.groupedMessageId,
+            files: convertedList,
+          };
+          console.log(result);
+          dispatch(addFilesToGroupMessage(groupMessageFile));
+          console.log(groupMessageFile);
         }
         //
       }
@@ -558,23 +573,30 @@ const SelectMethod = ({
     >
       {type === "user"
         ? typingUser && (
-            <p className="text-gray-500 text-sm">{typingUser} ...</p>
+            <p className="absolute -top-6 left-4 bg-white px-2 py-1 rounded shadow text-gray-600 text-xs">
+              {typingUser} ...
+            </p>
           )
         : typingGroup && (
-            <p className="text-gray-500 text-sm">{typingGroup} ...</p>
+            <p className="absolute -top-6 left-4 bg-white px-2 py-1 rounded shadow text-gray-600 text-xs">
+              {typingGroup} ...
+            </p>
           )}
-      <div className="flex items-center">
-        <input
-          type="text"
+      <div className="relative flex items-center w-full">
+        <textarea
           value={message}
           onChange={(e) => {
-            const newMessage = e.target.value.trim();
-            if (newMessage !== "" && newMessage !== message.trim()) {
+            const newMessage = e.target.value;
+            if (newMessage.trim() !== "" && newMessage !== message.trim()) {
               handleTypingUser(id);
             } else {
               handleStopTyping(id);
             }
-            setMessage(e.target.value);
+            setMessage(newMessage);
+
+            // CẬP NHẬT: Tự động điều chỉnh chiều cao textarea
+            e.target.style.height = "auto";
+            e.target.style.height = e.target.scrollHeight + "px";
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -582,8 +604,11 @@ const SelectMethod = ({
               handleSendMessage();
             }
           }}
-          className="flex-1 p-2 rounded bg-white outline-none border border-transparent focus:ring-0 focus:border-transparent"
+          className="flex-1 p-2 rounded bg-white outline-none border border-transparent 
+               focus:ring-0 focus:border-transparent resize-none overflow-hidden
+               max-h-40 min-h-[40px]"
           placeholder={`Nhập @, tin nhắn tới ${conversationName}`}
+          rows={1} // CẬP NHẬT: Đặt số dòng tối thiểu ban đầu
         />
 
         <div className="flex items-center space-x-4 ml-4">
@@ -593,12 +618,10 @@ const SelectMethod = ({
               onClick={handleSendMessage}
             ></i>
           )}
-
           <i
             className="fas fa-smile cursor-pointer"
             onClick={() => setShowPicker(!showPicker)}
           ></i>
-
           <i
             className="fas fa-paperclip cursor-pointer"
             onClick={() => fileInputRef.current.click()}
@@ -610,7 +633,6 @@ const SelectMethod = ({
             multiple
             onChange={handleFileChange}
           />
-
           <i className="fas fa-microphone"></i>
           <i className="fas fa-ellipsis-v"></i>
         </div>
