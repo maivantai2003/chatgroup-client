@@ -49,9 +49,11 @@ const GroupInfo = ({ conversation }) => {
         alert("GroupInfor");
         dispatch(GetGroupById(conversation.id));
       });
+      return ()=>{
+        connection.off("MemberToGroup")
+      }
     }
-  }, [connection])
-  console.log(listGroupMessageFile);
+  }, [connection,dispatch])
   const mediaItems = listGroupMessageFile.filter((file) =>
     ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp4", "mov", "avi"].includes(
       file.typeFile.toLowerCase()

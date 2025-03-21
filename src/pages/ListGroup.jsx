@@ -52,12 +52,17 @@ const ListGroup = ({ id, onSelectConversation }) => {
         console.log(conversation)
         dispatch(addConversatioInState(conversation))
       })
+      connection.on("ReceiveConversationMemberGroup",(conversation)=>{
+        console.log(conversation)
+        dispatch(addConversatioInState(conversation))
+      })
       return () => {
         connection.off("MemberToGroup");
         connection.off("ReceiveAcceptFriend");
         connection.off("UpdateConversationUser");
         connection.off("UpdateConversationGroup");
         connection.off("UpdateConversationCloud")
+        connection.off("ReceiveConversationMemberGroup")
       };
     }
   }, [connection, id, dispatch]);

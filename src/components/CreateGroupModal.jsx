@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetAllFriendById } from "../redux/friend/friendSlice";
 import axios from "axios";
@@ -8,6 +8,7 @@ import { CreateGroup } from "../redux/group/groupSlice";
 import { CreateGroupDetail } from "../redux/groupdetail/groupdetailSlice";
 import { toast } from "react-toastify";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
+import { SignalRContext } from "../context/SignalRContext";
 const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,7 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [uploading, setUploading] = useState(false);
   const [groupName, setGroupName] = useState("");
   const dispatch = useDispatch();
+  const connection = useContext(SignalRContext);
   const users = useSelector((state) => state.friend.listFriend);
   const toggleUser = (user) => {
     setSelectedUsers((prev) => {
@@ -68,12 +70,17 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   };
   const handleCreateGroup = async () => {
     try {
+      if (groupName.trim() === "" || groupName === undefined) {
+        toast.warning("Vui lòng nhập tên nhóm");
+        return;
+      }
       const groupDto = {
         groupName: groupName,
         avatar: selectedImage,
       };
+      // create group
       var result = await dispatch(CreateGroup(groupDto)).unwrap();
-      if (result !== null && result.groupId> 0) {
+      if (result !== null && result.groupId > 0) {
         var groupId = result.groupId;
         const groupDetails = [
           { userId: id, groupId: groupId, role: "Admin" },
@@ -83,20 +90,44 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
             role: "Member",
           })),
         ];
-        await Promise.all(groupDetails.map((groupDetailDto)=>dispatch(CreateGroupDetail(groupDetailDto))))
-        console.log(groupDetails)
-        var listConversation=groupDetails.map((conversation)=>({
-          id:groupId,
-          userId:conversation.userId,
-          avatar:result.avatar,
-          conversationName:result.groupName,
-          userSend:"",
-          type:"group",
-          content:`${conversation.userId === id ? "Bạn đã tạo nhóm "+result.groupName : "Bạn đã được thêm vào nhóm "+result.groupName}`
-        }))
-        await Promise.all(listConversation.map((conversationDto)=>dispatch(CreateConversation(conversationDto))))
-        console.log(listConversation)
-        toast("Tạo nhóm thành công");
+        //create detail group
+        const createGroupDetailPromises = groupDetails.map((groupDetailDto) =>
+          dispatch(CreateGroupDetail(groupDetailDto)).unwrap()
+        );
+        const createGroupDetails = await Promise.all(createGroupDetailPromises);
+        console.log(createGroupDetails);
+        var listConversation = groupDetails.map((conversation) => ({
+          id: groupId,
+          userId: conversation.userId,
+          avatar: result.avatar,
+          conversationName: result.groupName,
+          userSend: "",
+          type: "group",
+          content: `${
+            conversation.userId === id
+              ? "Bạn đã tạo nhóm " + result.groupName
+              : "Bạn đã được thêm vào nhóm " + result.groupName
+          }`,
+        }));
+        //create conversation
+        const createConversationPromises = listConversation.map(
+          (conversationDto) =>
+            dispatch(CreateConversation(conversationDto)).unwrap()
+        );
+        const listConversations = await Promise.all(createConversationPromises);
+        console.log(listConversations);
+        if (connection) {
+          listConversations
+            .filter((user) => user.userId !== id)
+            .forEach((conversation) => {
+              connection.invoke(
+                "AddConversationMemberGroup",
+                conversation.userId.toString(),
+                conversation
+              );
+            });
+        }
+        toast.success("Tạo nhóm thành công");
       } else {
         toast.error("Tạo nhóm không thành công");
         return;
@@ -113,6 +144,7 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
     setSelectedImage(null);
     setGroupName("");
   };
+  console.log("userId: " + id.toString());
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={closeModal}>

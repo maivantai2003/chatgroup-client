@@ -76,16 +76,6 @@ const AddMemberModal = ({
           console.log(groupDetails[i].userId+"")
         } 
       }
-      // await Promise.all(groupMembers.map((member)=>{
-      //   if(connection){
-      //     connection.invoke("AddMemberToGroup",member.userId+"")
-      //   }
-      // }))
-      // await Promise.all(selectedMembers.map((member=>{
-      //   if(connection){
-      //     connection.invoke("AddMemberToGroup",member.id+"")
-      //   }
-      // })))
       //
       // if (groupDetails.length > 0) {
       //   await Promise.all(
