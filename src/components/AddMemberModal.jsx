@@ -59,7 +59,6 @@ const AddMemberModal = ({
       }
     });
   };
-
   const handleConfirm = async () => {
     try {
       if (selectedMembers.length === 0) return;
@@ -70,53 +69,48 @@ const AddMemberModal = ({
           role: "Member",
         })),
       ];
-      if(connection){
-        for(let i=0;i<groupDetails.length;i++){
-          connection.invoke("AddMemberToGroup",groupDetails[i].userId+"")
-          console.log(groupDetails[i].userId+"")
-        } 
+      //
+      if (groupDetails.length > 0) {
+        await Promise.all(
+          groupDetails.map((groupDetailDto) =>
+            dispatch(CreateGroupDetail(groupDetailDto))
+          )
+        );
       }
       //
-      // if (groupDetails.length > 0) {
-      //   await Promise.all(
-      //     groupDetails.map((groupDetailDto) =>
-      //       dispatch(CreateGroupDetail(groupDetailDto))
-      //     )
-      //   );
-      // }
-      // var listConversation = groupDetails.map((conversation) => ({
-      //   id: groupId,
-      //   userId: conversation.userId,
-      //   avatar: avatar,
-      //   conversationName: groupName,
-      //   userSend: "",
-      //   type: "group",
-      //   content: `${"Bạn đã được thêm vào nhóm " + groupName}`,
-      // }));
-      // await Promise.all(
-      //   listConversation.map((conversationDto) =>
-      //     dispatch(CreateConversation(conversationDto))
-      //   )
-      // );
-      // console.log(listConversation);
-      // if (groupMembers.length > 0) {
-      //   let listConversation = groupMembers.map((member) => ({
-      //     userId: member.userId,
-      //     id: groupId,
-      //     type: "group",
-      //     userSend: "",
-      //     content:
-      //       selectedMembers.map((member) => member.name).join(", ") +
-      //       " được thêm vào nhóm",
-      //   }));
-      //   await Promise.all(
-      //     listConversation.map((conversationUpdateDto) =>
-      //       dispatch(UpdateConversation(conversationUpdateDto))
-      //     )
-      //   );
-      //   console.log(listConversation)
+      var listConversation = groupDetails.map((conversation) => ({
+        id: groupId,
+        userId: conversation.userId,
+        avatar: avatar,
+        conversationName: groupName,
+        userSend: "",
+        type: "group",
+        content: `${"Bạn đã được thêm vào nhóm " + groupName}`,
+      }));
+      await Promise.all(
+        listConversation.map((conversationDto) =>
+          dispatch(CreateConversation(conversationDto))
+        )
+      );
+      console.log(listConversation);
+      if (groupMembers.length > 0) {
+        let listConversation = groupMembers.map((member) => ({
+          userId: member.userId,
+          id: groupId,
+          type: "group",
+          userSend: "",
+          content:
+            selectedMembers.map((member) => member.name).join(", ") +
+            " được thêm vào nhóm",
+        }));
+        await Promise.all(
+          listConversation.map((conversationUpdateDto) =>
+            dispatch(UpdateConversation(conversationUpdateDto))
+          )
+        );
+        console.log(listConversation)
 
-      // }
+      }
       // setSelectedMembers([]);
       // await dispatch(GetGroupById(groupId))
       // onClose();
