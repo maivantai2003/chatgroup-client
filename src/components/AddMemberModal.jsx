@@ -87,12 +87,11 @@ const AddMemberModal = ({
         type: "group",
         content: `${"Bạn đã được thêm vào nhóm " + groupName}`,
       }));
-      await Promise.all(
+      var createMemberAddGroupConversations=await Promise.all(
         listConversation.map((conversationDto) =>
-          dispatch(CreateConversation(conversationDto))
+          dispatch(CreateConversation(conversationDto)).unwrap()
         )
       );
-      console.log(listConversation);
       if (groupMembers.length > 0) {
         let listConversation = groupMembers.map((member) => ({
           userId: member.userId,
@@ -103,17 +102,33 @@ const AddMemberModal = ({
             selectedMembers.map((member) => member.name).join(", ") +
             " được thêm vào nhóm",
         }));
-        await Promise.all(
+        var updateMemberInGroupConversations=await Promise.all(
           listConversation.map((conversationUpdateDto) =>
-            dispatch(UpdateConversation(conversationUpdateDto))
+            dispatch(UpdateConversation(conversationUpdateDto)).unwrap()
           )
         );
-        console.log(listConversation)
-
+        console.log(updateMemberInGroupConversations)
       }
-      // setSelectedMembers([]);
-      // await dispatch(GetGroupById(groupId))
-      // onClose();
+      if(connection){
+        createMemberAddGroupConversations.forEach((conversation) => {
+          connection.invoke(
+            "AddConversationMemberGroup",
+            conversation.userId.toString(),
+            conversation
+          );
+        });
+        updateMemberInGroupConversations.filter((user) => user.userId !== userId)
+        .forEach((conversation) => {
+          connection.invoke(
+            "UpdateConversationMemberInGroup",
+            conversation.userId.toString(),
+            conversation
+          );
+        });
+      }
+      setSelectedMembers([]);
+      await dispatch(GetGroupById(groupId))
+      onClose();
     } catch (ex) {
       console.error("Lỗi khi thêm thành viên vào nhóm:", ex);
     }

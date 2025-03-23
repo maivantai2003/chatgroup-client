@@ -37,4 +37,5 @@ const groupmessagefileSlice = createSlice({
       })
   },
 });
+export const {addGroupMessageFile}=groupmessagefileSlice.actions;
 export default groupmessagefileSlice.reducer;

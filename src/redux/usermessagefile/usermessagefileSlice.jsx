@@ -27,7 +27,10 @@ const usermessagefileSlice = createSlice({
   reducers: {
     addUserMessageFile:(state,action)=>{
       state.listUserMessageFile.push(action.payload)
-    }
+    },
+    addMultipleUserMessageFiles: (state, action) => {
+      state.listUserMessageFile = [...state.listUserMessageFile, ...action.payload];
+    },
   },
   extraReducers: (builder) => {
       builder.addCase(GetAllUserMessageFile.fulfilled, (state, action) => {
@@ -37,4 +40,5 @@ const usermessagefileSlice = createSlice({
       })
   },
 });
+export const {addUserMessageFile,addMultipleUserMessageFiles}=usermessagefileSlice.actions;
 export default usermessagefileSlice.reducer;

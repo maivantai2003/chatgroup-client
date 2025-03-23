@@ -283,21 +283,34 @@ const SelectMethod = ({
             ).unwrap()
           );
           console.log(createUserMessageFile);
-          const convertedList = createdFiles.map((file) => ({
+          const convertedFileList = createdFiles.map((file) => ({
             fileId: file.maFile,
             fileName: file.tenFile,
             fileUrl: file.duongDan,
             typeFile: file.loaiFile,
             sizeFile: file.kichThuocFile,
           }));
+          const convertedSendFileList = createdFiles.map((file) => ({
+            userId:userId,
+            fileId: file.maFile,
+            fileName: file.tenFile,
+            fileUrl: file.duongDan,
+            typeFile: file.loaiFile,
+            sizeFile: file.kichThuocFile,
+            sentDate:result.createAt
+          }));
           let userMessageFile = {
             userMessageId: result.userMessageId,
-            files: convertedList,
+            files: convertedFileList,
           };
           console.log(result);
           dispatch(addFilesToUserMessage(userMessageFile));
+          if(connection){
+            connection.invoke("SendUserMessageFile",userMessageDto.receiverId.toString(),userMessageFile,convertedSendFileList)
+          }
+          console.log(convertedSendFileList)
           console.log(userMessageFile);
-        }
+        }  
         //
       } else {
         toast.error("Gửi tin nhắn không thành công");

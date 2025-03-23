@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  addFilesToUserMessage,
   GetAllUserMessage,
   receiveUserMessage,
 } from "../redux/usermessage/usermessageSlice";
@@ -33,13 +34,19 @@ const UserMessages = ({ userId, id, type, avatar }) => {
         dispatch(receiveUserMessage(userMessage));
         console.log(userMessage);
       });
+      connection.on("ReceiveUserMessageFile", (file) => {
+        dispatch(addFilesToUserMessage(file));
+        console.log(file)
+      });
       connection.on("CheckUser", (value) => {
         console.log(value);
       });
+      
     }
     return () => {
       if (connection) {
         connection.off("ReceiveUserMessage");
+        connection.off("ReceiveUserMessageFile")
         connection.off("CheckUser");
       }
     };

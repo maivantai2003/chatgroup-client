@@ -1,15 +1,17 @@
 import { FaFile } from "react-icons/fa";
 import MediaViewer from "../components/MediaView";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GetAllUserMessageFile } from "../redux/usermessagefile/usermessagefileSlice";
+import { addMultipleUserMessageFiles, GetAllUserMessageFile } from "../redux/usermessagefile/usermessagefileSlice";
 import FileItem from "../components/FileItem";
+import { SignalRContext } from "../context/SignalRContext";
 
 const UserInfo = ({ conversation }) => {
   const [isOpenMedia, setIsOpenMedia] = useState(false);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const connection=useContext(SignalRContext)
   const listUserMessageFile = useSelector(
     (state) => state.usermessagefile.listUserMessageFile
   );
@@ -26,6 +28,17 @@ const UserInfo = ({ conversation }) => {
     };
     fetchData();
   }, [dispatch, conversation.id, conversation.userId]);
+  useEffect(()=>{
+    if(connection){
+      connection.on("ReceiveUserMessageFileInfor",(listFile)=>{
+        dispatch(addMultipleUserMessageFiles(listFile))
+        console.log(listFile)
+      })
+      return ()=>{
+        connection.off("ReceiveUserMessageFileInfor")
+      }
+    }
+  },[connection,dispatch])
   const mediaItems = listUserMessageFile.filter((file) =>
     ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp4", "mov", "avi"].includes(
       file.typeFile.toLowerCase()
