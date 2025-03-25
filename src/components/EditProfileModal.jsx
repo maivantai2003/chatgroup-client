@@ -83,9 +83,7 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
         phoneNumber: updatedData.phoneNumber,
         status: 1,
       };
-      console.log("Dữ liệu gửi lên server:", updatedData);
-      console.log(updatedData.userId, userUpdateDto);
-      console.log(localStorage.getItem("user"))
+      
       try {
         var result = await dispatch(
           UpdateUser({ id: updatedData.userId, userUpdateDto: userUpdateDto })

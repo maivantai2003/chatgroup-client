@@ -75,8 +75,8 @@ const SelectMethod = ({
         // }
         setTypingUser(value);
       });
-      connection.on("ReceiveHoverGroupMessage", (id, value) => {
-        if (userId.toString() !== id) {
+      connection.on("ReceiveHoverGroupMessage", (senderId,groupId, value) => {
+        if (userId.toString() !== senderId && groupId===id.toString()) {
           setTypingGroup(value);
         }
       });
@@ -95,6 +95,11 @@ const SelectMethod = ({
       fetchData();
     }
   }, [type, id, dispatch, groupUsers]);
+  useEffect(()=>{
+    setMessage("")
+    setTypingUser(null)
+    setTypingGroup(null)
+  },[conversationId])
   const handleSendMessage = async () => {
     try {
       if (message.trim() !== "" || selectedFiles.length > 0) {
