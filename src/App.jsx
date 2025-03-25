@@ -96,6 +96,7 @@ const MainLayout = () => {
               <ListGroup
                 id={userId}
                 onSelectConversation={setSelectedConversation}
+                search={search}
               />
             </div>
             {selectedConversation ? (

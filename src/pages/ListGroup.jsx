@@ -10,7 +10,7 @@ import {
 } from "../redux/conversation/conversationSlice";
 import { SignalRContext } from "../context/SignalRContext";
 import { distance } from "framer-motion";
-const ListGroup = ({ id, onSelectConversation }) => {
+const ListGroup = ({ id, onSelectConversation,search }) => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
   const dispatch = useDispatch();
@@ -73,7 +73,9 @@ const ListGroup = ({ id, onSelectConversation }) => {
   }, [connection, id, dispatch]);
   const filteredConversations = listConversation.filter(
     (conv) => conv.userId === id
-  );
+  ).filter((conv) =>
+    search ? conv.conversationName.toLowerCase().includes(search.toLowerCase()) : true
+  );;
   return (
     <div className="flex-1 overflow-y-auto">
       {loading ? (

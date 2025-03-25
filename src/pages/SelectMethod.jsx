@@ -117,15 +117,6 @@ const SelectMethod = ({
   const handleSendCloudMessage = async () => {
     console.log(message);
     let uploadedFiles = [];
-    // if (selectedFiles.length > 0) {
-    //   const uploadPromises = selectedFiles.map((file) =>
-    //     uploadFileToCloudinary(file)
-    //   );
-    //   uploadedFiles = await Promise.all(uploadPromises)
-    //   uploadedFiles = uploadedFiles.filter((file) => file !== null);
-    // }
-    // console.log(uploadedFiles)
-    // cloudMessageDto
     let cloudMessageDto = {
       userId: userId,
       content: message,
@@ -306,7 +297,7 @@ const SelectMethod = ({
           console.log(result);
           dispatch(addFilesToUserMessage(userMessageFile));
           if(connection){
-            connection.invoke("SendUserMessageFile",userMessageDto.receiverId.toString(),userMessageFile,convertedSendFileList)
+            connection.invoke("SendUserMessageFile",userMessageDto.receiverId.toString(),userMessageDto.senderId.toString(),userMessageFile,convertedSendFileList)
           }
           console.log(convertedSendFileList)
           console.log(userMessageFile);
@@ -368,7 +359,7 @@ const SelectMethod = ({
                     content: message,
                   }
                 );
-              });
+              });   
           } catch (error) {
             console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
             toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
@@ -415,12 +406,24 @@ const SelectMethod = ({
             typeFile: file.loaiFile,
             sizeFile: file.kichThuocFile,
           }));
+          const convertedSendFileList = createdFiles.map((file) => ({
+            userId:userId,
+            fileId: file.maFile,
+            fileName: file.tenFile,
+            fileUrl: file.duongDan,
+            typeFile: file.loaiFile,
+            sizeFile: file.kichThuocFile,
+            sentDate:result.createAt
+          }));
           let groupMessageFile = {
             groupedMessageId: result.groupedMessageId,
             files: convertedList,
           };
           console.log(result);
           dispatch(addFilesToGroupMessage(groupMessageFile));
+          if(connection){
+            connection.invoke("SendGroupMessageFile",id.toString(),userId.toString(),groupMessageFile,convertedSendFileList)
+          }
           console.log(groupMessageFile);
         }
         //

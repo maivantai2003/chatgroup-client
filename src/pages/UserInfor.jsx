@@ -30,7 +30,11 @@ const UserInfo = ({ conversation }) => {
   }, [dispatch, conversation.id, conversation.userId]);
   useEffect(()=>{
     if(connection){
-      connection.on("ReceiveUserMessageFileInfor",(listFile)=>{
+      connection.on("ReceiveUserMessageFileInfor",(senderId,listFile)=>{
+        console.log("//")
+        console.log(conversation.id, conversation.userId)
+        console.log(senderId)
+        console.log("//")
         dispatch(addMultipleUserMessageFiles(listFile))
         console.log(listFile)
       })

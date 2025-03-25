@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { UpdateUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import { updateUserInfo } from "../helpers/convert";
+import { UpdateConversationInfor } from "../redux/conversation/conversationSlice";
 
 const EditProfileModal = ({ isOpen, closeModal, user }) => {
   const [formData, setFormData] = useState({ ...user });
@@ -90,7 +91,7 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
           UpdateUser({ id: updatedData.userId, userUpdateDto: userUpdateDto })
         ).unwrap();
         if (result !== null) {
-        console.log(result)
+          console.log(result)
           toast.success("Cập nhật thành công");
           updateUserInfo(userUpdateDto)
           console.log(localStorage.getItem("user"))
@@ -98,6 +99,13 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
           toast.error("Cập nhật không thành công");
           return;
         }
+        var resultUpdateInfor=await dispatch(UpdateConversationInfor({
+          id:userUpdateDto.userId,
+          type:"user",
+          avatar:userUpdateDto.avatar,
+          conversationName:userUpdateDto.userName
+        }))
+        console.log(resultUpdateInfor)
       } catch (ex) {
         console.log(ex);
       }

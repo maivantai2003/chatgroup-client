@@ -89,6 +89,7 @@ const ChatMessage = ({ conversation }) => {
         avatar={conversation.avatar!==null?conversation.avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
         name={conversation.conversationName}
         type={conversation.type}
+        id={conversation.id}
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">

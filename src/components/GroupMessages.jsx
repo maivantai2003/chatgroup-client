@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addGroupMessageRecevie, GetAllGroupMessage } from "../redux/groupmessage/groupmessageSlice";
+import { addFilesToGroupMessage, addGroupMessageRecevie, GetAllGroupMessage } from "../redux/groupmessage/groupmessageSlice";
 import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import { SignalRContext } from "../context/SignalRContext";
@@ -32,6 +32,11 @@ const GroupMessages = ({ userId, id }) => {
       connection.on("UserJoin", (value) => {
         console.log(value);
       });
+      connection.on("ReceiveGroupMessageFile",(id,file)=>{
+        if(id!==userId.toString()){
+          dispatch(addFilesToGroupMessage(file))
+        }
+      })
       connection.on("ReceiveGroupMessage",(id,groupMessage)=>{
         console.log(groupMessage)
         if(id!==userId.toString()){
@@ -44,6 +49,7 @@ const GroupMessages = ({ userId, id }) => {
       if(connection){
         connection.off("UserJoin");
         connection.off("ReceiveGroupMessage")
+        connection.off("ReceiveGroupMessageFile")
       }
     };
   }, [connection,id]);
@@ -54,8 +60,8 @@ const GroupMessages = ({ userId, id }) => {
       }, 100); // Giảm delay để mượt hơn
     }
   }, [listGroupMessage]);
-  const groupedMessages = groupMessagesByDate(listGroupMessage);
-
+  const filteredMessages = listGroupMessage.filter(msg => msg.groupId === id);
+  const groupedMessages = groupMessagesByDate(filteredMessages);
   return (
     <div className="flex flex-col p-4 space-y-3 bg-gray-100 flex-grow overflow-y-auto" ref={containerRef}>
       {loading ? (
@@ -86,7 +92,7 @@ const GroupMessages = ({ userId, id }) => {
                 )}
                 {/* Nội dung tin nhắn */}
                 <div
-                  className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${msg.senderId === userId ? "bg-blue-100 border-blue-300 text-black" : "bg-gray-200 border-gray-300 text-black"}`}
+                  className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${msg.senderId === userId ? "bg-blue-100 border-blue-300 text-black" : "bg-white border-blue-300 text-black"}`}
                 >
                   {msg.senderId !== userId && (
                     <p className="text-xs font-bold text-gray-600">

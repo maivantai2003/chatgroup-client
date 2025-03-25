@@ -26,7 +26,10 @@ const groupmessagefileSlice = createSlice({
   reducers: {
     addGroupMessageFile:(state,action)=>{
       state.listGroupMessageFile.push(action.payload)
-    }
+    },
+    addMultipleGroupMessageFiles: (state, action) => {
+      state.listGroupMessageFile = [...state.listGroupMessageFile, ...action.payload];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -37,5 +40,5 @@ const groupmessagefileSlice = createSlice({
       })
   },
 });
-export const {addGroupMessageFile}=groupmessagefileSlice.actions;
+export const {addGroupMessageFile,addMultipleGroupMessageFiles}=groupmessagefileSlice.actions;
 export default groupmessagefileSlice.reducer;

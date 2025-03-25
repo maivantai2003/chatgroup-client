@@ -14,7 +14,7 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const DEFAULT_AVATAR = "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740748643/lui1zw6ip7ew5modhzsg.png";
+  const DEFAULT_AVATAR = config.DEFAULT_AVATAR
   const [avatarPreview, setAvatarPreview] = useState(DEFAULT_AVATAR);
   const navigate=useNavigate();
   const dispatch=useDispatch();
@@ -73,7 +73,7 @@ const RegisterForm = () => {
           let conversationDto={
             id:result.userId,
             userId:result.userId,
-            avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1741155183/ocivujn3qq5pxv6ngnau.jpg",
+            avatar:config.CLOUD_AVATAR,
             conversationName:"Cloud của tôi",
             userSend:"Cloud",
             type:"cloud",

@@ -38,7 +38,7 @@ export default function MediaViewer({
       className="fixed inset-0 flex items-center justify-center bg-black/50"
     >
       <div
-        className={`bg-gray-800 rounded-lg flex flex-col transition-all ${
+        className={`bg-gray-800 rounded-lg flex flex-col transition-all overflow-hidden ${
           isFullScreen ? "w-[90vw] h-[90vh]" : "w-[60vw] h-[60vh]"
         }`}
         style={{
@@ -72,7 +72,7 @@ export default function MediaViewer({
         </div>
 
         {/* Nội dung */}
-        <div className="flex flex-1">
+        <div className="flex flex-1 overflow-hidden">
           {/* Danh sách thumbnails */}
           <div className="w-1/4 bg-gray-900 p-4 overflow-y-auto">
             {mediaItems.map((item, index) => (
@@ -91,10 +91,10 @@ export default function MediaViewer({
                   <img
                     src={item.fileUrl}
                     alt="Thumbnail"
-                    className="w-full h-auto object-cover rounded"
+                    className="w-full h-24 object-cover rounded"
                   />
                 ) : (
-                  <video className="w-full h-auto object-cover rounded">
+                  <video className="w-full h-24 object-cover rounded">
                     <source src={item.fileUrl} type="video/mp4" />
                   </video>
                 )}
@@ -111,12 +111,13 @@ export default function MediaViewer({
                 <img
                   src={mediaItems[currentIndex].fileUrl}
                   alt="Media"
-                  className="max-w-full max-h-full object-contain"
+                  className="w-full h-full max-w-full max-h-full object-contain"
                 />
               ) : (
                 <video
                   controls
-                  className="max-w-full max-h-full object-contain"
+                  
+                  className="w-full h-full max-w-full max-h-full object-contain"
                 >
                   <source
                     src={mediaItems[currentIndex].fileUrl}

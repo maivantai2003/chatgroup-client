@@ -144,6 +144,15 @@ const conversationSlice = createSlice({
             : conv
         );
         state.listConversation = sortConversations(state.listConversation);
+      }),builder.addCase(UpdateConversationInfor.fulfilled, (state, action) => {
+        const { id, type, avatar, conversationName } = action.payload;
+      
+        state.listConversation = state.listConversation.map(conv =>
+          conv.id === id && conv.type === type
+            ? { ...conv, avatar, conversationName }
+            : conv
+        );
+        state.listConversation = sortConversations(state.listConversation);
       });      
   },
 });

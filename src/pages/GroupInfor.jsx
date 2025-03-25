@@ -5,7 +5,7 @@ import { FaFile, FaSignOutAlt, FaUsers } from "react-icons/fa";
 import AddMemberModal from "../components/AddMemberModal";
 import { SignalRContext } from "../context/SignalRContext";
 import MediaViewer from "../components/MediaView";
-import { GetAllGroupMessageFile } from "../redux/groupmessagefile/groupmessagefileSlice";
+import { addMultipleGroupMessageFiles, GetAllGroupMessageFile } from "../redux/groupmessagefile/groupmessagefileSlice";
 import FileItem from "../components/FileItem";
 
 const GroupInfo = ({ conversation }) => {
@@ -49,8 +49,12 @@ const GroupInfo = ({ conversation }) => {
         alert("GroupInfor");
         dispatch(GetGroupById(conversation.id));
       });
+      connection.on("ReceiveGroupMessageFileInfor",(id,listFile)=>{
+        dispatch(addMultipleGroupMessageFiles(listFile))
+      })
       return ()=>{
         connection.off("MemberToGroup")
+        connection.off("ReceiveGroupMessageFileInfor")
       }
     }
   }, [connection,dispatch])

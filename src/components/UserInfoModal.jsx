@@ -62,7 +62,7 @@ const UserInfoModal = ({ user, onClose }) => {
           </div>
 
           {/* Các tùy chọn khác */}
-          <div className="mt-4 border-t pt-4">
+          {/* <div className="mt-4 border-t pt-4">
             <p className="flex items-center text-gray-700">
               📁 Nhóm chung (4)
             </p>
@@ -72,7 +72,7 @@ const UserInfoModal = ({ user, onClose }) => {
             <p className="flex items-center text-gray-700 mt-2 text-red-500">
               🚫 Chặn tin nhắn và cuộc gọi
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
