@@ -25,9 +25,17 @@ const GroupMessages = ({ userId, id }) => {
   }, [dispatch, id]);
   useEffect(() => {
     if (connection) {
+      // connection
+      //   .invoke("JoinGroup", id + "")
+      //   .catch((err) => console.error("Error joining group:", err));
       connection
-        .invoke("JoinGroup", id + "")
-        .catch((err) => console.error("Error joining group:", err));
+      .invoke("LeaveGroup", id + "")
+      .catch((err) => console.error("Error leaving group:", err))
+      .finally(() => {
+        connection
+          .invoke("JoinGroup", id + "")
+          .catch((err) => console.error("Error joining group:", err));
+      });
 
       connection.on("UserJoin", (value) => {
         console.log(value);

@@ -69,11 +69,11 @@ const SelectMethod = ({
   const groupUsers = useSelector((state) => state.group.group);
   useEffect(() => {
     if (connection) {
-      connection.on("ReceiveHoverUserMessage", (value) => {
-        // if(userId.toString()===id){
-        //   setTypingUser(value);
-        // }
-        setTypingUser(value);
+      connection.on("ReceiveHoverUserMessage", (receiverId,value) => {
+        if(receiverId===userId.toString()){
+          setTypingUser(value);
+        }
+        //setTypingUser(value);
       });
       connection.on("ReceiveHoverGroupMessage", (senderId,groupId, value) => {
         if (userId.toString() !== senderId && groupId===id.toString()) {
@@ -324,7 +324,7 @@ const SelectMethod = ({
       senderId: userId,
       groupId: id,
       messageType: message.trim() !== "" ? "text" : "file",
-      content: message,
+      content: message !== "" ? message : "Bạn đã gửi file",
     };
     if (groupMessageDto !== null) {
       var result = await dispatch(AddGroupMessage(groupMessageDto)).unwrap();
@@ -334,13 +334,14 @@ const SelectMethod = ({
           type: type,
           userId: userId,
           userSend: "Bạn",
-          content: message,
+          content: message !== "" ? message : userName + " đã gửi file",
         };
         setMessage("");
         var resultConversationUpdateGroup = await dispatch(
           UpdateConversationGroup(conversationUpdateGroupDto)
         ).unwrap();
         console.log(resultConversationUpdateGroup);
+        console.log(listGroupUser.groupDetailUsers)
         if (connection) {
           try {
             //id group, id user gửi tin nhắn trong nhóm

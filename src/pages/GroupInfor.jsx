@@ -5,7 +5,10 @@ import { FaFile, FaSignOutAlt, FaUsers } from "react-icons/fa";
 import AddMemberModal from "../components/AddMemberModal";
 import { SignalRContext } from "../context/SignalRContext";
 import MediaViewer from "../components/MediaView";
-import { addMultipleGroupMessageFiles, GetAllGroupMessageFile } from "../redux/groupmessagefile/groupmessagefileSlice";
+import {
+  addMultipleGroupMessageFiles,
+  GetAllGroupMessageFile,
+} from "../redux/groupmessagefile/groupmessagefileSlice";
 import FileItem from "../components/FileItem";
 
 const GroupInfo = ({ conversation }) => {
@@ -14,6 +17,8 @@ const GroupInfo = ({ conversation }) => {
   const [isOpenMedia, setIsOpenMedia] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const groupDetail = useSelector((state) => state.group.group);
+  const [showAllMedia, setShowAllMedia] = useState(false);
+  const [showAllFiles, setShowAllFiles] = useState(false);
   const listGroupMessageFile = useSelector(
     (state) => state.groupmessagefile.listGroupMessageFile
   );
@@ -49,15 +54,27 @@ const GroupInfo = ({ conversation }) => {
         alert("GroupInfor");
         dispatch(GetGroupById(conversation.id));
       });
-      connection.on("ReceiveGroupMessageFileInfor",(id,listFile)=>{
-        dispatch(addMultipleGroupMessageFiles(listFile))
-      })
-      return ()=>{
-        connection.off("MemberToGroup")
-        connection.off("ReceiveGroupMessageFileInfor")
-      }
+      connection.on(
+        "ReceiveGroupMessageFileInfor",
+        (groupId, userId, listFile) => {
+          console.log("Call group");
+          if (
+            userId !== conversation.userId.toString() &&
+            groupId === conversation.id.toString() &&
+            conversation.type === "group"
+          ) {
+            console.log(userId);
+            console.log(conversation.userId);
+            dispatch(addMultipleGroupMessageFiles(listFile));
+          }
+        }
+      );
+      return () => {
+        connection.off("MemberToGroup");
+        connection.off("ReceiveGroupMessageFileInfor");
+      };
     }
-  }, [connection,dispatch])
+  }, [connection, dispatch]);
   const mediaItems = listGroupMessageFile.filter((file) =>
     ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp4", "mov", "avi"].includes(
       file.typeFile.toLowerCase()
@@ -80,7 +97,7 @@ const GroupInfo = ({ conversation }) => {
       ].includes(file.typeFile.toLowerCase())
   );
   return (
-    <div>
+    <div className="max-h-[calc(100vh-100px)] overflow-auto p-4 bg-white rounded-md shadow-md">
       <div className="font-bold text-center">Thông tin nhóm</div>
       <div className="mt-4 flex flex-col items-center">
         {/* <div className="flex -space-x-2">
@@ -128,7 +145,9 @@ const GroupInfo = ({ conversation }) => {
       <div className="mt-4">
         <div className="font-bold">Thành viên nhóm</div>
         {loadingMembers ? (
-          <p className="text-gray-500 text-sm">Đang tải danh sách thành viên...</p>
+          <p className="text-gray-500 text-sm">
+            Đang tải danh sách thành viên...
+          </p>
         ) : (
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2">
@@ -141,46 +160,48 @@ const GroupInfo = ({ conversation }) => {
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
         <div className="font-bold">Ảnh/Video</div>
-        <div className="grid grid-cols-3 gap-1 mt-2">
+        <div className="grid grid-cols-3 gap-1 mt-2 max-h-96 overflow-auto">
           {mediaItems.length > 0 ? (
             <>
-              {mediaItems.slice(0, 6).map((media, index) => {
-                const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(
-                  media.fileUrl
-                );
-                const isVideo = /\.(mp4|mov|avi)$/i.test(media.fileUrl);
+              {(showAllMedia ? mediaItems : mediaItems.slice(0, 6)).map(
+                (media, index) => {
+                  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(
+                    media.fileUrl
+                  );
+                  const isVideo = /\.(mp4|mov|avi)$/i.test(media.fileUrl);
 
-                return isImage ? (
-                  <img
-                    key={index}
-                    src={media.fileUrl}
-                    className="w-20 h-20 rounded object-cover cursor-pointer"
-                    alt="media"
-                    onClick={() => {
-                      setSelectedIndex(index);
-                      setIsOpenMedia(true);
-                    }}
-                  />
-                ) : isVideo ? (
-                  <video
-                    key={index}
-                    className="w-20 h-20 rounded cursor-pointer"
-                    onClick={() => {
-                      setSelectedIndex(index);
-                      setIsOpenMedia(true);
-                    }}
-                  >
-                    <source src={media.fileUrl} type="video/mp4" />
-                    Trình duyệt không hỗ trợ video.
-                  </video>
-                ) : null;
-              })}
+                  return isImage ? (
+                    <img
+                      key={index}
+                      src={media.fileUrl}
+                      className="w-20 h-20 rounded object-cover cursor-pointer"
+                      alt="media"
+                      onClick={() => {
+                        setSelectedIndex(index);
+                        setIsOpenMedia(true);
+                      }}
+                    />
+                  ) : isVideo ? (
+                    <video
+                      key={index}
+                      className="w-20 h-20 rounded cursor-pointer"
+                      onClick={() => {
+                        setSelectedIndex(index);
+                        setIsOpenMedia(true);
+                      }}
+                    >
+                      <source src={media.fileUrl} type="video/mp4" />
+                      Trình duyệt không hỗ trợ video.
+                    </video>
+                  ) : null;
+                }
+              )}
               {mediaItems.length > 6 && (
                 <button
-                  onClick={() => setIsOpenMedia(true)}
+                  onClick={() => setShowAllMedia(!showAllMedia)}
                   className="mt-2 text-blue-500"
                 >
-                  Xem tất cả
+                  {showAllMedia ? "Thu gọn" : "Xem tất cả"}
                 </button>
               )}
             </>
@@ -195,12 +216,22 @@ const GroupInfo = ({ conversation }) => {
         {loadingFiles ? (
           <p className="text-gray-500 text-sm">Đang tải...</p>
         ) : (
-          <div className="mt-2">
+          <div className="mt-2 max-h-96 overflow-auto">
             {files.length > 0 ? (
               <>
-                {files.slice(0, 3).map((file, index) => (
-                  <FileItem key={index} file={file} />
-                ))}
+                {(showAllFiles ? files : files.slice(0, 3)).map(
+                  (file, index) => (
+                    <FileItem key={index} file={file} />
+                  )
+                )}
+                {files.length > 3 && (
+                  <button
+                    onClick={() => setShowAllFiles(!showAllFiles)}
+                    className="mt-2 text-blue-500"
+                  >
+                    {showAllFiles ? "Thu gọn" : "Xem tất cả"}
+                  </button>
+                )}
               </>
             ) : (
               <p className="text-gray-500 text-sm">Chưa có file nào</p>
