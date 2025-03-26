@@ -67,6 +67,7 @@ import { GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
 import UserMessages from "../components/UserMessages";
 import GroupMessages from "../components/GroupMessages";
 import CloudMessages from "../components/CloudMessages";
+import EmptyChatPlaceholder from "../components/EmptyChatPlaceholder";
 //import MessageItem from "./MessageItem";
 
 const ChatMessage = ({ conversation }) => {
@@ -80,7 +81,7 @@ const ChatMessage = ({ conversation }) => {
       case "cloud":
         return <CloudMessages {...conversation} />;
       default:
-        return <p className="text-center bg-white text-gray-400 text-xs">Không có tin nhắn</p>;
+        return <EmptyChatPlaceholder />;
     }
   };
   return (

@@ -57,6 +57,7 @@ const MainLayout = () => {
   } else {
     navigate("/login");
   }
+  
   return (
     //<SignalRProvider>
     <div className="bg-gray-100 flex h-screen">
@@ -106,10 +107,11 @@ const MainLayout = () => {
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
-                {/* <ImageSlider/> */}
-                <p className="text-lg text-gray-500">
+                <ImageSlider/>
+                {/* <p className="text-lg text-gray-500">
                   Chọn một cuộc trò chuyện để bắt đầu
-                </p>
+                </p> */}
+                
               </div>
             )}
           </>

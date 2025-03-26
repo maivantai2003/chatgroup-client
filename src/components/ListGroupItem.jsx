@@ -32,12 +32,12 @@ const ListGroupItem = ({
 
         <div className="ml-3 flex flex-col w-full">
           <div className="flex justify-between items-center">
-            <span className="font-bold">{conversationName}</span>
+            <span className="text-gray-900 font-semibold">{conversationName}</span>
             <span className="text-xs text-gray-400">{timeAgo}</span>
           </div>
 
           <div className="text-sm text-gray-600">
-            <span className="font-semibold">{userSend}:</span>{" "}
+            <span className="font-semibold">{(userSend==="" || userSend===null)?"":userSend+":"}</span>{" "}
             {content.includes("[image]") ? "📷 Hình ảnh" : content}
           </div>
         </div>

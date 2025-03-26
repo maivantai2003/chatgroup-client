@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
@@ -12,9 +12,11 @@ const FriendList = ({ id }) => {
   const [search, setSearch] = useState("");
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
   const friends = useSelector((state) => state.friend.listFriend);
+
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,10 +25,28 @@ const FriendList = ({ id }) => {
       setLoading(false);
     };
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, id]);
+
+  // Đóng menu khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setSelectedFriend(null);
+      }
+    };
+
+    if (selectedFriend) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [selectedFriend]);
+
   const filteredFriends = friends.filter((friend) =>
     friend.userName.toLowerCase().includes(search.toLowerCase())
   );
+
   return (
     <div className="max-w-4xl w-full mx-auto bg-white shadow-lg rounded-lg p-4">
       {/* Header */}
@@ -74,15 +94,18 @@ const FriendList = ({ id }) => {
               </div>
               <button
                 onClick={() =>
-                  setSelectedFriend(
-                    friend.id === selectedFriend ? null : friend.id
-                  )
+                  setSelectedFriend(selectedFriend === friend.id ? null : friend.id)
                 }
               >
                 <EllipsisVerticalIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
+
+              {/* Menu hiển thị thông tin */}
               {selectedFriend === friend.id && (
-                <div className="absolute right-10 mt-2 w-48 bg-white border shadow-lg rounded-md">
+                <div
+                  ref={menuRef}
+                  className="absolute right-10 mt-2 w-48 bg-white border shadow-lg rounded-md z-10"
+                >
                   <ul>
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -93,12 +116,12 @@ const FriendList = ({ id }) => {
                     >
                       Xem thông tin
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Phân loại
                     </li>
                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Đặt tên gợi nhớ
-                    </li>
+                    </li> */}
                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Chặn người này
                     </li>
@@ -106,13 +129,12 @@ const FriendList = ({ id }) => {
                       Xóa bạn
                     </li>
                   </ul>
-                  {showModal && (
-                    <UserInfoModal
-                      user={friend}
-                      onClose={() => setShowModal(false)}
-                    />
-                  )}
                 </div>
+              )}
+
+              {/* Modal hiển thị thông tin bạn bè */}
+              {showModal && (
+                <UserInfoModal user={friend} onClose={() => setShowModal(false)} />
               )}
             </div>
           ))}
