@@ -8,10 +8,10 @@ const Header=({avatar,name,type,id})=>{
       <TimeRequest name={name} type={type} id={id} />
     </div>
     <div className="flex items-center space-x-4">
-      <i className="fas fa-phone"></i>
-      <i className="fas fa-video"></i>
+      {/* <i className="fas fa-phone"></i>
+      <i className="fas fa-video"></i> */}
       <i className="fas fa-search"></i>
-      <i className="fas fa-ellipsis-v"></i>
+      {/* <i className="fas fa-ellipsis-v"></i> */}
     </div>
   </div>
 }

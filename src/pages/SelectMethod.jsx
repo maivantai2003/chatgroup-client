@@ -62,6 +62,7 @@ const SelectMethod = ({
   const [typingUser, setTypingUser] = useState(null);
   const [typingGroup, setTypingGroup] = useState(null);
   const [listGroupUser, setListGroupUser] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState([]);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
   var userName = userInfor.UserName;
@@ -69,14 +70,14 @@ const SelectMethod = ({
   const groupUsers = useSelector((state) => state.group.group);
   useEffect(() => {
     if (connection) {
-      connection.on("ReceiveHoverUserMessage", (receiverId,value) => {
-        if(receiverId===userId.toString()){
+      connection.on("ReceiveHoverUserMessage", (receiverId, value) => {
+        if (receiverId === userId.toString()) {
           setTypingUser(value);
         }
         //setTypingUser(value);
       });
-      connection.on("ReceiveHoverGroupMessage", (senderId,groupId, value) => {
-        if (userId.toString() !== senderId && groupId===id.toString()) {
+      connection.on("ReceiveHoverGroupMessage", (senderId, groupId, value) => {
+        if (userId.toString() !== senderId && groupId === id.toString()) {
           setTypingGroup(value);
         }
       });
@@ -95,11 +96,11 @@ const SelectMethod = ({
       fetchData();
     }
   }, [type, id, dispatch, groupUsers]);
-  useEffect(()=>{
-    setMessage("")
-    setTypingUser(null)
-    setTypingGroup(null)
-  },[conversationId])
+  useEffect(() => {
+    setMessage("");
+    setTypingUser(null);
+    setTypingGroup(null);
+  }, [conversationId]);
   const handleSendMessage = async () => {
     try {
       if (message.trim() !== "" || selectedFiles.length > 0) {
@@ -145,14 +146,27 @@ const SelectMethod = ({
         ).unwrap();
         if (resultUpdateConversation !== null) {
           if (selectedFiles.length > 0) {
-            const uploadPromises = selectedFiles.map((file) =>
-              uploadFileToCloudinary(file)
+            setUploadProgress(
+              selectedFiles.map((file) => ({
+                fileName: file.file.name,
+                progress: 0,
+              }))
+            );
+            const uploadPromises = selectedFiles.map((file, index) =>
+              //uploadFileToCloudinary(file)
+              uploadFileToCloudinary(file, (progress) => {
+                setUploadProgress((prev) =>
+                  prev.map((item, i) =>
+                    i === index ? { ...item, progress } : item
+                  )
+                );
+              })
             );
             const uploadedFiles = await Promise.all(uploadPromises);
             const successfulUploads = uploadedFiles.filter(
               (file) => file !== null && file !== undefined
             );
-            setSelectedFiles([]);
+            setSelectedFiles(() => []);
             console.log("File upload thành công:", successfulUploads);
             // Save file upload in DB
             const createFilePromises = successfulUploads.map((file) =>
@@ -187,6 +201,9 @@ const SelectMethod = ({
               files: convertedList,
             };
             dispatch(addFilesToCloudMessage(cloudMessageFile));
+            setTimeout(() => {
+              setUploadProgress([]);
+            }, 3000);
             console.log(cloudMessageFile);
           }
         }
@@ -247,14 +264,28 @@ const SelectMethod = ({
         }
         //
         if (selectedFiles.length > 0) {
-          const uploadPromises = selectedFiles.map((file) =>
-            uploadFileToCloudinary(file)
+          setUploadProgress(
+            selectedFiles.map((file) => ({
+              fileName: file.file.name,
+              progress: 0,
+            }))
+          );
+          const uploadPromises = selectedFiles.map((file, index) =>
+            //uploadFileToCloudinary(file)
+            uploadFileToCloudinary(file, (progress) => {
+              setUploadProgress((prev) =>
+                prev.map((item, i) =>
+                  i === index ? { ...item, progress } : item
+                )
+              );
+            })
           );
           const uploadedFiles = await Promise.all(uploadPromises);
           const successfulUploads = uploadedFiles.filter(
             (file) => file !== null && file !== undefined
           );
-          setSelectedFiles([]);
+          setSelectedFiles(() => []);
+          console.log(selectedFiles);
           console.log("File upload thành công:", successfulUploads);
           // Save file upload in DB
           const createFilePromises = successfulUploads.map((file) =>
@@ -287,13 +318,13 @@ const SelectMethod = ({
             sizeFile: file.kichThuocFile,
           }));
           const convertedSendFileList = createdFiles.map((file) => ({
-            userId:userId,
+            userId: userId,
             fileId: file.maFile,
             fileName: file.tenFile,
             fileUrl: file.duongDan,
             typeFile: file.loaiFile,
             sizeFile: file.kichThuocFile,
-            sentDate:result.createAt
+            sentDate: result.createAt,
           }));
           let userMessageFile = {
             userMessageId: result.userMessageId,
@@ -301,12 +332,22 @@ const SelectMethod = ({
           };
           console.log(result);
           dispatch(addFilesToUserMessage(userMessageFile));
-          if(connection){
-            connection.invoke("SendUserMessageFile",userMessageDto.receiverId.toString(),userMessageDto.senderId.toString(),userMessageFile,convertedSendFileList)
+          if (connection) {
+            connection.invoke(
+              "SendUserMessageFile",
+              userMessageDto.receiverId.toString(),
+              userMessageDto.senderId.toString(),
+              userMessageFile,
+              convertedSendFileList
+            );
           }
-          console.log(convertedSendFileList)
+          setTimeout(() => {
+            setUploadProgress([]);
+          }, 3000);
+          console.log(selectedFiles);
+          console.log(convertedSendFileList);
           console.log(userMessageFile);
-        }  
+        }
         //
       } else {
         toast.error("Gửi tin nhắn không thành công");
@@ -341,7 +382,7 @@ const SelectMethod = ({
           UpdateConversationGroup(conversationUpdateGroupDto)
         ).unwrap();
         console.log(resultConversationUpdateGroup);
-        console.log(listGroupUser.groupDetailUsers)
+        console.log(listGroupUser.groupDetailUsers);
         if (connection) {
           try {
             //id group, id user gửi tin nhắn trong nhóm
@@ -365,7 +406,7 @@ const SelectMethod = ({
                     content: message,
                   }
                 );
-              });   
+              });
           } catch (error) {
             console.error("Lỗi khi gửi tin nhắn qua SignalR:", error);
             toast.error("Không thể gửi tin nhắn, vui lòng thử lại!");
@@ -373,14 +414,30 @@ const SelectMethod = ({
         }
         //
         if (selectedFiles.length > 0) {
-          const uploadPromises = selectedFiles.map((file) =>
-            uploadFileToCloudinary(file)
+          setUploadProgress(
+            selectedFiles.map((file) => ({
+              fileName: file.file.name,
+              progress: 0,
+            }))
+          );
+          const uploadPromises = selectedFiles.map((file, index) =>
+            //uploadFileToCloudinary(file)
+            uploadFileToCloudinary(file, (progress) => {
+              setUploadProgress((prev) =>
+                prev.map((item, i) =>
+                  i === index ? { ...item, progress } : item
+                )
+              );
+            })
           );
           const uploadedFiles = await Promise.all(uploadPromises);
           const successfulUploads = uploadedFiles.filter(
             (file) => file !== null && file !== undefined
           );
-          setSelectedFiles([]);
+          if(successfulUploads.length>0){
+            setSelectedFiles(() => []);
+            console.log(selectedFiles)
+          }
           console.log("File upload thành công:", successfulUploads);
           // Save file upload in DB
           const createFilePromises = successfulUploads.map((file) =>
@@ -413,13 +470,13 @@ const SelectMethod = ({
             sizeFile: file.kichThuocFile,
           }));
           const convertedSendFileList = createdFiles.map((file) => ({
-            userId:userId,
+            userId: userId,
             fileId: file.maFile,
             fileName: file.tenFile,
             fileUrl: file.duongDan,
             typeFile: file.loaiFile,
             sizeFile: file.kichThuocFile,
-            sentDate:result.createAt
+            sentDate: result.createAt,
           }));
           let groupMessageFile = {
             groupedMessageId: result.groupedMessageId,
@@ -427,9 +484,18 @@ const SelectMethod = ({
           };
           console.log(result);
           dispatch(addFilesToGroupMessage(groupMessageFile));
-          if(connection){
-            connection.invoke("SendGroupMessageFile",id.toString(),userId.toString(),groupMessageFile,convertedSendFileList)
+          if (connection) {
+            connection.invoke(
+              "SendGroupMessageFile",
+              id.toString(),
+              userId.toString(),
+              groupMessageFile,
+              convertedSendFileList
+            );
           }
+          setTimeout(() => {
+            setUploadProgress([]);
+          }, 3000);
           console.log(groupMessageFile);
         }
         //
@@ -473,7 +539,7 @@ const SelectMethod = ({
     }));
     setSelectedFiles((prevFiles) => [...prevFiles, ...filesWithPreview]);
   };
-  const uploadFileToCloudinary = async (file) => {
+  const uploadFileToCloudinary = async (file, onProgress) => {
     var fileDetail = file.file;
     const formData = new FormData();
     formData.append("file", fileDetail);
@@ -488,6 +554,14 @@ const SelectMethod = ({
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percent = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              onProgress(percent);
+            }
+          },
         }
       );
       return {
@@ -655,8 +729,8 @@ const SelectMethod = ({
             multiple
             onChange={handleFileChange}
           />
-          <i className="fas fa-microphone"></i>
-          <i className="fas fa-ellipsis-v"></i>
+          {/* <i className="fas fa-microphone"></i>
+          <i className="fas fa-ellipsis-v"></i> */}
         </div>
       </div>
 
@@ -702,6 +776,29 @@ const SelectMethod = ({
           className="absolute bottom-12 right-4 bg-white shadow-lg rounded"
         >
           <EmojiPicker onEmojiClick={handleEmojiClick} />
+        </div>
+      )}
+      {uploadProgress.length > 0 && (
+        <div className="fixed top-5 right-5 bg-white p-4 rounded-lg shadow-lg w-80">
+          <h4 className="text-lg font-semibold mb-2 text-gray-700">
+            Đang gửi file...
+          </h4>
+          {uploadProgress.map(({ fileName, progress }) => (
+            <div key={fileName} className="mb-3">
+              <span className="block text-sm font-medium text-gray-600">
+                {fileName}
+              </span>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-500 h-2.5 rounded-full transition-all"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <span className="block text-sm text-gray-500 mt-1">
+                {progress}%
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

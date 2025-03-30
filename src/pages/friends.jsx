@@ -19,7 +19,25 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   //const connection=useSignalR()
   var userInfor = JSON.parse(localStorage.getItem("user"));
   const handleRejectFriend = async (id, friendId, userId) => {
-    console.log(id, friendId, userId);
+    let friendDto = {
+      userId: userId,
+      friendId: friendId,
+      status: 3,
+    };
+    try{
+      var result = await dispatch(
+        UpdateFriend({
+          id: id,
+          friendDto: friendDto,
+        }).unwrap()
+      );
+      console.log(result)
+      if(result==null){
+        toast.error("Hủy kết bạn không thành công")
+      }
+    }catch(ex){
+      toast.error(ex)
+    }
   };
   const handleAcceptFriend = async (id, friendId, userId,avatar,userName) => {
     //setLoading(true);

@@ -107,7 +107,6 @@ const AddMemberModal = ({
             dispatch(UpdateConversation(conversationUpdateDto)).unwrap()
           )
         );
-        console.log(updateMemberInGroupConversations)
       }
       if(connection){
         createMemberAddGroupConversations.forEach((conversation) => {

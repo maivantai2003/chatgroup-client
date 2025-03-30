@@ -30,7 +30,6 @@ const ListGroup = ({ id, onSelectConversation,search }) => {
     console.log("Conection ... ... ...");
     if (connection) {
       connection.on("MemberToGroup", async () => {
-        console.log("ListGroup");
         setLoading(true);
         await dispatch(GetAllConversation(id));
         setLoading(false);

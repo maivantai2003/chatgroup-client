@@ -125,7 +125,7 @@ const FileItem = ({ file }) => {
         download
         className="text-blue-500 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-2 right-3"
       >
-        <FaDownload />
+        <FaDownload/>
       </a>
     </div>
   );

@@ -15,6 +15,7 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
   const connection = useContext(SignalRContext);
   const users = useSelector((state) => state.friend.listFriend);
@@ -36,6 +37,9 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
     };
     loadData();
   }, [dispatch]);
+  const filteredUsers = users.filter((user) =>
+    user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -217,11 +221,13 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                   type="text"
                   placeholder="Nhập tên, số điện thoại..."
                   className="w-full p-2 border border-gray-300 rounded-md"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
               {/* Tabs bộ lọc */}
-              <div className="mt-3 flex space-x-2 text-sm text-gray-600">
+              {/* <div className="mt-3 flex space-x-2 text-sm text-gray-600">
                 {["Tất cả", "Khách hàng", "Gia đình", "Công việc"].map(
                   (tab) => (
                     <button
@@ -232,14 +238,14 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                     </button>
                   )
                 )}
-              </div>
+              </div> */}
 
               {/* Danh sách thành viên có scroll */}
               <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
                 {loading ? (
                   <p className="text-gray-500 text-center">Đang tải...</p>
-                ) : (
-                  users.map((user, index) => (
+                ) : filteredUsers.length > 0 ? (
+                  filteredUsers.map((user, index) => (
                     <label
                       key={index}
                       className="flex items-center space-x-3 p-2 border rounded-md cursor-pointer hover:bg-gray-100"
@@ -258,6 +264,10 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                       <span className="text-gray-700">{user.userName}</span>
                     </label>
                   ))
+                ) : (
+                  <p className="text-gray-500 text-center">
+                    Không tìm thấy kết quả
+                  </p>
                 )}
               </div>
 

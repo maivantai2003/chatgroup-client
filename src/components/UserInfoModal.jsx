@@ -11,7 +11,7 @@ const UserInfoModal = ({ user, onClose }) => {
   };
 
   if (!user) return null;
-
+  console.log(user)
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-transparent backdrop-blur-md z-50">
       <div className="bg-white w-[420px] h-[520px] rounded-lg shadow-lg">
@@ -44,10 +44,10 @@ const UserInfoModal = ({ user, onClose }) => {
         {/* Body */}
         <div className="p-5 mt-8">
           {/* Nút gọi điện & nhắn tin */}
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <button className="flex-1 py-2 border rounded-md mr-2">📞 Gọi điện</button>
             <button className="flex-1 py-2 bg-blue-500 text-white rounded-md">💬 Nhắn tin</button>
-          </div>
+          </div> */}
 
           {/* Thông tin cá nhân */}
           <div className="mt-4 border-t pt-4">
@@ -56,7 +56,6 @@ const UserInfoModal = ({ user, onClose }) => {
             <p className="flex justify-between mt-1"><span>Ngày sinh:</span> <span>{formatDate(user.birthday)}</span></p>
             <p className="flex justify-between mt-1"><span>Điện thoại:</span> <span>******</span></p>
           </div>
-
           {/* Hình ảnh */}
           {/* <div className="mt-4 border-t pt-4">
             <h3 className="text-gray-600 font-semibold">Hình ảnh</h3>

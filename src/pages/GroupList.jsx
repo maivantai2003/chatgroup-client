@@ -119,10 +119,10 @@ export default function GroupList({ id }) {
                 {/* Menu popover */}
                 {openMenu === group.groupId && (
                   <div className="absolute right-0 top-12 bg-white shadow-lg rounded-lg w-40 z-10 border p-2">
-                    <button className="flex items-center w-full text-left p-2 hover:bg-gray-200 rounded">
+                    {/* <button className="flex items-center w-full text-left p-2 hover:bg-gray-200 rounded">
                       <MdLabelOutline className="mr-2" />
                       Phân loại
-                    </button>
+                    </button> */}
                     <button className="flex items-center w-full text-left p-2 hover:bg-gray-200 rounded">
                       <FiLogOut className="mr-2" />
                       Rời nhóm

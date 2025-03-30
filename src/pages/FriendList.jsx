@@ -15,6 +15,7 @@ const FriendList = ({ id }) => {
   const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
   const friends = useSelector((state) => state.friend.listFriend);
+  const [selectedFriendData, setSelectedFriendData] = useState(null);
 
   const menuRef = useRef(null);
 
@@ -111,6 +112,7 @@ const FriendList = ({ id }) => {
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
                         setSelectedFriend(null);
+                        setSelectedFriendData(friend);
                         setShowModal(true);
                       }}
                     >
@@ -122,9 +124,9 @@ const FriendList = ({ id }) => {
                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Đặt tên gợi nhớ
                     </li> */}
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Chặn người này
-                    </li>
+                    </li> */}
                     <li className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer">
                       Xóa bạn
                     </li>
@@ -133,8 +135,8 @@ const FriendList = ({ id }) => {
               )}
 
               {/* Modal hiển thị thông tin bạn bè */}
-              {showModal && (
-                <UserInfoModal user={friend} onClose={() => setShowModal(false)} />
+              {showModal && selectedFriendData && (
+                <UserInfoModal user={selectedFriendData} onClose={() => setShowModal(false)} />
               )}
             </div>
           ))}

@@ -51,14 +51,15 @@ const RegisterForm = () => {
 
   const onSubmit =async (data) => {
     const avatarUrl = await uploadAvatar();
-    console.log(data.avatar)
-    console.log("Form Data:", data);
+    // console.log(data.avatar)
+    // console.log("Form Data:", data);
     let userRegister={
       userName:data.userName,
       sex:data.sex,
       phoneNumber:data.phoneNumber,
       birthday:data.birthday,
-      avatar:avatarUrl
+      avatar:avatarUrl,
+      password:data.password
     }
     try{
       const result=await dispatch(registerUser(userRegister)).unwrap()
@@ -85,7 +86,6 @@ const RegisterForm = () => {
             return
           }
         }
-
       }
       navigate("/login")
     }catch(ex){
@@ -132,11 +132,18 @@ const RegisterForm = () => {
         <div>
           <label className="block text-sm font-medium">Phone Number</label>
           <input
-            {...register("phoneNumber")}
+            {...register("phoneNumber", { 
+              required: "Phone number is required", 
+              pattern: { 
+                value: /^(0[3-9])[0-9]{8}$/, 
+                message: "Số điện thoại không hợp lệ"
+              } 
+            })}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
             type="text"
             placeholder="Enter phone number"
           />
+          {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium">Sex</label>
@@ -157,6 +164,16 @@ const RegisterForm = () => {
             type="date"
           />
           {errors.birthday && <p className="text-red-500 text-sm">{errors.birthday.message}</p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Password</label>
+          <input
+            {...register("password", { required: "Password is required" })}
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+            type="text"
+            placeholder="Enter password"
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
         </div>
         <button type="submit" disabled={isUploading} className={`w-full p-2 rounded-lg transition ${isUploading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"}`}>
           {isUploading ? "Đang tải ảnh..." : "Đăng Ký"}

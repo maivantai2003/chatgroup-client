@@ -80,7 +80,9 @@ const GroupInfo = ({ conversation }) => {
       file.typeFile.toLowerCase()
     )
   );
-
+  const handleExitGroup = async () => {
+    alert("Exit group");
+  };
   // Lọc danh sách file không phải ảnh/video
   const files = listGroupMessageFile.filter(
     (file) =>
@@ -125,14 +127,14 @@ const GroupInfo = ({ conversation }) => {
         </div>
       </div>
       <div className="flex justify-around mt-4">
-        <button className="flex flex-col items-center">
+        {/* <button className="flex flex-col items-center">
           <i className="fas fa-bell text-lg"></i>
           <span className="text-xs">Tắt thông báo</span>
         </button>
         <button className="flex flex-col items-center">
           <i className="fas fa-thumbtack text-lg"></i>
           <span className="text-xs">Ghim hội thoại</span>
-        </button>
+        </button> */}
         <button className="flex flex-col items-center">
           <i
             className="fas fa-user-plus text-lg"
@@ -241,7 +243,10 @@ const GroupInfo = ({ conversation }) => {
       </div>
       <div className="h-[4px] bg-gray-200 my-4"></div>
       <div className="mt-4">
-        <button className="flex items-center text-red-500 hover:text-red-700 font-semibold">
+        <button
+          className="flex items-center text-red-500 hover:text-red-700 font-semibold"
+          onClick={handleExitGroup}
+        >
           <FaSignOutAlt className="w-5 h-5 mr-2" />
           Rời nhóm
         </button>

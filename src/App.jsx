@@ -53,7 +53,6 @@ const MainLayout = () => {
     var userId = userInfor.UserId;
     var avatar = userInfor.Avatar;
     var userName = userInfor.UserName;
-    console.log("request")
   } else {
     navigate("/login");
   }
