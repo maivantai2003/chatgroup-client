@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useDispatch, useSelector } from "react-redux";
-import { GetAllFriendById } from "../redux/friend/friendSlice";
+import { GetAllFriendById, UpdateFriend } from "../redux/friend/friendSlice";
 import UserInfoModal from "../components/UserInfoModal";
+import { toast } from "react-toastify";
 
 const FriendList = ({ id }) => {
   const [search, setSearch] = useState("");
@@ -47,7 +48,35 @@ const FriendList = ({ id }) => {
   const filteredFriends = friends.filter((friend) =>
     friend.userName.toLowerCase().includes(search.toLowerCase())
   );
+  const handleRemoveFriend = async (id,userId,friendId) => {
+    let friendDto = {
+      userId: friendId,
+      friendId: userId,
+      status: 3,
+    };
+    try {
+      if (friendDto !== null && id!==null) {
+       
+        var result = await dispatch(
+          UpdateFriend({
+            id: id,
+            friendDto: friendDto,
+          })
+        ).unwrap();
 
+        if (result === null) {
+          toast.error("Hủy kết bạn không thành công");
+          return;
+        }
+
+        toast.success("Hủy kết bạn thành công");
+        console.log(result);
+      }
+    } catch (ex) {
+      console.log(ex);
+      toast.error("Hủy kết bạn không thành công");
+    }
+  }
   return (
     <div className="max-w-4xl w-full mx-auto bg-white shadow-lg rounded-lg p-4">
       {/* Header */}
@@ -95,7 +124,9 @@ const FriendList = ({ id }) => {
               </div>
               <button
                 onClick={() =>
-                  setSelectedFriend(selectedFriend === friend.id ? null : friend.id)
+                  setSelectedFriend(
+                    selectedFriend === friend.id ? null : friend.id
+                  )
                 }
               >
                 <EllipsisVerticalIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
@@ -127,7 +158,12 @@ const FriendList = ({ id }) => {
                     {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       Chặn người này
                     </li> */}
-                    <li className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer">
+                    <li
+                      className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        handleRemoveFriend(friend.id,friend.userId,friend.friendId);
+                      }}
+                    >
                       Xóa bạn
                     </li>
                   </ul>
@@ -136,7 +172,10 @@ const FriendList = ({ id }) => {
 
               {/* Modal hiển thị thông tin bạn bè */}
               {showModal && selectedFriendData && (
-                <UserInfoModal user={selectedFriendData} onClose={() => setShowModal(false)} />
+                <UserInfoModal
+                  user={selectedFriendData}
+                  onClose={() => setShowModal(false)}
+                />
               )}
             </div>
           ))}

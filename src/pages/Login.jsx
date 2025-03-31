@@ -54,7 +54,7 @@ const LoginForm = () => {
   return (
     <div 
       className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('https://cdn.xtmobile.vn/vnt_upload/news/08_2022/09/thumbnail-zalo.jpg')" }}
+      style={{ backgroundImage: "url('https://cdn.prod.website-files.com/659415b46df8ea43c3877776/65aa597826783da5fc7ab091_chatbot-live-chat-illustration.jpeg')" }}
     >
       <div className="max-w-md w-full p-6 rounded-lg shadow-lg bg-white/30 backdrop-blur-md border border-white/50">
         <h2 className="text-2xl font-bold mb-4 text-center">Đăng nhập</h2>
@@ -84,9 +84,9 @@ const LoginForm = () => {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <p className="text-center text-sm text-gray-800 mt-4">
           Chưa có tài khoản?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
+          <Link to="/register" className="text-blue-700 hover:underline">
             Đăng ký
           </Link>
         </p>
