@@ -207,6 +207,7 @@ const RegisterForm = () => {
           >
             {isUploading ? "Đang tải ảnh..." : "Đăng Ký"}
           </button>
+          {/* <button className="w-full p-2 rounded-lg transition">Quay lại</button> */}
         </form>
       </div>
     </div>

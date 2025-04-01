@@ -148,7 +148,6 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
     setSelectedImage(null);
     setGroupName("");
   };
-  console.log("userId: " + id.toString());
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={closeModal}>
