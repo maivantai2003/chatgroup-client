@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
-import ListGroupItem from "../components/ListConversationItem";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addConversatioInState,
@@ -10,7 +9,8 @@ import {
 } from "../redux/conversation/conversationSlice";
 import { SignalRContext } from "../context/SignalRContext";
 import { distance } from "framer-motion";
-const ListGroup = ({ id, onSelectConversation,search }) => {
+import ListConversationItem from "../components/ListConversationItem";
+const ListConversation = ({ id, onSelectConversation,search }) => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
   const dispatch = useDispatch();
@@ -83,7 +83,7 @@ const ListGroup = ({ id, onSelectConversation,search }) => {
         </div>
       ) : filteredConversations.length > 0 ? (
         filteredConversations.map((conversation) => (
-          <ListGroupItem
+          <ListConversationItem
             key={conversation.conversationId}
             {...conversation}
             isSelected={conversation.conversationId === selectedId}
@@ -99,4 +99,4 @@ const ListGroup = ({ id, onSelectConversation,search }) => {
     </div>
   );
 };
-export default ListGroup;
+export default ListConversation;

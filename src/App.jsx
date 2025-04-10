@@ -3,7 +3,6 @@ import "./App.css";
 //import SearchInput from "./components/SearchInput";
 import ChatMessage from "./pages/ChatMessage";
 import InforChat from "./pages/InforChat";
-import ListGroup from "./pages/ListGroup";
 import LoginForm from "./pages/Login";
 import TitleBar from "./pages/TitleBar";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ import GroupList from "./pages/GroupList";
 import { jwtDecode } from "jwt-decode";
 import ImageSlider from "./components/ImageSlider";
 import { FaRemoveFormat, FaSearch } from "react-icons/fa";
+import ListConversation from "./pages/ListConversation";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -93,7 +93,7 @@ const MainLayout = () => {
                 </div>
               </div>
               {/* {search ? <ListGroup /> : <input />} */}
-              <ListGroup
+              <ListConversation
                 id={userId}
                 onSelectConversation={setSelectedConversation}
                 search={search}

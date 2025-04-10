@@ -3,7 +3,7 @@ import Avatar from "./Avatar";
 import { getTimeAgo } from "../helpers/convertTime";
 import { useEffect } from "react";
 
-const ListGroupItem = ({
+const ListConversationItem = ({
   id,
   avatar,
   conversationName,
@@ -45,4 +45,4 @@ const ListGroupItem = ({
     </div>
   );
 };
-export default ListGroupItem;
+export default ListConversationItem;
