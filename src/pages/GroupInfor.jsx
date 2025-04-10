@@ -81,7 +81,7 @@ const GroupInfo = ({ conversation }) => {
     )
   );
   const handleExitGroup = async () => {
-    alert("Exit group");
+    console.log(listGroupMessageFile)
   };
   // Lọc danh sách file không phải ảnh/video
   const files = listGroupMessageFile.filter(

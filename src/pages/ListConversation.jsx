@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
-import ListGroupItem from "../components/ListGroupItem";
+import ListGroupItem from "../components/ListConversationItem";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addConversatioInState,
