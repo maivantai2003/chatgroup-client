@@ -8,6 +8,7 @@ import config from "../constant/linkApi";
 import { toast } from "react-toastify";
 import { CreateCloudMessage } from "../redux/cloudmessage/cloudmessageSlice";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
+import { CheckPhoneNumber } from "../redux/user/userSlice";
 const RegisterForm = () => {
   const {
     register,
@@ -56,6 +57,14 @@ const RegisterForm = () => {
     const avatarUrl = await uploadAvatar();
     // console.log(data.avatar)
     // console.log("Form Data:", data);
+    if(data.phoneNumber){
+      var result=await dispatch(CheckPhoneNumber(data.phoneNumber)).unwrap()
+      if(result){
+        toast.warning("Số điện thoại đã tồn tại")
+        return;
+      }
+    }
+    console.log("Số điện thoại chưa tồn tại")
     let userRegister = {
       userName: data.userName,
       sex: data.sex,
