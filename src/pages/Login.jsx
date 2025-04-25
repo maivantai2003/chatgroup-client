@@ -1,10 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import Link từ react-router-dom
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
+import { SignalRContext } from "../context/SignalRContext";
+import { jwtDecode } from "jwt-decode";
 
 const LoginForm = () => {
   const { signIn } = useAuth();
@@ -13,6 +15,7 @@ const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const dispatch=useDispatch()
   const navigate=useNavigate()
+  const connection=useContext(SignalRContext)
   const onSubmit = async (data) => {
     try {
       let authRequest = {
@@ -22,6 +25,19 @@ const LoginForm = () => {
       console.log(authRequest)
       const result=await dispatch(login(authRequest)).unwrap()
       localStorage.setItem("accessToken",result.accessToken)
+      window.dispatchEvent(new Event("storage"));
+      const token = localStorage.getItem("accessToken");
+      var user = jwtDecode(token).userInfor;
+      localStorage.setItem("user", user);
+      var userInfor = JSON.parse(localStorage.getItem("user"));
+      var userId = userInfor.UserId;
+      console.log(userId)
+      if(connection){
+        connection.on("CheckConnection",(value)=>{
+          console.log(value)
+        })
+        connection.invoke("LoadRequestFriend",userId.toString())
+      }
       // console.log(authRequest);
       if (result!==null) {
         setErrorMessage(null);
@@ -29,16 +45,20 @@ const LoginForm = () => {
         toast.success("Đăng Nhập Thành Công")
       } else {
         setErrorMessage(result?.reason || "Đăng nhập thất bại");
+        toast.error("Vui Lòng Kiểm Tra Số Điện Thoại Hoặc Mật Khẩu")
+        return
       }
     } catch (error) {
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
+      toast.error("Lỗi hệ thống. Vui lòng thử lại!")
+      return
     }
   };
 
   return (
     <div 
       className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('https://cdn.xtmobile.vn/vnt_upload/news/08_2022/09/thumbnail-zalo.jpg')" }}
+      style={{ backgroundImage: "url('https://cdn.prod.website-files.com/659415b46df8ea43c3877776/65aa597826783da5fc7ab091_chatbot-live-chat-illustration.jpeg')" }}
     >
       <div className="max-w-md w-full p-6 rounded-lg shadow-lg bg-white/30 backdrop-blur-md border border-white/50">
         <h2 className="text-2xl font-bold mb-4 text-center">Đăng nhập</h2>
@@ -68,9 +88,9 @@ const LoginForm = () => {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <p className="text-center text-sm text-gray-800 mt-4">
           Chưa có tài khoản?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
+          <Link to="/register" className="text-blue-700 hover:underline">
             Đăng ký
           </Link>
         </p>

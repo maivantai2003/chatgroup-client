@@ -1,8 +1,8 @@
 import axiosInstance from "../interceptors/AxiosInstance";
 
 const cloudmessageFileService = {
-  GetAllCloudMessageFiles: async () => {
-    const response = await axiosInstance.get("CloudMessageFile/GetAll");
+  GetAllCloudMessageFile: async (id) => {
+    const response = await axiosInstance.get("CloudMessageFile/GetAllCloudMessageFile?userId="+id);
     return response.data;
   },
   GetCloudMessageFileById: async (id) => {

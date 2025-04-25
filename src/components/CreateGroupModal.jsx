@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetAllFriendById } from "../redux/friend/friendSlice";
 import axios from "axios";
@@ -8,13 +8,16 @@ import { CreateGroup } from "../redux/group/groupSlice";
 import { CreateGroupDetail } from "../redux/groupdetail/groupdetailSlice";
 import { toast } from "react-toastify";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
+import { SignalRContext } from "../context/SignalRContext";
 const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
+  const connection = useContext(SignalRContext);
   const users = useSelector((state) => state.friend.listFriend);
   const toggleUser = (user) => {
     setSelectedUsers((prev) => {
@@ -34,6 +37,9 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
     };
     loadData();
   }, [dispatch]);
+  const filteredUsers = users.filter((user) =>
+    user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -68,12 +74,17 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
   };
   const handleCreateGroup = async () => {
     try {
+      if (groupName.trim() === "" || groupName === undefined) {
+        toast.warning("Vui lòng nhập tên nhóm");
+        return;
+      }
       const groupDto = {
         groupName: groupName,
         avatar: selectedImage,
       };
+      // create group
       var result = await dispatch(CreateGroup(groupDto)).unwrap();
-      if (result !== null && result.groupId> 0) {
+      if (result !== null && result.groupId > 0) {
         var groupId = result.groupId;
         const groupDetails = [
           { userId: id, groupId: groupId, role: "Admin" },
@@ -83,23 +94,44 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
             role: "Member",
           })),
         ];
-        await Promise.all(groupDetails.map((groupDetailDto)=>dispatch(CreateGroupDetail(groupDetailDto))))
-        console.log(groupDetails);
-        // for (const groupDetailDto of groupDetails) {
-        //   await dispatch(CreateGroupDetail(groupDetailDto));
-        // }
-        var listConversation=groupDetails.map((conversation)=>({
-          id:groupId,
-          userId:conversation.userId,
-          avatar:result.avatar,
-          conversationName:result.groupName,
-          userSend:"",
-          type:"group",
-          content:`${conversation.userId === id ? "Bạn đã tạo nhóm "+result.groupName : "Bạn đã được thêm vào nhóm "+result.groupName}`
-        }))
-        await Promise.all(listConversation.map((conversationDto)=>dispatch(CreateConversation(conversationDto))))
-        console.log(listConversation)
-        toast("Tạo nhóm thành công");
+        //create detail group
+        const createGroupDetailPromises = groupDetails.map((groupDetailDto) =>
+          dispatch(CreateGroupDetail(groupDetailDto)).unwrap()
+        );
+        const createGroupDetails = await Promise.all(createGroupDetailPromises);
+        console.log(createGroupDetails);
+        var listConversation = groupDetails.map((conversation) => ({
+          id: groupId,
+          userId: conversation.userId,
+          avatar: result.avatar,
+          conversationName: result.groupName,
+          userSend: "",
+          type: "group",
+          content: `${
+            conversation.userId === id
+              ? "Bạn đã tạo nhóm " + result.groupName
+              : "Bạn đã được thêm vào nhóm " + result.groupName
+          }`,
+        }));
+        //create conversation
+        const createConversationPromises = listConversation.map(
+          (conversationDto) =>
+            dispatch(CreateConversation(conversationDto)).unwrap()
+        );
+        const listConversations = await Promise.all(createConversationPromises);
+        console.log(listConversations);
+        if (connection) {
+          listConversations
+            .filter((user) => user.userId !== id)
+            .forEach((conversation) => {
+              connection.invoke(
+                "AddConversationMemberGroup",
+                conversation.userId.toString(),
+                conversation
+              );
+            });
+        }
+        toast.success("Tạo nhóm thành công");
       } else {
         toast.error("Tạo nhóm không thành công");
         return;
@@ -188,11 +220,13 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                   type="text"
                   placeholder="Nhập tên, số điện thoại..."
                   className="w-full p-2 border border-gray-300 rounded-md"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
               {/* Tabs bộ lọc */}
-              <div className="mt-3 flex space-x-2 text-sm text-gray-600">
+              {/* <div className="mt-3 flex space-x-2 text-sm text-gray-600">
                 {["Tất cả", "Khách hàng", "Gia đình", "Công việc"].map(
                   (tab) => (
                     <button
@@ -203,14 +237,14 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                     </button>
                   )
                 )}
-              </div>
+              </div> */}
 
               {/* Danh sách thành viên có scroll */}
               <div className="mt-3 max-h-60 overflow-y-auto space-y-2">
                 {loading ? (
                   <p className="text-gray-500 text-center">Đang tải...</p>
-                ) : (
-                  users.map((user, index) => (
+                ) : filteredUsers.length > 0 ? (
+                  filteredUsers.map((user, index) => (
                     <label
                       key={index}
                       className="flex items-center space-x-3 p-2 border rounded-md cursor-pointer hover:bg-gray-100"
@@ -229,6 +263,10 @@ const CreateGroupModal = ({ isOpen, closeModal, id }) => {
                       <span className="text-gray-700">{user.userName}</span>
                     </label>
                   ))
+                ) : (
+                  <p className="text-gray-500 text-center">
+                    Không tìm thấy kết quả
+                  </p>
                 )}
               </div>
 

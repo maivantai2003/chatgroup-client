@@ -4,7 +4,10 @@ export const CreateGroupDetail=createAsyncThunk("groupdetail/CreateGroupdetail",
     const response=await groupdetailService.CreateGroupDetail(groupDetailDto)
     return response
 })
-
+export const DeleteGroupDetail=createAsyncThunk("groupdetail/DeleteGroupdetail",async(id)=>{
+    const response=await groupdetailService.DeleteGroupDetail(id)
+    return response
+})
 const initialState={
     listGroupDetail:[],
     groupdetail:null

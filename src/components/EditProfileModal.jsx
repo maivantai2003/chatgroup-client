@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { UpdateUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import { updateUserInfo } from "../helpers/convert";
-
+import { UpdateConversationInfor } from "../redux/conversation/conversationSlice";
 const EditProfileModal = ({ isOpen, closeModal, user }) => {
   const [formData, setFormData] = useState({ ...user });
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
@@ -82,22 +82,26 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
         phoneNumber: updatedData.phoneNumber,
         status: 1,
       };
-      console.log("Dữ liệu gửi lên server:", updatedData);
-      console.log(updatedData.userId, userUpdateDto);
-      console.log(localStorage.getItem("user"))
+
       try {
         var result = await dispatch(
           UpdateUser({ id: updatedData.userId, userUpdateDto: userUpdateDto })
         ).unwrap();
         if (result !== null) {
-        console.log(result)
           toast.success("Cập nhật thành công");
-          updateUserInfo(userUpdateDto)
-          console.log(localStorage.getItem("user"))
+          updateUserInfo(userUpdateDto);
         } else {
           toast.error("Cập nhật không thành công");
           return;
         }
+        var resultUpdateInfor = await dispatch(
+          UpdateConversationInfor({
+            id: userUpdateDto.userId,
+            type: "user",
+            avatar: userUpdateDto.avatar,
+            conversationName: userUpdateDto.userName,
+          })
+        );
       } catch (ex) {
         console.log(ex);
       }
@@ -112,7 +116,7 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-transparent backdrop-blur-md flex justify-center items-center">
+    <div className="fixed inset-0 bg-transparent backdrop-blur-md flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Chỉnh sửa thông tin</h2>
 
@@ -256,11 +260,20 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
             >
               Hủy
             </button>
-            <button
+            {/* <button
               type="submit"
               className="p-2 bg-blue-500 text-white rounded"
             >
               Lưu
+            </button> */}
+            <button
+              type="submit"
+              className={`p-2 rounded ${
+                loading ? "bg-gray-400" : "bg-blue-500 text-white"
+              }`}
+              disabled={loading}
+            >
+              {loading ? "Đang lưu..." : "Lưu"}
             </button>
           </div>
         </form>

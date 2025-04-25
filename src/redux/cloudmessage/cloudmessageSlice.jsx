@@ -25,7 +25,20 @@ const initialState = {
 const cloudmessageSlice = createSlice({
   name: "cloudmessage",
   initialState,
-  reducers: {},
+  reducers: {
+    addCloudMessage:(state,action)=>{
+      state.listCloudMessage.push(action.payload);
+    },
+    addFilesToCloudMessage: (state, action) => {
+      const { cloudMessageId, files } = action.payload;
+      const message = state.listCloudMessage.find(
+        (msg) => msg.cloudMessageId === cloudMessageId
+      );
+      if (message) {
+        message.files = message.files ? [...message.files, ...files] : [...files];
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(CreateCloudMessage.fulfilled, (state, action) => {
       state.listCloudMessage.push(action.payload);
@@ -35,5 +48,5 @@ const cloudmessageSlice = createSlice({
     })
   },
 });
-
+export const {addCloudMessage,addFilesToCloudMessage}=cloudmessageSlice.actions;
 export default cloudmessageSlice.reducer;

@@ -67,27 +67,30 @@ import { GetCloudMessagesById } from "../redux/cloudmessage/cloudmessageSlice";
 import UserMessages from "../components/UserMessages";
 import GroupMessages from "../components/GroupMessages";
 import CloudMessages from "../components/CloudMessages";
+import EmptyChatPlaceholder from "../components/EmptyChatPlaceholder";
 //import MessageItem from "./MessageItem";
 
 const ChatMessage = ({ conversation }) => {
   
   const renderMessages = () => {
     switch (conversation.type) {
-      // case "user":
-      //   return <UserMessages conversationId={conversation.conversationId} />;
-      // case "group":
-      //   return <GroupMessages conversationId={conversation.conversationId} />;
+      case "user":
+        return <UserMessages {...conversation} />;
+      case "group":
+        return <GroupMessages {...conversation} />;
       case "cloud":
         return <CloudMessages {...conversation} />;
       default:
-        return <p className="text-center bg-white text-gray-400 text-xs">Không có tin nhắn</p>;
+        return <EmptyChatPlaceholder />;
     }
   };
   return (
     <div className="flex-1 flex flex-col h-full">
       <Header
-        avatar={conversation.avatar}
+        avatar={conversation.avatar!==null?conversation.avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
         name={conversation.conversationName}
+        type={conversation.type}
+        id={conversation.id}
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">

@@ -3,7 +3,6 @@ import "./App.css";
 //import SearchInput from "./components/SearchInput";
 import ChatMessage from "./pages/ChatMessage";
 import InforChat from "./pages/InforChat";
-import ListGroup from "./pages/ListGroup";
 import LoginForm from "./pages/Login";
 import TitleBar from "./pages/TitleBar";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
@@ -16,10 +15,11 @@ import GroupList from "./pages/GroupList";
 import { jwtDecode } from "jwt-decode";
 import ImageSlider from "./components/ImageSlider";
 import { FaRemoveFormat, FaSearch } from "react-icons/fa";
+import ListConversation from "./pages/ListConversation";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
-    <Routes>
+      <Routes>
       {/* {!isAuthenticated ? (
           <>
             <Route path="/login" element={<LoginForm />} />
@@ -47,8 +47,8 @@ const MainLayout = () => {
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
   if (token !== null) {
-    var user = jwtDecode(token).userInfor;
-    localStorage.setItem("user", user);
+    // var user = jwtDecode(token).userInfor;
+    // localStorage.setItem("user", user);
     var userInfor = JSON.parse(localStorage.getItem("user"));
     var userId = userInfor.UserId;
     var avatar = userInfor.Avatar;
@@ -56,7 +56,9 @@ const MainLayout = () => {
   } else {
     navigate("/login");
   }
+  
   return (
+    //<SignalRProvider>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex h-screen w-full">
@@ -86,13 +88,15 @@ const MainLayout = () => {
                     >
                       x
                     </button>
+                    
                   )}
                 </div>
               </div>
               {/* {search ? <ListGroup /> : <input />} */}
-              <ListGroup
+              <ListConversation
                 id={userId}
                 onSelectConversation={setSelectedConversation}
+                search={search}
               />
             </div>
             {selectedConversation ? (
@@ -102,16 +106,18 @@ const MainLayout = () => {
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
-                {/* <ImageSlider/> */}
-                <p className="text-lg text-gray-500">
+                <ImageSlider/>
+                {/* <p className="text-lg text-gray-500">
                   Chọn một cuộc trò chuyện để bắt đầu
-                </p>
+                </p> */}
+                
               </div>
             )}
           </>
         )}
       </div>
     </div>
+    //</SignalRProvider>
   );
 };
 export default App;

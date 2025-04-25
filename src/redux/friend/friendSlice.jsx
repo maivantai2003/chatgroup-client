@@ -39,13 +39,17 @@ const friendSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(GetAllFriendById.fulfilled, (state, action) => {
-      state.listFriend = action.payload;
+      state.listFriend = action.payload.filter((friend) => friend.status === 1);
     }),
       builder.addCase(GetFriendRequest.fulfilled, (state, action) => {
         state.listFriendRequest = action.payload;
       }),
       builder.addCase(UpdateFriend.fulfilled, (state, action) => {
         const { id, status } = action.payload;
+        if (status === 3) {
+          state.listFriend = state.listFriend.filter((friend) => friend.id !== id);
+          return;
+        }
         const index = state.listFriendRequest.findIndex(
           (friend) => friend.id === id
         );
@@ -53,10 +57,9 @@ const friendSlice = createSlice({
         if (index !== -1) {
           const updatedFriend = {
             ...state.listFriendRequest[index],
-            status: 1,
+            status: status,
           };
           state.listFriendRequest.splice(index, 1);
-
           if (status === 1) {
             state.listFriend.push(updatedFriend);
           }

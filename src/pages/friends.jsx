@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
 import {
   AddFriend,
   GetFriendRequest,
@@ -10,13 +9,34 @@ import { GetAllUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
-
+import { SignalRContext } from "../context/SignalRContext";
+//import {useSignalR} from "../context/SignalRContext"
 const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const connection=useContext(SignalRContext)
+  //const connection=useSignalR()
   var userInfor = JSON.parse(localStorage.getItem("user"));
   const handleRejectFriend = async (id, friendId, userId) => {
-    console.log(id, friendId, userId);
+    let friendDto = {
+      userId: userId,
+      friendId: friendId,
+      status: 3,
+    };
+    try{
+      var result = await dispatch(
+        UpdateFriend({
+          id: id,
+          friendDto: friendDto,
+        }).unwrap()
+      );
+      console.log(result)
+      if(result==null){
+        toast.error("Hủy kết bạn không thành công")
+      }
+    }catch(ex){
+      toast.error(ex)
+    }
   };
   const handleAcceptFriend = async (id, friendId, userId,avatar,userName) => {
     //setLoading(true);
@@ -61,6 +81,9 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
             toast.error("Lỗi")
             return
           }
+          if(connection){
+            await connection.invoke("AcceptFriend",userId.toString(),resultConversationFriend).catch((err) => console.error("Error calling AcceptFriend:", err));
+          }
         }else{
           toast.error("Lỗi")
           return
@@ -102,6 +125,7 @@ const FriendRequest = ({ id, friendId, userId, userName, avatar }) => {
 const FriendSuggestion = ({ userId, userName, avatar, id }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const connection=useContext(SignalRContext)
   const handleRequestFriend = async (userId, id) => {
     setLoading(true);
     console.log(userId, id);
@@ -114,6 +138,9 @@ const FriendSuggestion = ({ userId, userName, avatar, id }) => {
       var result = await dispatch(AddFriend(friendDto));
       console.log(result);
       if (result !== null) {
+        if(connection){
+          connection.invoke("SendRequestFriend",userId.toString())
+        }
         toast.success("Gửi kết bạn thành công");
         await dispatch(GetFriendRequest(id))
         await dispatch(GetAllUser(id));

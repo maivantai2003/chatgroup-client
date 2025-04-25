@@ -1,8 +1,9 @@
 export const getTimeAgo = (sentTime) => {
-    const time = new Date(sentTime);
-    const now = new Date();
-    const diff = Math.floor((now - time) / 1000); // Chuyển về giây
-
+    if (!sentTime) return "Vừa xong";
+    const time = new Date(sentTime).getTime();
+    const now = new Date().getTime();
+    if (time > now) return "Vừa xong"; 
+    const diff = Math.floor((now - time) / 1000);
     if (diff < 60) return `${diff} giây trước`;
     if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;

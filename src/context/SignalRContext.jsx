@@ -1,48 +1,42 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import SignalRService from "../hubs/signalRService";
-import { useSelector } from "react-redux"; // Nếu dùng Redux để lấy token
-
-const SignalRContext = createContext();
-
+import { createContext, useEffect, useState } from "react";
+import SignalRService from "../services/signalRService";
+export const SignalRContext = createContext(null);
 export const SignalRProvider = ({ children }) => {
-  const [isConnected, setIsConnected] = useState(false);
-  //const user = useSelector((state) => state.auth.user); // Lấy token từ Redux
   const [connection, setConnection] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("accessToken"));
+
   useEffect(() => {
-    // if (user?.token) {
-    //   SignalRService.startConnection(user.token).then(() => {
-    //     setIsConnected(true);
-    //   });
-    // }
-    const startSignalR = async () => {
-        try {
-          if (!connection) {
-            const conn = await SignalRService.startConnection();
-            setIsConnected(true);
-            setConnection(conn);
-          }
-        } catch (error) {
-          console.error("SignalR connection error:", error);
-          setIsConnected(false);
-        }
-      };
-  
-      startSignalR();
-  
-      return () => {
-        if (connection) {
-          SignalRService.stopConnection();
-        }
-      };
-  }, []);
+    const handleStorageChange = () => {
+      const newToken = localStorage.getItem("accessToken");
+      if (!newToken) {
+        SignalRService.stopConnection();
+        setConnection(null);
+      } else {
+        setToken(newToken);
+        SignalRService.updateToken(newToken);
+        setConnection(SignalRService.getConnection());
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    const initConnection = async () => {
+      if (!token) return;
+      await SignalRService.startConnection(token);
+      setConnection(SignalRService.getConnection());
+    };
+
+    initConnection();
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      SignalRService.stopConnection();
+    };
+  }, [token]);
 
   return (
-    <SignalRContext.Provider value={{ isConnected, connection }}>
+    <SignalRContext.Provider value={connection}>
       {children}
     </SignalRContext.Provider>
   );
-};
-
-export const useSignalR = () => {
-  return useContext(SignalRContext);
 };

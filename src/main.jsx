@@ -7,7 +7,6 @@ import store from './redux/store.js'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { SignalRProvider } from './context/SignalRContext.jsx'
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
@@ -27,5 +26,5 @@ createRoot(document.getElementById('root')).render(
       <App />
       </BrowserRouter>
     </Provider>
-  </StrictMode>,
+  </StrictMode>
 )

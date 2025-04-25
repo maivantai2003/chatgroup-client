@@ -3,7 +3,7 @@ import Avatar from "./Avatar";
 import { getTimeAgo } from "../helpers/convertTime";
 import { useEffect } from "react";
 
-const ListGroupItem = ({
+const ListConversationItem = ({
   id,
   avatar,
   conversationName,
@@ -15,29 +15,29 @@ const ListGroupItem = ({
 }) => {
   const [timeAgo, setTimeAgo] = useState(getTimeAgo(lastMessage));
   useEffect(() => {
+    setTimeAgo(getTimeAgo(lastMessage));
     const interval = setInterval(() => {
       setTimeAgo(getTimeAgo(lastMessage));
-    }, 60000);
-
+    }, 10000);
     return () => clearInterval(interval);
   }, [lastMessage,id]);
   return (
-    <div className={`p-2 ${isSelected ? "bg-gray-200" : ""}`} onClick={onClick}>
+    <div className={`p-2 ${isSelected ? "bg-blue-100" : ""}`} onClick={onClick}>
       <div className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
         <img
-          src={avatar}
+          src={avatar!==null?avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
           alt={conversationName}
           className="w-12 h-12 rounded-full object-cover"
         />
 
         <div className="ml-3 flex flex-col w-full">
           <div className="flex justify-between items-center">
-            <span className="font-bold">{conversationName}</span>
+            <span className="text-gray-900 font-semibold">{conversationName}</span>
             <span className="text-xs text-gray-400">{timeAgo}</span>
           </div>
 
           <div className="text-sm text-gray-600">
-            <span className="font-semibold">{userSend}:</span>{" "}
+            <span className="font-semibold">{(userSend==="" || userSend===null)?"":userSend+":"}</span>{" "}
             {content.includes("[image]") ? "📷 Hình ảnh" : content}
           </div>
         </div>
@@ -45,4 +45,4 @@ const ListGroupItem = ({
     </div>
   );
 };
-export default ListGroupItem;
+export default ListConversationItem;
