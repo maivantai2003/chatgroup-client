@@ -54,17 +54,16 @@ const RegisterForm = () => {
   };
 
   const onSubmit = async (data) => {
-    const avatarUrl = await uploadAvatar();
-    // console.log(data.avatar)
-    // console.log("Form Data:", data);
     if(data.phoneNumber){
       var result=await dispatch(CheckPhoneNumber(data.phoneNumber)).unwrap()
+      console.log(result)
       if(result){
         toast.warning("Số điện thoại đã tồn tại")
         return;
       }
     }
     console.log("Số điện thoại chưa tồn tại")
+    const avatarUrl = await uploadAvatar();
     let userRegister = {
       userName: data.userName,
       sex: data.sex,
@@ -107,6 +106,7 @@ const RegisterForm = () => {
         }
       }
       navigate("/login");
+      toast.success("Đăng Ký Tài Khoản Thành Công")
     } catch (ex) {
       console.log(ex);
       toast.error("Đăng ký không thành công");

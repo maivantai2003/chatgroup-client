@@ -45,9 +45,13 @@ const LoginForm = () => {
         toast.success("Đăng Nhập Thành Công")
       } else {
         setErrorMessage(result?.reason || "Đăng nhập thất bại");
+        toast.error("Vui Lòng Kiểm Tra Số Điện Thoại Hoặc Mật Khẩu")
+        return
       }
     } catch (error) {
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
+      toast.error("Lỗi hệ thống. Vui lòng thử lại!")
+      return
     }
   };
 
