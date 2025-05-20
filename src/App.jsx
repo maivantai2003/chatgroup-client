@@ -16,6 +16,7 @@ import { jwtDecode } from "jwt-decode";
 import ImageSlider from "./components/ImageSlider";
 import { FaRemoveFormat, FaSearch } from "react-icons/fa";
 import ListConversation from "./pages/ListConversation";
+import ChatWidgetWrapper from "./components/ChatWidgetWrapper";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -59,6 +60,7 @@ const MainLayout = () => {
   
   return (
     //<SignalRProvider>
+    <>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex h-screen w-full">
@@ -117,6 +119,8 @@ const MainLayout = () => {
         )}
       </div>
     </div>
+    <ChatWidgetWrapper />
+    </>
     //</SignalRProvider>
   );
 };
