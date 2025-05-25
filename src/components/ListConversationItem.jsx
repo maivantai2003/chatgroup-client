@@ -11,7 +11,7 @@ const ListConversationItem = ({
   userSend,
   lastMessage,
   onClick,
-  isSelected
+  isSelected,
 }) => {
   const [timeAgo, setTimeAgo] = useState(getTimeAgo(lastMessage));
   useEffect(() => {
@@ -20,24 +20,32 @@ const ListConversationItem = ({
       setTimeAgo(getTimeAgo(lastMessage));
     }, 10000);
     return () => clearInterval(interval);
-  }, [lastMessage,id]);
+  }, [lastMessage, id]);
   return (
     <div className={`p-2 ${isSelected ? "bg-blue-100" : ""}`} onClick={onClick}>
       <div className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer">
         <img
-          src={avatar!==null?avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
+          src={
+            avatar !== null
+              ? avatar
+              : "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"
+          }
           alt={conversationName}
           className="w-12 h-12 rounded-full object-cover"
         />
 
         <div className="ml-3 flex flex-col w-full">
           <div className="flex justify-between items-center">
-            <span className="text-gray-900 font-semibold">{conversationName}</span>
+            <span className="text-gray-900 font-semibold">
+              {conversationName}
+            </span>
             <span className="text-xs text-gray-400">{timeAgo}</span>
           </div>
 
-          <div className="text-sm text-gray-600">
-            <span className="font-semibold">{(userSend==="" || userSend===null)?"":userSend+":"}</span>{" "}
+          <div className="text-sm text-gray-600 truncate overflow-hidden whitespace-nowrap">
+            <span className="font-semibold">
+              {userSend === "" || userSend === null ? "" : userSend + ":"}
+            </span>{" "}
             {content.includes("[image]") ? "📷 Hình ảnh" : content}
           </div>
         </div>
