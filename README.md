@@ -16,7 +16,6 @@ ChatGroup is a modern messaging application that allows users to make friends, c
 ![SignalR](https://img.shields.io/badge/SignalR-0078D4?style=for-the-badge&logo=signalr&logoColor=white)
 
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![SignalR](https://img.shields.io/badge/Quartz.NET-ffffff?style=for-the-badge&logo=Quartz.NET&logoColor=0078D4)
 
 ## Run project
 ### Requierment
@@ -33,7 +32,7 @@ git clone https://github.com/maivantai2003/chatgroup-server
 
 ```
 2. Run server (You can do this step on IDE like Visual Studio)
-Change connectionString on Job_assignment_management.Api/appsettings.json
+Change connectionString on appsettings.json
 ```json
 {
 "ConnectionStrings": {
