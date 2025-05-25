@@ -2,11 +2,11 @@
 ChatGroup is a modern messaging application that allows users to make friends, chat one-on-one or in groups, and includes an integrated ChatGPT assistant for intelligent Q&A, quick lookups, or entertainment. The app is designed with an intuitive and user-friendly interface to enhance communication experiences and foster better connections among users.
 
 ## Features
-📱 Real-time personal and group messaging
-👥 Friend requests and friend list management
-🤖 Chat with integrated ChatGPT assistant
-📷 Send images, emojis, and files
-🔒 Secure personal information and messages
+📱 Real-time personal and group messaging  
+👥 Friend requests and friend list management  
+🤖 Chat with integrated ChatGPT assistant  
+📷 Send images, emojis, and files  
+🔒 Secure personal information and messages  
 
 ## Built with
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
