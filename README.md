@@ -77,7 +77,7 @@ npm install
 npm run dev
 ```
 
-## Demo
+<!-- ## Demo
 **Task management**
 <img src="./demo_image/task.png" >
 <img src="./demo_image/task2.png" >
@@ -101,7 +101,7 @@ npm run dev
 
 **Account management**
 <img src="./demo_image/account.png" >
-<img src="./demo_image/authorization.png" >
+<img src="./demo_image/authorization.png" > -->
 
 
 #### Contact email:
