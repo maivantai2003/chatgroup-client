@@ -35,28 +35,27 @@ const ListConversation = ({ id, onSelectConversation,search }) => {
         setLoading(false);
       });
       connection.on("UpdateConversationUser", (conversation) => {
-        console.log(conversation);
+        
         dispatch(updateConversationInState(conversation));
       });
       connection.on("UpdateConversationGroup", (conversation) => {
-        console.log(conversation);
+        
         dispatch(updateConversationGroupInState(conversation));
       });
       connection.on("UpdateConversationCloud",(conversation)=>{
-        console.log(connection)
+        
         dispatch(updateConversationInState(conversation))
       })
       connection.on("ReceiveAcceptFriend",(conversation)=>{
-        console.log(connection)
-        console.log(conversation)
+        
         dispatch(addConversatioInState(conversation))
       })
       connection.on("ReceiveConversationMemberGroup",(conversation)=>{
-        console.log(conversation)
+        
         dispatch(addConversatioInState(conversation))
       })
       connection.on("ReceiveConversationMemberInGroup",(conversation)=>{
-        console.log(connection)
+        
         dispatch(updateConversationInState(conversation))
       })
       return () => {
