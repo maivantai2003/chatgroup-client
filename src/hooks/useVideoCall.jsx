@@ -65,7 +65,6 @@ const useVideoCall = (toUserId) => {
   const handleCallRequest = (fromUserId) => {
     console.log("Cuộc gọi đến từ:", fromUserId);
     setIncomingCall({ fromUserId });
-    // Hiển thị popup nhận cuộc gọi
   };
 
   const handleReceiveOffer = async (fromUserId, offer) => {
