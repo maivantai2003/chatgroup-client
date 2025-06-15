@@ -17,7 +17,6 @@ const useVideoCall = (toUserId) => {
     connection.on("ReceiveIceCandidate", handleReceiveIceCandidate);
 
     return () => {
-      //connection.stop();
       connection.off("ReceiveCallRequest");
       connection.off("ReceiveOffer");
       connection.off("ReceiveAnswer");
