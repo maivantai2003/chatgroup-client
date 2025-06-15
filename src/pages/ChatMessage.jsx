@@ -68,10 +68,22 @@ import UserMessages from "../components/UserMessages";
 import GroupMessages from "../components/GroupMessages";
 import CloudMessages from "../components/CloudMessages";
 import EmptyChatPlaceholder from "../components/EmptyChatPlaceholder";
+import useVideoCall from "../hooks/useVideoCall";
+import IncomingCallModal from "../components/IncomingCallModal";
+import VideoCallModal from "../components/VideoCallModal";
 //import MessageItem from "./MessageItem";
 
 const ChatMessage = ({ conversation }) => {
-  
+  const {
+    startCall,
+    localVideoRef,
+    remoteVideoRef,
+    rejectCall,
+    acceptCall,
+    endCall,
+    isInCall,
+    incomingCall,
+  } = useVideoCall(conversation.id.toString());
   const renderMessages = () => {
     switch (conversation.type) {
       case "user":
@@ -87,15 +99,35 @@ const ChatMessage = ({ conversation }) => {
   return (
     <div className="flex-1 flex flex-col h-full">
       <Header
-        avatar={conversation.avatar!==null?conversation.avatar:"https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"}
+        avatar={
+          conversation.avatar !== null
+            ? conversation.avatar
+            : "https://res.cloudinary.com/dktn4yfpi/image/upload/v1740899136/bv3ndtwp1sosxw9sdvzj.jpg"
+        }
         name={conversation.conversationName}
         type={conversation.type}
         id={conversation.id}
+        onStartCall={startCall}
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">
         <SelectMethod {...conversation} />
       </div>
+
+      {isInCall && (
+        <VideoCallModal
+          localVideoRef={localVideoRef}
+          remoteVideoRef={remoteVideoRef}
+          onEndCall={endCall}
+        />
+      )}
+      {incomingCall && (
+        <IncomingCallModal
+          callerName={"Người dùng " + incomingCall.fromUserId}
+          onAccept={acceptCall}
+          onReject={rejectCall}
+        />
+      )}
     </div>
   );
 };

@@ -33,7 +33,6 @@ export const SignalRProvider = ({ children }) => {
       SignalRService.stopConnection();
     };
   }, [token]);
-
   return (
     <SignalRContext.Provider value={connection}>
       {children}

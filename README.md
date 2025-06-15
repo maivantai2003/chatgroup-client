@@ -1,4 +1,5 @@
 ## Overview
+<<<<<<< HEAD
 ChatGroup is a modern messaging application that allows users to make friends, chat one-on-one or in groups, and includes an integrated ChatGPT assistant for intelligent Q&A, quick lookups, or entertainment. The app is designed with an intuitive and user-friendly interface to enhance communication experiences and foster better connections among users.
 
 ## Features
@@ -7,6 +8,14 @@ ChatGroup is a modern messaging application that allows users to make friends, c
 🤖 Chat with integrated ChatGPT assistant  
 📷 Send images, emojis, and files  
 🔒 Secure personal information and messages  
+=======
+Task Management System is an application that helps users organize, track and manage personal and team tasks or projects effectively. The application provides intuitive and easy-to-use features to optimize workflow, increase productivity and improve collaboration among team members.
+
+## Features
+🌟 Authentication & Authorization  
+🌟 Chat  
+🌟 Realtime Updates
+>>>>>>> 31ae9e72f95de095b19606ceaab90df91fb5c966
 
 ## Built with
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
@@ -16,6 +25,7 @@ ChatGroup is a modern messaging application that allows users to make friends, c
 ![SignalR](https://img.shields.io/badge/SignalR-0078D4?style=for-the-badge&logo=signalr&logoColor=white)
 
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![SignalR](https://img.shields.io/badge/Quartz.NET-ffffff?style=for-the-badge&logo=Quartz.NET&logoColor=0078D4)
 
 ## Run project
 ### Requierment
@@ -32,7 +42,7 @@ git clone https://github.com/maivantai2003/chatgroup-server
 
 ```
 2. Run server (You can do this step on IDE like Visual Studio)
-Change connectionString on appsettings.json
+Change connectionString on Job_assignment_management.Api/appsettings.json
 ```json
 {
 "ConnectionStrings": {
@@ -79,6 +89,7 @@ npm run dev
 ```
 
 <!-- ## Demo
+
 **Task management**
 <img src="./demo_image/task.png" >
 <img src="./demo_image/task2.png" >
@@ -102,6 +113,7 @@ npm run dev
 
 **Account management**
 <img src="./demo_image/account.png" >
+
 <img src="./demo_image/authorization.png" > -->
 
 
