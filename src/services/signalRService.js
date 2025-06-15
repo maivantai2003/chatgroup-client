@@ -21,7 +21,8 @@ class SignalRService {
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${config.HUB_URL}`, {
                 accessTokenFactory: () => token,
-                transport: signalR.HttpTransportType.WebSockets,
+                transport: signalR.HttpTransportType.WebSockets|signalR.HttpTransportType.LongPolling,
+                withCredentials:true
             })
             .withAutomaticReconnect([0, 2000, 5000, 10000])
             .configureLogging(signalR.LogLevel.Information)
