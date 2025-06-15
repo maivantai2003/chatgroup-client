@@ -8,8 +8,9 @@ export function getConnection() {
     const token = localStorage.getItem("accessToken")
     connection = new HubConnectionBuilder()
       .withUrl(`${config.HUB_URL}`, {
-        //transport: HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents |  HttpTransportType.LongPolling,
-        accessTokenFactory:()=>token
+        transport: HttpTransportType.WebSockets | HttpTransportType.ServerSentEvents |  HttpTransportType.LongPolling,
+        accessTokenFactory:()=>token,
+        withCredentials: true
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
