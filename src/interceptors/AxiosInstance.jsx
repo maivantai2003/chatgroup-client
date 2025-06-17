@@ -4,13 +4,13 @@ import axios from "axios";
 // import authService from "../services/authService";
 // import { setCredentials,logout } from "../redux/auth/authSlice";
 import config from "../constant/linkApi";
-const axiosInstance=axios.create({
-    baseURL:`${config.API_URL}/`,
-    headers: {
-      "Content-type": "application/json",
-    },
-    //withCredentials: true,
-})
+const axiosInstance = axios.create({
+  baseURL: `${config.API_URL}/`,
+  headers: {
+    "Content-type": "application/json",
+  },
+  //withCredentials: true,
+});
 axiosInstance.interceptors.request.use(
   async (config) => {
     const accessToken = localStorage.getItem("accessToken");
@@ -18,6 +18,11 @@ axiosInstance.interceptors.request.use(
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
+    //
+    if (config.url.includes("ngrok-free.app")) {
+      config.headers["ngrok-skip-browser-warning"] = "69420";
+    }
+    //
     return config;
   },
   (error) => {
@@ -36,7 +41,7 @@ axiosInstance.interceptors.response.use(
       //   if (!refreshToken) {
       //     store.dispatch(logout());
       //     return Promise.reject(error);
-      //   } 
+      //   }
 
       //   const data = await authService.refreshToken(refreshToken);
       //   store.dispatch(setCredentials({
