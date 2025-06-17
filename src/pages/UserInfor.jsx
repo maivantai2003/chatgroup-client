@@ -50,7 +50,6 @@ const UserInfo = ({ conversation }) => {
     )
   );
 
-  // Lọc danh sách file không phải ảnh/video
   const files = listUserMessageFile.filter(
     (file) =>
       ![
