@@ -8,7 +8,18 @@ const useVideoCall = (toUserId) => {
   const connection = useContext(SignalRContext);
   const [incomingCall, setIncomingCall] = useState(null);
   const [isInCall, setIsInCall] = useState(false);
-
+  //new
+  useEffect(() => {
+    let timeout;
+    if (isInCall && !incomingCall) {
+      timeout = setTimeout(() => {
+        console.log("Không nhận phản hồi, kết thúc cuộc gọi");
+        endCall();
+      }, 30000);
+    }
+    return () => clearTimeout(timeout);
+  }, [isInCall, incomingCall]);
+  //
   useEffect(() => {
     if (!connection) return;
     connection.on("ReceiveCallRequest", handleCallRequest);
@@ -23,66 +34,128 @@ const useVideoCall = (toUserId) => {
       connection.off("ReceiveIceCandidate");
     };
   }, [connection]);
-
-  const startCall = async () => {
-    console.log(toUserId);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    //localVideoRef.current.srcObject = stream;
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = stream;
-    } else {
-      // Nếu chưa, delay 1 chút
-      setTimeout(() => {
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-      }, 100);
+  const cleanUpMedia = () => {
+    if (localVideoRef.current?.srcObject) {
+      localVideoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+      localVideoRef.current.srcObject = null;
     }
-    const pc = new RTCPeerConnection();
-    peerConnectionRef.current = pc;
-
-    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        connection.invoke(
-          "SendIceCandidate",
-          toUserId,
-          JSON.stringify(event.candidate)
-        );
-      }
-    };
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    connection.invoke("SendOffer", toUserId, JSON.stringify(offer));
-    setIsInCall(true);
+    if (remoteVideoRef.current?.srcObject) {
+      remoteVideoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+      remoteVideoRef.current.srcObject = null;
+    }
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
   };
+  const startCall = async () => {
+    try {
+      cleanUpMedia();
+      console.log(toUserId);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      //localVideoRef.current.srcObject = stream;
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      } else {
+        // Nếu chưa, delay 1 chút
+        setTimeout(() => {
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+          }
+        }, 100);
+      }
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          // Nếu cần hỗ trợ TURN server:
+          // {
+          //   urls: "turn:your.turn.server:3478",
+          //   username: "user",
+          //   credential: "pass"
+          // }
+        ],
+      });
+      peerConnectionRef.current = pc;
 
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          connection.invoke(
+            "SendIceCandidate",
+            toUserId,
+            JSON.stringify(event.candidate)
+          );
+        }
+      };
+      //new
+      pc.ontrack = (event) => {
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = event.streams[0];
+        }
+      };
+      //
+      await connection.invoke("SendCallRequest", toUserId);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      console.log("SendOffer to:", toUserId);
+      connection.invoke("SendOffer", toUserId, JSON.stringify(offer));
+      setIsInCall(true);
+    } catch (error) {
+      console.error("Lỗi khi bắt đầu cuộc gọi:", error);
+      alert("Không thể truy cập thiết bị (camera/mic).");
+    }
+  };
   const handleCallRequest = (fromUserId) => {
     console.log("Cuộc gọi đến từ:", fromUserId);
     setIncomingCall({ fromUserId });
   };
 
   const handleReceiveOffer = async (fromUserId, offer) => {
-    const pc = new RTCPeerConnection();
+    console.log("Receive offer from:", fromUserId);
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        // Nếu cần hỗ trợ TURN server:
+        // {
+        //   urls: "turn:your.turn.server:3478",
+        //   username: "user",
+        //   credential: "pass"
+        // }
+      ],
+    });
     peerConnectionRef.current = pc;
-
+    //new
+    pc.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+    //
     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
 
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    localVideoRef.current.srcObject = stream;
+    //old
+    //localVideoRef.current.srcObject = stream;
+    //new
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+    }
+    //
     stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     connection.invoke("SendAnswer", fromUserId, JSON.stringify(answer));
+    //new
+    setIsInCall(true);
+    //
   };
 
   const handleReceiveAnswer = async (fromUserId, answer) => {
@@ -92,7 +165,7 @@ const useVideoCall = (toUserId) => {
   };
 
   const handleReceiveIceCandidate = async (fromUserId, candidate) => {
-    console.log(fromUserId)
+    console.log(fromUserId);
     await peerConnectionRef.current.addIceCandidate(
       new RTCIceCandidate(JSON.parse(candidate))
     );
@@ -101,21 +174,13 @@ const useVideoCall = (toUserId) => {
     if (!incomingCall) return;
     const fromUserId = incomingCall.fromUserId;
     setIncomingCall(null); // Ẩn modal
-
     const pc = new RTCPeerConnection();
     peerConnectionRef.current = pc;
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    localVideoRef.current.srcObject = stream;
-    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
     pc.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
     };
-
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         connection.invoke(
@@ -125,7 +190,20 @@ const useVideoCall = (toUserId) => {
         );
       }
     };
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+    }
+
+    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+    //new
     setIsInCall(true);
+    //
   };
   const rejectCall = () => {
     setIncomingCall(null);
@@ -133,27 +211,34 @@ const useVideoCall = (toUserId) => {
     // Optional: Gửi tín hiệu từ chối nếu cần
   };
   const endCall = () => {
-    // logic kết thúc
+    console.log("Kết thúc cuộc gọi");
+
+    // Ngắt tất cả track video/audio local
     if (localVideoRef.current?.srcObject) {
-      localVideoRef.current.srcObject
-        .getTracks()
-        .forEach((track) => track.stop());
+      localVideoRef.current.srcObject.getTracks().forEach((track) => {
+        track.stop();
+      });
       localVideoRef.current.srcObject = null;
     }
 
-    // Dừng các track của remote video stream
+    // Ngắt tất cả track video/audio remote
     if (remoteVideoRef.current?.srcObject) {
-      remoteVideoRef.current.srcObject
-        .getTracks()
-        .forEach((track) => track.stop());
+      remoteVideoRef.current.srcObject.getTracks().forEach((track) => {
+        track.stop();
+      });
       remoteVideoRef.current.srcObject = null;
     }
 
-    // Đóng peer connection nếu còn
+    // Đóng peer connection nếu còn tồn tại
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
       peerConnectionRef.current = null;
     }
+
+    // Báo server nếu cần
+    // connection.invoke("EndCall", toUserId); (tuỳ bạn có xử lý gì không)
+
+    // Tắt modal gọi
     setIsInCall(false);
   };
 

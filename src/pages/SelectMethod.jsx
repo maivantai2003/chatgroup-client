@@ -65,7 +65,7 @@ const SelectMethod = ({
   const [uploadProgress, setUploadProgress] = useState([]);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
-  var userName = userInfor.UserName;
+  var userName = userInfor.UserName || "user";
   const connection = useContext(SignalRContext);
   const groupUsers = useSelector((state) => state.group.group);
   useEffect(() => {

@@ -15,9 +15,11 @@ const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const dispatch=useDispatch()
   const navigate=useNavigate()
+  const [isLogin,setLogin]=useState(false);
   const connection=useContext(SignalRContext)
   const onSubmit = async (data) => {
     try {
+      setLogin(true);
       let authRequest = {
         phoneNumber:data.userName,
         userName:  data.password
@@ -49,6 +51,7 @@ const LoginForm = () => {
         return
       }
     } catch (error) {
+      setLogin(false);
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
       toast.error("Lỗi hệ thống. Vui lòng thử lại!")
       return
@@ -83,7 +86,7 @@ const LoginForm = () => {
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg">
+          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg" hidden={isLogin}>
             Đăng nhập
           </button>
         </form>

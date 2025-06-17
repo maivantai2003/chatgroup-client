@@ -1,5 +1,4 @@
 // components/IncomingCallModal.jsx
-import React from "react";
 
 const IncomingCallModal = ({ callerName, onAccept, onReject }) => {
   return (
