@@ -17,6 +17,8 @@ import ImageSlider from "./components/ImageSlider";
 import { FaRemoveFormat, FaSearch } from "react-icons/fa";
 import ListConversation from "./pages/ListConversation";
 import ChatWidgetWrapper from "./components/ChatWidgetWrapper";
+import { ForgotPassword } from "./components/ForgotPasswordPage";
+import { ResetPasswordPage } from "./components/ResetPasswordPage";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -38,6 +40,8 @@ function App() {
       <Route path="*" element={<Navigate to="/login" replace />} />
       <Route path="/" element={<MainLayout />} />
       <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/forgot-password" element={<ForgotPassword/>}/>
+      <Route path="/reset-password" element={<ResetPasswordPage/>}/>
     </Routes>
   );
 }

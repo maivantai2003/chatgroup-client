@@ -83,6 +83,8 @@ const ChatMessage = ({ conversation }) => {
     endCall,
     isInCall,
     incomingCall,
+    localStream,
+    remoteStream,
   } = useVideoCall(conversation.id.toString());
   const renderMessages = () => {
     switch (conversation.type) {
@@ -119,6 +121,8 @@ const ChatMessage = ({ conversation }) => {
           localVideoRef={localVideoRef}
           remoteVideoRef={remoteVideoRef}
           onEndCall={endCall}
+          localStream={localStream}
+          remoteStream={remoteStream}
         />
       )}
       {incomingCall && (
