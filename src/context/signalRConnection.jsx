@@ -1,5 +1,5 @@
 // signalRConnection.jsx
-import { HubConnectionBuilder, LogLevel, HttpTransportType } from "@microsoft/signalr";
+import { HubConnectionBuilder, LogLevel} from "@microsoft/signalr";
 import config from "../constant/linkApi";
 let connection;
 

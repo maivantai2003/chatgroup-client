@@ -56,6 +56,7 @@ const TitleBar = ({ name,id,avatar }) => {
       {isEditProfileOpen && user && (
         <EditProfileModal isOpen={isEditProfileOpen} closeModal={() => setEditProfileOpen(false)} user={user} />
       )}
+      
     </div>
   );
 };

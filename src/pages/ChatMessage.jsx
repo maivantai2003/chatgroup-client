@@ -73,7 +73,7 @@ import IncomingCallModal from "../components/IncomingCallModal";
 import VideoCallModal from "../components/VideoCallModal";
 //import MessageItem from "./MessageItem";
 
-const ChatMessage = ({ conversation }) => {
+const ChatMessage = ({ conversation,onToggleInfor }) => {
   const {
     startCall,
     localVideoRef,
@@ -110,6 +110,8 @@ const ChatMessage = ({ conversation }) => {
         type={conversation.type}
         id={conversation.id}
         onStartCall={startCall}
+        onToggleInfor={onToggleInfor}
+
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">

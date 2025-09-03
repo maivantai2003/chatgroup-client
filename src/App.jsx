@@ -1,4 +1,3 @@
-import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 //import SearchInput from "./components/SearchInput";
 import ChatMessage from "./pages/ChatMessage";
@@ -7,34 +6,22 @@ import LoginForm from "./pages/Login";
 import TitleBar from "./pages/TitleBar";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Register from "./pages/Register";
-import { useEffect, useState } from "react";
 import Sidebar from "./pages/Siderbar";
 import FriendSuggestions from "./pages/friends";
 import FriendList from "./pages/FriendList";
 import GroupList from "./pages/GroupList";
-import { jwtDecode } from "jwt-decode";
 import ImageSlider from "./components/ImageSlider";
-import { FaRemoveFormat, FaSearch } from "react-icons/fa";
 import ListConversation from "./pages/ListConversation";
 import ChatWidgetWrapper from "./components/ChatWidgetWrapper";
 import { ForgotPassword } from "./components/ForgotPasswordPage";
 import { ResetPasswordPage } from "./components/ResetPasswordPage";
+import { useEffect, useState } from "react";
+import { FaSearch } from "react-icons/fa";
+import { isTokenExpired } from "./utils/helpers";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
       <Routes>
-      {/* {!isAuthenticated ? (
-          <>
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<MainLayout />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )} */}
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
@@ -49,21 +36,25 @@ const MainLayout = () => {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("message");
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [showInfor, setShowInfor] = useState(true);
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
-  if (token !== null) {
-    // var user = jwtDecode(token).userInfor;
-    // localStorage.setItem("user", user);
-    var userInfor = JSON.parse(localStorage.getItem("user"));
-    var userId = userInfor.UserId;
-    var avatar = userInfor.Avatar;
-    var userName = userInfor.UserName;
-  } else {
-    navigate("/login");
+  useEffect(() => {
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      navigate("/login", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (!token || isTokenExpired(token)) {
+    return null;
   }
-  
+  var userInfor = JSON.parse(localStorage.getItem("user"));
+  var userId = userInfor.UserId;
+  var avatar = userInfor.Avatar;
+  var userName = userInfor.UserName;
   return (
-    //<SignalRProvider>
     <>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -107,16 +98,14 @@ const MainLayout = () => {
             </div>
             {selectedConversation ? (
               <>
-                <ChatMessage conversation={selectedConversation} />
-                <InforChat conversation={selectedConversation} />
+                <ChatMessage conversation={selectedConversation} onToggleInfor={() => setShowInfor(prev => !prev)} />
+                {
+                  showInfor && (<InforChat conversation={selectedConversation} />)
+                }
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 <ImageSlider/>
-                {/* <p className="text-lg text-gray-500">
-                  Chọn một cuộc trò chuyện để bắt đầu
-                </p> */}
-                
               </div>
             )}
           </>
@@ -125,7 +114,6 @@ const MainLayout = () => {
     </div>
     <ChatWidgetWrapper />
     </>
-    //</SignalRProvider>
   );
 };
 export default App;

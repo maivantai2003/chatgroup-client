@@ -1,95 +1,58 @@
-// src/components/OpenAIChatBox.jsx
-import axios from "axios";
+// src/components/ChatWidgetWrapper.jsx
 import { useState } from "react";
-import config from "../constant/linkApi";
+import { FaTimes, FaRobot } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import OpenAIChatBox from "./OpenAIChatBox";
 
-const OpenAIChatBox = () => {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    const newMessages = [...messages, { role: "user", content: input }];
-    setMessages(newMessages);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const response = await axios.post(config.API_URL+"/AI?question="+input);
-      const reply = response;
-      console.log(reply)
-      const formattedReply = {
-        role: "assistant",
-        content: reply.data.trim(),
-      };
-      setMessages((prev) => [...prev, formattedReply]);
-    } catch (err) {
-      console.error("OpenAI error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") sendMessage();
-  };
+const ChatWidgetWrapper = () => {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col w-full h-full bg-white">
-      <div className="flex-1 overflow-y-auto space-y-2 mb-4 px-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${
-              msg.role === "user" ? "justify-end" : "justify-start"
-            }`}
+    <div className="fixed bottom-4 right-4 z-50">
+      <AnimatePresence>
+        {isOpen ? (
+          <motion.div
+            key="chatbox"
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="w-[380px] h-[520px] bg-white rounded-2xl shadow-xl flex flex-col border"
           >
-            <div
-              className={`max-w-xs p-2 rounded-lg text-sm ${
-                msg.role === "user"
-                  ? "bg-blue-100 text-right"
-                  : "bg-gray-100 text-left"
-              }`}
-              style={{
-                whiteSpace: "pre-wrap",
-                wordWrap: "break-word",
-              }}
-            >
-              {msg.content}
+            {/* Header */}
+            <div className="flex justify-between items-center px-4 py-2 rounded-t-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+              <div className="flex items-center gap-2 font-semibold">
+                <FaRobot /> ChatAI
+              </div>
+              <button
+                className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-full"
+                onClick={() => setIsOpen(false)}
+              >
+                <FaTimes />
+              </button>
             </div>
-          </div>
-        ))}
-        {loading && (
-          <p className="text-sm text-gray-500 text-left">Đang trả lời...</p>
-        )}
-      </div>
-      <div className="flex gap-2">
-        <input
-          type="text"
-          className="flex-1 border border-gray-300 rounded px-3 py-2"
-          placeholder="Nhập tin nhắn..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        {input.trim() && (
-          <button
-            onClick={sendMessage}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+
+            {/* Body chat */}
+            <div className="flex-1 overflow-hidden">
+              <OpenAIChatBox />
+            </div>
+          </motion.div>
+        ) : (
+          <motion.button
+            key="chatbutton"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            onClick={() => setIsOpen(true)}
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white p-4 rounded-full shadow-lg"
+            aria-label="Mở chat"
           >
-            Gửi
-          </button>
+            <FaRobot className="text-xl" />
+          </motion.button>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
 
-export default OpenAIChatBox;
+export default ChatWidgetWrapper;
