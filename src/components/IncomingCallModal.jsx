@@ -1,22 +1,21 @@
-// components/IncomingCallModal.jsx
-
 const IncomingCallModal = ({ callerName, onAccept, onReject }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-      <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-        <h2 className="text-xl font-semibold mb-4">{callerName} đang gọi cho bạn</h2>
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={onAccept}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Chấp nhận
-          </button>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
+        <h3 className="text-lg font-semibold">📲 Cuộc gọi đến</h3>
+        <p className="text-gray-600 mt-2">{callerName} đang gọi cho bạn...</p>
+        <div className="flex justify-center gap-6 mt-4">
           <button
             onClick={onReject}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
           >
-            Từ chối
+            ❌ Từ chối
+          </button>
+          <button
+            onClick={onAccept}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            ✅ Trả lời
           </button>
         </div>
       </div>

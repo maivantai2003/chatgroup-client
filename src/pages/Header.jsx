@@ -1,7 +1,7 @@
 import Avatar from "../components/Avatar";
 import TimeRequest from "../components/TimeRequest";
 
-const Header = ({ avatar, name, type, id, onStartCall,onToggleInfor }) => {
+const Header = ({ avatar, name, type, id,onToggleInfor, onVideoCall}) => {
   return (
     <div className="flex items-center justify-between p-4 bg-white">
       <div className="flex items-center">
@@ -11,7 +11,7 @@ const Header = ({ avatar, name, type, id, onStartCall,onToggleInfor }) => {
       <div className="flex items-center space-x-4">
         <i
           className="fas fa-video cursor-pointer"
-          onClick={onStartCall}
+          onClick={() => onVideoCall(id)}
         ></i>
         <i className="fas fa-search"></i>
         <i

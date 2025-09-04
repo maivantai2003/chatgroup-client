@@ -1,178 +1,114 @@
-import { useRef, useEffect, useContext, useState } from "react";
+import { useRef, useState, useContext } from "react";
 import { SignalRContext } from "../context/SignalRContext";
 
-const useVideoCall = (toUserId) => {
+const useVideoCall = (targetUserId) => {
+  const connection = useContext(SignalRContext);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerConnectionRef = useRef(null);
-  const localStreamRef = useRef(null);
-
-  const connection = useContext(SignalRContext);
-
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-
-  const [incomingCall, setIncomingCall] = useState(null);
-  const [isInCall, setIsInCall] = useState(false);
-  const [fromUserIdRef, setFromUserIdRef] = useState(null);
-
-  useEffect(() => {
-    if (!connection) return;
-
-    connection.on("ReceiveCallRequest", handleCallRequest);
-    connection.on("ReceiveOffer", handleReceiveOffer);
-    connection.on("ReceiveAnswer", handleReceiveAnswer);
-    connection.on("ReceiveIceCandidate", handleReceiveIceCandidate);
-
-    return () => {
-      connection.off("ReceiveCallRequest", handleCallRequest);
-      connection.off("ReceiveOffer", handleReceiveOffer);
-      connection.off("ReceiveAnswer", handleReceiveAnswer);
-      connection.off("ReceiveIceCandidate", handleReceiveIceCandidate);
-    };
-  }, [connection]);
-
-  const cleanUpMedia = () => {
-    localStreamRef.current?.getTracks().forEach((t) => t.stop());
-    localStreamRef.current = null;
-    setLocalStream(null);
-    setRemoteStream(null);
-
-    if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-  };
-
-  const getMediaStream = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      localStreamRef.current = stream;
-      setLocalStream(stream);
-      return stream;
-    } catch (err) {
-      console.error("❌ [getMediaStream] Error:", err);
-      throw err;
-    }
-  };
-
-  const createPeerConnection = (remoteUserId) => {
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        connection.invoke("SendIceCandidate", remoteUserId, JSON.stringify(event.candidate));
-      }
-    };
-
-    pc.ontrack = (event) => {
-      const remote = event.streams[0];
-      setRemoteStream(remote);
-    };
-
-    peerConnectionRef.current = pc;
-    return pc;
-  };
+  const [inCall, setInCall] = useState(false);
 
   const startCall = async () => {
-    try {
-      cleanUpMedia();
-      const stream = await getMediaStream();
-      const pc = createPeerConnection(toUserId);
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+    peerConnectionRef.current = new RTCPeerConnection();
 
-      await connection.invoke("SendCallRequest", toUserId);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await connection.invoke("SendOffer", toUserId, JSON.stringify(offer));
-      setIsInCall(true);
-    } catch (err) {
-      console.error("❌ [startCall] Error:", err);
-      alert("Không thể truy cập camera hoặc micro.");
+    // lấy stream local
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    stream.getTracks().forEach(track =>
+      peerConnectionRef.current.addTrack(track, stream)
+    );
+
+    // gán stream vào local video nếu đã có ref
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
     }
-  };
 
-  const handleCallRequest = (fromUserId) => {
-    setIncomingCall({ fromUserId });
-    setFromUserIdRef(fromUserId);
-  };
-
-  const acceptCall = async () => {
-    setIncomingCall(null);
-  };
-
-  const rejectCall = () => {
-    setIncomingCall(null);
-    cleanUpMedia();
-  };
-
-  const handleReceiveOffer = async (fromUserId, offer) => {
-    try {
-      cleanUpMedia();
-      const stream = await getMediaStream();
-      const pc = createPeerConnection(fromUserId);
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      await connection.invoke("SendAnswer", fromUserId, JSON.stringify(answer));
-      setIsInCall(true);
-    } catch (err) {
-      console.error("❌ [handleReceiveOffer] Error:", err);
-    }
-  };
-
-  const handleReceiveAnswer = async (fromUserId, answer) => {
-    try {
-      const pc = peerConnectionRef.current;
-      if (pc) {
-        await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(answer)));
+    // remote stream
+    peerConnectionRef.current.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
-    } catch (err) {
-      console.error("❌ [handleReceiveAnswer] Error:", err);
-    }
-  };
+    };
 
-  const handleReceiveIceCandidate = async (fromUserId, candidate) => {
-    try {
-      const pc = peerConnectionRef.current;
-      if (pc) {
-        await pc.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+    // ICE Candidate
+    peerConnectionRef.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        connection.invoke("SendIceCandidate", targetUserId, JSON.stringify(event.candidate));
       }
+    };
+
+    // tạo offer
+    const offer = await peerConnectionRef.current.createOffer();
+    await peerConnectionRef.current.setLocalDescription(offer);
+
+    // gửi offer qua server
+    connection.invoke("CallUser", targetUserId, "myUserId", "My Name", JSON.stringify(offer));
+
+    setInCall(true);
+  };
+
+  const handleReceiveCall = async ({ CallerId, CallerName, Offer }) => {
+    peerConnectionRef.current = new RTCPeerConnection();
+
+    // local stream
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    stream.getTracks().forEach(track =>
+      peerConnectionRef.current.addTrack(track, stream)
+    );
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+    }
+
+    peerConnectionRef.current.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+
+    peerConnectionRef.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        connection.invoke("SendIceCandidate", CallerId, JSON.stringify(event.candidate));
+      }
+    };
+
+    await peerConnectionRef.current.setRemoteDescription(JSON.parse(Offer));
+    const answer = await peerConnectionRef.current.createAnswer();
+    await peerConnectionRef.current.setLocalDescription(answer);
+
+    connection.invoke("AnswerCall", CallerId, JSON.stringify(answer));
+    setInCall(true);
+  };
+
+  const handleCallAnswered = async ({ Answer }) => {
+    await peerConnectionRef.current.setRemoteDescription(JSON.parse(Answer));
+  };
+
+  const handleReceiveCandidate = async ({ Candidate }) => {
+    try {
+      await peerConnectionRef.current.addIceCandidate(JSON.parse(Candidate));
     } catch (err) {
-      console.error("❌ [handleReceiveIceCandidate] Error:", err);
+      console.error("Error adding received candidate", err);
     }
   };
 
-  const endCall = () => {
-    cleanUpMedia();
-    setIsInCall(false);
+  const acceptCall = async (incomingCall) => {
+    await handleReceiveCall(incomingCall);
+  };
+
+  const rejectCall = ({ CallerId }) => {
+    connection.invoke("RejectCall", CallerId);
   };
 
   return {
-    startCall,
     localVideoRef,
     remoteVideoRef,
-    rejectCall,
+    inCall,
+    startCall,
+    handleReceiveCall,
+    handleCallAnswered,
+    handleReceiveCandidate,
     acceptCall,
-    endCall,
-    isInCall,
-    incomingCall,
-    localStream,
-    remoteStream,
+    rejectCall,
   };
 };
 
 export default useVideoCall;
-
