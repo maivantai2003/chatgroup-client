@@ -63,6 +63,7 @@ const SelectMethod = ({
   const [typingGroup, setTypingGroup] = useState(null);
   const [listGroupUser, setListGroupUser] = useState(null);
   const [uploadProgress, setUploadProgress] = useState([]);
+  const textareaRef=useRef(null);
   const dispatch = useDispatch();
   var userInfor = JSON.parse(localStorage.getItem("user"));
   var userName = userInfor.UserName || "user";
@@ -112,6 +113,9 @@ const SelectMethod = ({
         } else {
           console.log("group");
           await handleSendGroupMessage();
+        }
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "40px"; // reset chiều cao
         }
         // setMessage("");
         // setSelectedFiles([]);
@@ -681,6 +685,7 @@ const SelectMethod = ({
       <div className="relative flex items-center w-full">
         <textarea
           value={message}
+          ref={textareaRef}
           onChange={(e) => {
             const newMessage = e.target.value;
             if (newMessage.trim() !== "" && newMessage !== message.trim()) {
@@ -692,7 +697,8 @@ const SelectMethod = ({
 
             // CẬP NHẬT: Tự động điều chỉnh chiều cao textarea
             e.target.style.height = "auto";
-            e.target.style.height = e.target.scrollHeight + "px";
+            //e.target.style.height = e.target.scrollHeight + "px";
+            e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -701,8 +707,8 @@ const SelectMethod = ({
             }
           }}
           className="flex-1 p-2 rounded bg-white outline-none border border-transparent 
-               focus:ring-0 focus:border-transparent resize-none overflow-hidden
-               max-h-40 min-h-[40px]"
+             focus:ring-0 focus:border-transparent resize-none
+             max-h-40 min-h-[40px] overflow-y-auto"
           placeholder={`Nhập @, tin nhắn tới ${conversationName}`}
           rows={1} // CẬP NHẬT: Đặt số dòng tối thiểu ban đầu
         />

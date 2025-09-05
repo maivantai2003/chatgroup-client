@@ -36,13 +36,16 @@ const ListConversationItem = ({
 
         <div className="ml-3 flex flex-col w-full">
           <div className="flex justify-between items-center">
-            <span className="text-gray-900 font-semibold">
-              {conversationName}
+            <div className="flex-1 min-w-0">
+              <span className="text-gray-900 font-semibold truncate block">
+                {conversationName}
+              </span>
+            </div>
+            <span className="text-xs text-gray-400 whitespace-nowrap pl-2 shrink-0">
+              {timeAgo}
             </span>
-            <span className="text-xs text-gray-400">{timeAgo}</span>
           </div>
-
-          <div className="text-sm text-gray-600 truncate overflow-hidden whitespace-nowrap">
+          <div className="text-sm text-gray-600 truncate overflow-hidden whitespace-nowrap max-w-[200px]">
             <span className="font-semibold">
               {userSend === "" || userSend === null ? "" : userSend + ":"}
             </span>{" "}
