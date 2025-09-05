@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { XCircle } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { XCircle, Video, VideoOff, Minimize2, Maximize2 } from "lucide-react";
 
 const VideoCallModal = ({
   localVideoRef,
@@ -8,6 +8,15 @@ const VideoCallModal = ({
   remoteStream,
   onEndCall,
 }) => {
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [cameraOn, setCameraOn] = useState(true);
+  const boxSize = { width: 300, height: 200 };
+  // trạng thái kéo-thả
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+  const dragRef = useRef(null);
+  const isDragging = useRef(false);
+  const offset = useRef({ x: 0, y: 0 });
+
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
@@ -20,132 +29,161 @@ const VideoCallModal = ({
     }
   }, [remoteStream]);
 
+  const toggleCamera = () => {
+    if (localStream) {
+      localStream.getVideoTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+      setCameraOn((prev) => !prev);
+    }
+  };
+
+  // --- Drag handlers ---
+  const handleMouseDown = (e) => {
+    if (!isMinimized) return;
+    isDragging.current = true;
+    offset.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e) => {
+     if (!isDragging.current) return;
+
+  const newX = e.clientX - offset.current.x;
+  const newY = e.clientY - offset.current.y;
+
+  // lấy kích thước box thực tế (sau khi responsive)
+  const boxWidth = Math.min(boxSize.width, window.innerWidth * 0.9);
+  const boxHeight = Math.min(boxSize.height, window.innerHeight * 0.4);
+
+  const clampedX = Math.max(0, Math.min(newX, window.innerWidth - boxWidth));
+  const clampedY = Math.max(0, Math.min(newY, window.innerHeight - boxHeight));
+
+  setPosition({ x: clampedX, y: clampedY });
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6 flex flex-col space-y-6">
-        <div className="flex justify-between items-center border-b pb-3">
-          <h2 className="text-2xl font-semibold text-gray-800">Cuộc gọi video</h2>
-          <button onClick={onEndCall} className="text-red-500 hover:text-red-600 transition-all">
-            <XCircle size={36} />
-          </button>
+    <div
+      ref={dragRef}
+      onMouseDown={handleMouseDown}
+      style={
+        isMinimized
+          ? {
+             left: position.x,
+        top: position.y,
+        width: `${boxSize.width}px`,
+        height: `${boxSize.height}px`,
+        maxWidth: "90vw",
+        maxHeight: "40vh", // <= tránh tràn chiều cao
+        position: "fixed",
+        zIndex: 9999,
+        cursor: "move",
+            }
+          : {}
+      }
+      className={`fixed z-50 transition-all ${
+        isMinimized
+          ? "rounded-xl shadow-xl bg-white"
+          : "inset-0 flex items-center justify-center bg-black bg-opacity-80 p-4"
+      }`}
+    >
+      <div
+        className={`bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
+          isMinimized
+            ? "w-full h-full"
+            : "w-full max-w-4xl h-auto p-4 space-y-4"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center border-b pb-2 cursor-default">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Cuộc gọi video
+          </h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMinimized(!isMinimized);
+              }}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              {isMinimized ? <Maximize2 size={22} /> : <Minimize2 size={22} />}
+            </button>
+            <button
+              onClick={onEndCall}
+              className="text-red-500 hover:text-red-600 transition-all"
+            >
+              <XCircle size={28} />
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center space-y-2">
-          <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-4xl text-gray-700 shadow-inner">
-            👤
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold text-gray-800">Người gọi</p>
-            <p className="text-sm text-gray-500 italic">
-              {remoteStream ? "Đã kết nối hình ảnh" : "Đang chờ người kia kết nối..."}
-            </p>
-          </div>
-        </div>
+        {/* Video area */}
+        <div className="relative w-full h-full bg-black rounded-xl overflow-hidden">
+          {/* Remote video full background */}
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          {!remoteStream && (
+            <span className="absolute inset-0 flex items-center justify-center text-white text-base italic">
+              Đang chờ người kia kết nối...
+            </span>
+          )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-black rounded-xl overflow-hidden border-2 border-gray-300">
+          {/* Local video thumbnail ở góc phải dưới */}
+          <div className="absolute bottom-2 right-2 w-24 h-24 rounded-md overflow-hidden border-2 border-white shadow-lg">
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
-              className="w-full h-56 md:h-64 object-cover"
+              className="w-full h-full object-cover"
             />
-          </div>
-
-          <div className="bg-black rounded-xl overflow-hidden border-2 border-gray-300 relative">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              className="w-full h-56 md:h-64 object-cover"
-            />
-            {!remoteStream && (
-              <span className="absolute inset-0 flex items-center justify-center text-white text-base italic">
-                Đang chờ người kia kết nối...
+            {!cameraOn && (
+              <span className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black bg-opacity-70">
+                Camera tắt
               </span>
             )}
           </div>
         </div>
+
+        {/* Controls */}
+        {!isMinimized && (
+          <div className="flex justify-center space-x-6 pt-2">
+            <button
+              onClick={toggleCamera}
+              className="bg-gray-200 hover:bg-gray-300 p-3 rounded-full"
+            >
+              {cameraOn ? (
+                <Video size={24} className="text-gray-700" />
+              ) : (
+                <VideoOff size={24} className="text-red-500" />
+              )}
+            </button>
+            <button
+              onClick={onEndCall}
+              className="bg-red-500 hover:bg-red-600 p-3 rounded-full text-white"
+            >
+              <XCircle size={26} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default VideoCallModal;
-
-
-
-// import React, { useEffect, useRef } from "react";
-
-// const VideoCallModal = ({ localVideoRef, remoteVideoRef, onEndCall }) => {
-//   const audioRef = useRef(null);
-
-//   useEffect(() => {
-//     if (audioRef.current) {
-//       audioRef.current.play().catch((err) => {
-//         console.error("Không thể phát âm thanh:", err);
-//       });
-//     }
-//   }, []);
-
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-//       {/* Chuông đổ */}
-//       <audio ref={audioRef} src="/ringtone.mp3" loop />
-
-//       {/* Khung gọi */}
-//       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 flex flex-col items-center space-y-6">
-//         {/* Tiêu đề và nút */}
-//         <div className="w-full flex justify-between items-center">
-//           <h2 className="text-xl font-semibold text-gray-800">Cuộc gọi video</h2>
-//           <button
-//             onClick={onEndCall}
-//             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow"
-//           >
-//             Kết thúc
-//           </button>
-//         </div>
-
-//         {/* Thông tin người gọi */}
-//         <div className="flex flex-col items-center space-y-1">
-//           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl text-gray-600 shadow">
-//             👤
-//           </div>
-//           <span className="text-lg font-medium text-gray-800">Người gọi</span>
-//           <span className="text-sm text-gray-500">Đang kết nối...</span>
-//         </div>
-
-//         {/* Video hiển thị */}
-//         <div className="w-full flex justify-between gap-4">
-//           {/* Local video */}
-//           <div className="flex-1 bg-black rounded-lg overflow-hidden border">
-//             <video
-//               ref={localVideoRef}
-//               autoPlay
-//               muted
-//               className="w-full h-48 object-cover"
-//             />
-//           </div>
-
-//           {/* Remote video (chỉ hiển thị khi đã có kết nối) */}
-//           <div className="flex-1 bg-black rounded-lg overflow-hidden border">
-//             {remoteVideoRef?.current?.srcObject ? (
-//               <video
-//                 ref={remoteVideoRef}
-//                 autoPlay
-//                 className="w-full h-48 object-cover"
-//               />
-//             ) : (
-//               <div className="w-full h-48 flex items-center justify-center text-white text-sm italic">
-//                 Đang chờ người kia kết nối...
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VideoCallModal;
