@@ -30,7 +30,6 @@ const LoginForm = () => {
         phoneNumber: data.userName,
         userName: data.password,
       };
-      console.log(authRequest)
       const result = await dispatch(login(authRequest)).unwrap();
       console.log(result)
       localStorage.setItem("accessToken", result.accessToken);
