@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
@@ -14,9 +14,10 @@ const FriendList = ({ id }) => {
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [selectedFriendData, setSelectedFriendData] = useState(null);
+
   const dispatch = useDispatch();
   const friends = useSelector((state) => state.friend.listFriend);
-  const [selectedFriendData, setSelectedFriendData] = useState(null);
 
   const menuRef = useRef(null);
 
@@ -36,7 +37,6 @@ const FriendList = ({ id }) => {
         setSelectedFriend(null);
       }
     };
-
     if (selectedFriend) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -48,49 +48,41 @@ const FriendList = ({ id }) => {
   const filteredFriends = friends.filter((friend) =>
     friend.userName.toLowerCase().includes(search.toLowerCase())
   );
-  const handleRemoveFriend = async (id,userId,friendId) => {
-    let friendDto = {
-      userId: friendId,
-      friendId: userId,
-      status: 3,
-    };
-    try {
-      if (friendDto !== null && id!==null) {
-       
-        var result = await dispatch(
-          UpdateFriend({
-            id: id,
-            friendDto: friendDto,
-          })
-        ).unwrap();
 
-        if (result === null) {
+  const handleRemoveFriend = async (id, userId, friendId) => {
+    let friendDto = { userId: friendId, friendId: userId, status: 3 };
+    try {
+      if (friendDto && id) {
+        const result = await dispatch(
+          UpdateFriend({ id, friendDto })
+        ).unwrap();
+        if (!result) {
           toast.error("Hủy kết bạn không thành công");
           return;
         }
-
         toast.success("Hủy kết bạn thành công");
-        console.log(result);
       }
     } catch (ex) {
-      console.log(ex);
       toast.error("Hủy kết bạn không thành công");
     }
-  }
+  };
+
   return (
-    <div className="max-w-4xl w-full mx-auto bg-white shadow-lg rounded-lg p-4">
+    <div className="max-w-4xl w-full mx-auto bg-white shadow-md rounded-xl p-5">
       {/* Header */}
       <div className="flex justify-between items-center border-b pb-3">
-        <h2 className="text-lg font-semibold">Bạn bè ({friends.length})</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          👥 Bạn bè ({friends.length})
+        </h2>
       </div>
 
       {/* Thanh tìm kiếm */}
-      <div className="relative mt-3">
+      <div className="relative mt-4">
         <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
         <input
           type="text"
-          placeholder="Tìm bạn"
-          className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Tìm bạn..."
+          className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -104,24 +96,31 @@ const FriendList = ({ id }) => {
 
       {/* Hiển thị loading */}
       {loading ? (
-        <div className="flex justify-center items-center mt-4">
+        <div className="flex justify-center items-center mt-6">
           <div className="w-8 h-8 border-4 border-blue-400 border-dashed rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="mt-4">
+        <div className="mt-5 space-y-2">
           {filteredFriends.map((friend) => (
             <div
               key={friend.id}
-              className="relative flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg"
+              className="relative flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition"
             >
-              <div className="flex items-center space-x-3">
-                <img
-                  src={friend.avatar}
-                  alt={friend.userName}
-                  className="w-10 h-10 rounded-full"
-                />
-                <span className="text-gray-800">{friend.userName}</span>
+              {/* Avatar + Tên */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={friend.avatar}
+                    alt={friend.userName}
+                    className="w-11 h-11 rounded-full border"
+                  />
+                  {/* Dot online (có thể thay bằng trạng thái thật từ backend) */}
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                </div>
+                <span className="text-gray-800 font-medium">{friend.userName}</span>
               </div>
+
+              {/* Nút menu */}
               <button
                 onClick={() =>
                   setSelectedFriend(
@@ -132,11 +131,11 @@ const FriendList = ({ id }) => {
                 <EllipsisVerticalIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
 
-              {/* Menu hiển thị thông tin */}
+              {/* Menu */}
               {selectedFriend === friend.id && (
                 <div
                   ref={menuRef}
-                  className="absolute right-10 mt-2 w-48 bg-white border shadow-lg rounded-md z-10"
+                  className="absolute right-10 top-12 w-48 bg-white border shadow-lg rounded-md z-20 animate-fade-in"
                 >
                   <ul>
                     <li
@@ -149,19 +148,11 @@ const FriendList = ({ id }) => {
                     >
                       Xem thông tin
                     </li>
-                    {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      Phân loại
-                    </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      Đặt tên gợi nhớ
-                    </li> */}
-                    {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      Chặn người này
-                    </li> */}
                     <li
                       className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
-                        handleRemoveFriend(friend.id,friend.userId,friend.friendId);
+                        handleRemoveFriend(friend.id, friend.userId, friend.friendId);
+                        setSelectedFriend(null);
                       }}
                     >
                       Xóa bạn
@@ -170,7 +161,7 @@ const FriendList = ({ id }) => {
                 </div>
               )}
 
-              {/* Modal hiển thị thông tin bạn bè */}
+              {/* Modal thông tin */}
               {showModal && selectedFriendData && (
                 <UserInfoModal
                   user={selectedFriendData}

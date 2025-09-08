@@ -30,18 +30,23 @@ const LoginForm = () => {
         phoneNumber: data.userName,
         userName: data.password,
       };
+      console.log(authRequest);
       const result = await dispatch(login(authRequest)).unwrap();
-      console.log(result)
       localStorage.setItem("accessToken", result.accessToken);
       window.dispatchEvent(new Event("storage"));
       const token = localStorage.getItem("accessToken");
       var user = jwtDecode(token).userInfor;
-      localStorage.setItem("user", JSON.stringify(user));
-      var userId = user.UserId;
-      console.log(userId)
+      localStorage.setItem("user", user);
+      var userInfor = JSON.parse(localStorage.getItem("user"));
+      var userId = userInfor.UserId;
+      console.log(userId);
       if (connection) {
+        connection.on("CheckConnection", (value) => {
+          console.log(value);
+        });
         connection.invoke("LoadRequestFriend", userId.toString());
       }
+      // console.log(authRequest);
       if (result !== null) {
         setErrorMessage(null);
         navigate("/");
@@ -49,12 +54,13 @@ const LoginForm = () => {
       } else {
         setErrorMessage(result?.reason || "Đăng nhập thất bại");
         toast.error("Vui Lòng Kiểm Tra Số Điện Thoại Hoặc Mật Khẩu");
+        return;
       }
     } catch (error) {
-      console.log(error)
       setLogin(false);
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
       toast.error("Lỗi hệ thống. Vui lòng thử lại!");
+      return;
     }
   };
 
