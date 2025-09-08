@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import config from "../constant/linkApi";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export const ForgotPassword = () => {
   const {
@@ -12,12 +13,17 @@ export const ForgotPassword = () => {
     formState: { errors },
   } = useForm();
   const [isLoading, setLoading] = useState(false);
-
+  const [captchaToken,setCaptchaToken]=useState("")
   const onSubmit = async (data) => {
+    if (!captchaToken) {
+    toast.warn("Vui lòng xác thực CAPTCHA");
+    return;
+  }
     setLoading(true);
     try {
       const result = await axios.post(config.API_URL + "/authen/forgot-password", {
         email: data.email,
+        captchaToken:captchaToken
       });
       console.log(result);
       toast.success("Đã gửi email đặt lại mật khẩu nếu email tồn tại");
@@ -55,7 +61,7 @@ export const ForgotPassword = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
-
+          <ReCAPTCHA sitekey={config.STIE_KEY}  onChange={(token)=>setCaptchaToken(token || "")}/>
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-2 rounded-lg shadow-md hover:opacity-90 transition"
