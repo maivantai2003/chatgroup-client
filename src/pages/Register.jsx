@@ -58,6 +58,7 @@ const RegisterForm = () => {
   const onSubmit = async (data) => {
     if (data.phoneNumber) {
       var result = await dispatch(CheckPhoneNumber(data.phoneNumber)).unwrap();
+      console.log(result);
       if (result) {
         toast.warning("Số điện thoại đã tồn tại");
         return;
@@ -72,6 +73,7 @@ const RegisterForm = () => {
       avatar: avatarUrl,
       password: data.password,
     };
+    console.log(userRegister);
     try {
       const result = await dispatch(registerUser(userRegister)).unwrap();
       if (result !== null) {

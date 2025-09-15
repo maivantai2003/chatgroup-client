@@ -27,11 +27,9 @@ const GroupMessages = ({ userId, id }) => {
     };
     fetchData();
   }, [dispatch, id]);
+
   useEffect(() => {
     if (connection) {
-      // connection
-      //   .invoke("JoinGroup", id + "")
-      //   .catch((err) => console.error("Error joining group:", err));
       connection
         .invoke("LeaveGroup", id + "")
         .catch((err) => console.error("Error leaving group:", err))
@@ -44,14 +42,13 @@ const GroupMessages = ({ userId, id }) => {
       connection.on("UserJoin", (value) => {
         console.log(value);
       });
-      connection.on("ReceiveGroupMessageFile", (id, file) => {
-        if (id !== userId.toString()) {
+      connection.on("ReceiveGroupMessageFile", (senderId, file) => {
+        if (senderId !== userId.toString()) {
           dispatch(addFilesToGroupMessage(file));
         }
       });
-      connection.on("ReceiveGroupMessage", (id, groupMessage) => {
-        console.log(groupMessage);
-        if (id !== userId.toString()) {
+      connection.on("ReceiveGroupMessage", (senderId, groupMessage) => {
+        if (senderId !== userId.toString()) {
           dispatch(addGroupMessageRecevie(groupMessage));
         }
       });
@@ -64,6 +61,7 @@ const GroupMessages = ({ userId, id }) => {
       }
     };
   }, [connection, id]);
+
   useEffect(() => {
     if (messagesEndRef.current && containerRef.current) {
       setTimeout(() => {
@@ -71,11 +69,13 @@ const GroupMessages = ({ userId, id }) => {
           behavior: "smooth",
           block: "end",
         });
-      }, 100); // Giảm delay để mượt hơn
+      }, 100);
     }
   }, [listGroupMessage]);
+
   const filteredMessages = listGroupMessage.filter((msg) => msg.groupId === id);
   const groupedMessages = groupMessagesByDate(filteredMessages);
+
   return (
     <div
       className="flex flex-col p-4 space-y-3 bg-gray-100 flex-grow overflow-y-auto"
@@ -94,52 +94,81 @@ const GroupMessages = ({ userId, id }) => {
                 {date}
               </div>
             </div>
+
+            {/* Hiển thị tin nhắn trong ngày */}
             {groupedMessages[date].map((msg) => (
-              <div
-                key={msg.groupedMessageId}
-                className={`flex items-end ${
-                  msg.senderId === userId ? "justify-end" : "justify-start"
-                } mb-2`}
-              >
-                {/* Avatar cho tin nhắn người khác */}
-                {msg.senderId !== userId && (
-                  <img
-                    src={msg.senderAvatar || "/default-avatar.png"}
-                    alt="avatar"
-                    className="w-10 h-10 rounded-full mr-2"
-                  />
-                )}
-                {/* Nội dung tin nhắn */}
-                <div
-                  // className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${
-                  //   msg.senderId === userId
-                  //     ? "bg-blue-100 border-blue-300 text-black"
-                  //     : "bg-white border-blue-300 text-black"
-                  // }`}
-                  className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${
-                    msg.senderId === userId
-                      ? "bg-blue-100 border-blue-300 text-black"
-                      : "bg-white border-blue-300 text-black"
-                  }`}
-                >
-                  {msg.senderId !== userId && (
-                    <p className="text-xs font-bold text-gray-600">
-                      {msg.senderName}
-                    </p>
-                  )}
-                  {msg.content && <p className="text-sm">{msg.content}</p>}
-                  {msg.files && msg.files.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {msg.files.map((file, index) => (
-                        <FileMessage key={index} file={file} />
-                      ))}
+              <div key={msg.groupedMessageId} className="flex flex-col mb-3">
+                {/* Nếu có text */}
+                {msg.content && (
+                  <div
+                    className={`flex items-end space-x-2 ${
+                      msg.senderId === userId ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {msg.senderId !== userId && (
+                      <img
+                        src={msg.senderAvatar || "/default-avatar.png"}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full"
+                      />
+                    )}
+                    <div
+                      className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${
+                        msg.senderId === userId
+                          ? "bg-blue-100 border-blue-300 text-black"
+                          : "bg-white border-gray-300 text-black"
+                      }`}
+                    >
+                      {msg.senderId !== userId && (
+                        <p className="text-xs font-bold text-gray-600 mb-1">
+                          {msg.senderName}
+                        </p>
+                      )}
+                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-xs text-gray-400 text-right mt-1">
+                        {formatTime(msg.createAt)}
+                      </p>
                     </div>
-                  )}
-                  <p className="text-xs text-gray-400 text-right">
-                    {formatTime(msg.createAt)}
-                  </p>
-                  
-                </div>
+                  </div>
+                )}
+
+                {/* Nếu có file, mỗi file là 1 bubble riêng */}
+                {msg.files &&
+                  msg.files.length > 0 &&
+                  msg.files.map((file, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-end space-x-2 mt-2 ${
+                        msg.senderId === userId ? "justify-end" : "justify-start"
+                      }`
+                    }
+                    >
+                      {msg.senderId !== userId && (
+                        <img
+                          src={msg.senderAvatar || "/default-avatar.png"}
+                          alt="avatar"
+                          className="w-10 h-10 rounded-full"
+                        />
+                      )}
+                      <div
+                        className={`max-w-xs md:max-w-md p-3 rounded-lg shadow border ${
+                          msg.senderId === userId
+                            ? "bg-blue-100 border-blue-300 text-black"
+                            : "bg-white border-gray-300 text-black"
+                        }`}
+                      >
+                        {msg.senderId !== userId && (
+                          <p className="text-xs font-bold text-gray-600 mb-1">
+                            {/* {msg.senderName} */}
+                          </p>
+                        )}
+                        <FileMessage file={file} />
+                        {/* <p className="text-xs text-gray-400 text-right mt-1">
+                          {formatTime(msg.createAt)}
+                        </p> */}
+                      </div>
+                    </div>
+                  ))}
               </div>
             ))}
           </div>

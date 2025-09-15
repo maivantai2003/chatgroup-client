@@ -7,4 +7,3 @@ const config={
     STIE_KEY:import.meta.env.VITE_SITE_KEY
 }
 export default config;
-

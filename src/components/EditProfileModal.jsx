@@ -82,7 +82,6 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
         phoneNumber: updatedData.phoneNumber,
         status: 1,
       };
-
       try {
         var result = await dispatch(
           UpdateUser({ id: updatedData.userId, userUpdateDto: userUpdateDto })

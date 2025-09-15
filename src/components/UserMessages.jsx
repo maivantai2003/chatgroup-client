@@ -28,29 +28,24 @@ const UserMessages = ({ userId, id, type, avatar }) => {
     };
     fetchData();
   }, [dispatch, userId, id, type]);
+
   useEffect(() => {
     if (connection) {
       connection.on("ReceiveUserMessage", (userMessage) => {
         dispatch(receiveUserMessage(userMessage));
-        console.log(userMessage);
       });
       connection.on("ReceiveUserMessageFile", (file) => {
         dispatch(addFilesToUserMessage(file));
-        console.log(file)
       });
-      connection.on("CheckUser", (value) => {
-        console.log(value);
-      });
-      
     }
     return () => {
       if (connection) {
         connection.off("ReceiveUserMessage");
-        connection.off("ReceiveUserMessageFile")
-        connection.off("CheckUser");
+        connection.off("ReceiveUserMessageFile");
       }
     };
   }, [connection, dispatch, id]);
+
   useEffect(() => {
     if (messagesEndRef.current && containerRef.current) {
       setTimeout(() => {
@@ -58,15 +53,18 @@ const UserMessages = ({ userId, id, type, avatar }) => {
           behavior: "smooth",
           block: "end",
         });
-      }, 100); // Giảm delay để mượt hơn
+      }, 100);
     }
-  }, [listUserMessage]); // Theo dõi khi danh sách tin nhắn thay đổi
+  }, [listUserMessage]);
+
   const filteredMessages = listUserMessage.filter(
     (msg) =>
       (msg.senderId === userId && msg.receiverId === id) ||
       (msg.senderId === id && msg.receiverId === userId)
   );
+
   const groupedMessages = groupMessagesByDate(filteredMessages);
+
   return (
     <div
       className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto"
@@ -85,55 +83,76 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                 {date}
               </div>
             </div>
-  
+
             {/* Hiển thị tin nhắn trong ngày */}
             {groupedMessages[date].map((msg) => (
-              <div
-                key={msg.userMessageId}
-                className={`flex items-end space-x-2 ${
-                  msg.senderId === userId ? "justify-end" : "justify-start"
-                } mb-3`}
-              >
-                {/* Avatar nếu là tin nhắn của người khác */}
-                {msg.senderId !== userId && (
-                  <img
-                    src={avatar || "/default-avatar.png"}
-                    alt="Avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-  
-                {/* Nội dung tin nhắn */}
-                <div
-                  className={`p-3 max-w-xs md:max-w-md rounded-lg border shadow-sm ${
-                    msg.senderId === userId
-                      ? "bg-blue-100 border-blue-300 text-black"
-                      : "bg-gray-100 border-gray-300 text-black"
-                  }`}
-                >
-                  {/* Kiểm tra nếu tin nhắn có nội dung */}
-                  {msg.content && <p className="text-sm">{msg.content}</p>}
-  
-                  {/* Nếu có file đính kèm */}
-                  {msg.files && msg.files.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {msg.files.map((file, index) => (
-                        <FileMessage key={index} file={file} />
-                      ))}
+              <div key={msg.userMessageId} className="flex flex-col mb-3">
+                {/* Nếu có text */}
+                {msg.content && (
+                  <div
+                    className={`flex items-end space-x-2 ${
+                      msg.senderId === userId ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {msg.senderId !== userId && (
+                      <img
+                        src={avatar || "/default-avatar.png"}
+                        alt="Avatar"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    )}
+                    <div
+                      className={`p-3 max-w-xs md:max-w-md rounded-lg border shadow-sm ${
+                        msg.senderId === userId
+                          ? "bg-blue-100 border-blue-300 text-black"
+                          : "bg-gray-100 border-gray-300 text-black"
+                      }`}
+                    >
+                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-xs text-gray-500 text-right mt-1">
+                        {formatTime(msg.createAt)}
+                      </p>
                     </div>
-                  )}
-  
-                  {/* Hiển thị thời gian */}
-                  <p className="text-xs text-gray-500 text-right mt-1">
-                    {formatTime(msg.createAt)}
-                  </p>
-                </div>
+                  </div>
+                )}
+
+                {/* Nếu có file, mỗi file là 1 bubble */}
+                {msg.files &&
+                  msg.files.length > 0 &&
+                  msg.files.map((file, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-end space-x-2 mt-2 ${
+                        msg.senderId === userId ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      {msg.senderId !== userId && (
+                        <img
+                          src={avatar || "/default-avatar.png"}
+                          alt="Avatar"
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      )}
+                      <div
+                        className={`p-3 max-w-xs md:max-w-md rounded-lg border shadow-sm ${
+                          msg.senderId === userId
+                            ? "bg-blue-100 border-blue-300 text-black"
+                            : "bg-gray-100 border-gray-300 text-black"
+                        }`}
+                      >
+                        <FileMessage file={file} />
+                        <p className="text-xs text-gray-500 text-right mt-1 hidden">
+                          {formatTime(msg.createAt)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
               </div>
             ))}
           </div>
         ))
       )}
-  
+
       {/* Cuộn xuống tin nhắn cuối cùng */}
       <div ref={messagesEndRef}></div>
     </div>

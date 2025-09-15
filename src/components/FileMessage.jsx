@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   FaDownload,
   FaRegFilePdf,
@@ -10,7 +11,7 @@ import {
   FaRegFileVideo,
   FaRegFileImage,
 } from "react-icons/fa";
-import { SiZalo } from "react-icons/si"; // Icon Zalo (nếu có)
+import { SiZalo } from "react-icons/si";
 
 const formatSize = (size) => {
   if (!size) return "N/A";
@@ -29,14 +30,11 @@ const formatSize = (size) => {
   return `${formattedSize.toFixed(2)} ${sizes[order]}`;
 };
 
-// Kiểm tra xem file có phải là hình ảnh
-const isImage = (file) => {
-  return ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(
+const isImage = (file) =>
+  ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(
     file.typeFile.toLowerCase()
   );
-};
 
-// Chọn icon phù hợp với loại file
 const getFileIcon = (fileType) => {
   switch (fileType.toLowerCase()) {
     case "pdf":
@@ -77,46 +75,46 @@ const getFileIcon = (fileType) => {
 };
 
 const FileMessage = ({ file }) => {
+  const [preview, setPreview] = useState("");
+  useEffect(() => {
+    if (file.typeFile.toLowerCase() === "txt") {
+      fetch(file.fileUrl)
+        .then((res) => res.text())
+        .then((text) => {
+          const lines = text.split("\n").slice(0, 5).join("\n");
+          setPreview(lines);
+        })
+        .catch(() => setPreview("Không thể đọc file"));
+    }
+  }, [file.fileUrl, file.typeFile]);
+
   return (
-    // <div className="bg-blue-100 p-3 rounded-lg flex items-center justify-between w-80 mb-2">
-    //   <div className="flex items-center flex-1 overflow-hidden">
-    //     {isImage(file) ? (
-    //       <img
-    //         src={file.fileUrl}
-    //         alt={file.fileName}
-    //         className="w-10 h-10 object-cover rounded mr-3"
-    //       />
-    //     ) : (
-    //       getFileIcon(file.typeFile)
-    //     )}
-    //     <div className="flex-1 min-w-0">
-    //       <p className="text-sm font-medium truncate">{file.fileName}</p>
-    //       <p className="text-xs text-gray-500">{file.sizeFile}</p>
-    //     </div>
-    //   </div>
-    //   <a href={file.fileUrl} download className="text-blue-500 text-lg p-2">
-    //     <FaDownload />
-    //   </a>
-    // </div>
-    <div className="flex items-center justify-between">
-      <div className="flex items-center flex-1 overflow-hidden">
-        {isImage(file) ? (
-          <img
-            src={file.fileUrl}
-            alt={file.fileName}
-            className="w-10 h-10 object-cover rounded mr-3"
-          />
-        ) : (
-          getFileIcon(file.typeFile)
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{file.fileName}</p>
-          <p className="text-xs text-gray-500">{file.sizeFile}</p>
+    <div className="flex flex-col border p-2 rounded mb-2 bg-gray-50">
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center flex-1 overflow-hidden">
+          {isImage(file) ? (
+            <img
+              src={file.fileUrl}
+              alt={file.fileName}
+              className="w-10 h-10 object-cover rounded mr-3"
+            />
+          ) : (
+            getFileIcon(file.typeFile)
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{file.fileName}</p>
+            <p className="text-xs text-gray-500">{file.sizeFile}</p>
+          </div>
         </div>
+        <a href={file.fileUrl} download className="text-blue-500 text-lg p-2">
+          <FaDownload />
+        </a>
       </div>
-      <a href={file.fileUrl} download className="text-blue-500 text-lg p-2">
-        <FaDownload />
-      </a>
+      {file.typeFile.toLowerCase() === "txt" && (
+        <pre className="text-xs text-gray-700 bg-white p-2 rounded overflow-x-auto">
+          {preview}
+        </pre>
+      )}
     </div>
   );
 };
