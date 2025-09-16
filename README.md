@@ -7,20 +7,26 @@ A modern real-time messaging app with 1-on-1 video calls, instant chat, and smar
 💬 Realtime Chat Instant messaging between friends, groups, and cloud-based storage.
 
 📹 1-on-1 Video Calling Direct video calls between friends with smooth real-time experience.
+
 👥 Friend Management
     View incoming friend requests
+
     Manage connected friends
 
 🧑‍🤝‍🧑 Group Management
     Track groups you've joined or created
+
     Real-time group messaging
 
 🎂 Birthday Notifications Automatically send birthday reminders for your friends
 
 🔐 Secure Password Reset
     Users can securely reset their password via email verification. The process includes:
+
     Sending a password reset link to the user's registered email
+
     CAPTCHA validation to prevent automated abuse
+    
     Token-based verification to ensure the request is legitimate and time-limited
 
 ## Built with
