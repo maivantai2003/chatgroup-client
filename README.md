@@ -3,7 +3,9 @@ A modern real-time messaging app with 1-on-1 video calls, instant chat, and smar
 
 ## Features
 🌟 Authentication & Authorization Secure user login, registration, and role-based access control.
+
 💬 Realtime Chat Instant messaging between friends, groups, and cloud-based storage.
+
 📹 1-on-1 Video Calling Direct video calls between friends with smooth real-time experience.
 👥 Friend Management
     View incoming friend requests
