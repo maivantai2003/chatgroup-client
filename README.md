@@ -1,11 +1,22 @@
 ## Overview
-Task Management System is an application that helps users organize, track and manage personal and team tasks or projects effectively. The application provides intuitive and easy-to-use features to optimize workflow, increase productivity and improve collaboration among team members.
+A modern real-time messaging app with 1-on-1 video calls, instant chat, and smart social features like friend requests, group management, and birthday notifications. Designed for smooth, scalable, and intuitive communication.
 
 ## Features
-🌟 Authentication & Authorization  
-🌟 Chat  
-🌟 Realtime Updates
-
+🌟 Authentication & Authorization Secure user login, registration, and role-based access control.
+💬 Realtime Chat Instant messaging between friends, groups, and cloud-based storage.
+📹 1-on-1 Video Calling Direct video calls between friends with smooth real-time experience.
+👥 Friend Management
+    View incoming friend requests
+    Manage connected friends
+🧑‍🤝‍🧑 Group Management
+    Track groups you've joined or created
+    Real-time group messaging
+🎂 Birthday Notifications Automatically send birthday reminders for your friends
+🔐 Secure Password Reset
+    Users can securely reset their password via email verification. The process includes:
+    Sending a password reset link to the user's registered email
+    CAPTCHA validation to prevent automated abuse
+    Token-based verification to ensure the request is legitimate and time-limited
 ## Built with
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
@@ -78,14 +89,12 @@ npm run dev
 ```
 
 ## Demo
-**Task management**
-<img src="./demo_image/task.png" >
-<img src="./demo_image/task2.png" >
-<img src="./demo_image/create_task.png" >
-<img src="./demo_image/gant.png" >
-<img src="./demo_image/chat.png" >
+**Authentication**
+<img src="./screenshots/login.png" >
+<img src="./screenshots/register.png" >
+<img src="./screenshots/forgotPassword.png" >
 
-**Project management**
+<!-- **Project management**
 <img src="./demo_image/project.png" >
 <img src="./demo_image/job_change.png" >
 <img src="./demo_image/job_history.png" >
@@ -101,7 +110,7 @@ npm run dev
 
 **Account management**
 <img src="./demo_image/account.png" >
-<img src="./demo_image/authorization.png" >
+<img src="./demo_image/authorization.png" > -->
 
 
 #### Contact email:
