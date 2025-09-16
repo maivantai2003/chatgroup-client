@@ -10,15 +10,19 @@ A modern real-time messaging app with 1-on-1 video calls, instant chat, and smar
 👥 Friend Management
     View incoming friend requests
     Manage connected friends
+
 🧑‍🤝‍🧑 Group Management
     Track groups you've joined or created
     Real-time group messaging
+
 🎂 Birthday Notifications Automatically send birthday reminders for your friends
+
 🔐 Secure Password Reset
     Users can securely reset their password via email verification. The process includes:
     Sending a password reset link to the user's registered email
     CAPTCHA validation to prevent automated abuse
     Token-based verification to ensure the request is legitimate and time-limited
+
 ## Built with
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
