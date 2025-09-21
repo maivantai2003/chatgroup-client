@@ -18,6 +18,7 @@ import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { isTokenExpired } from "./utils/helpers";
+import { NewParers } from "./pages/NewPapers";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
@@ -65,6 +66,8 @@ const MainLayout = () => {
           <FriendList id={userId} />
         ) : activeTab === "groups" ? (
           <GroupList id={userId} />
+        ): activeTab === "news" ? (
+          <NewParers/>
         ) : (
           <>
             <div className="w-1/4 bg-white text-black flex flex-col">

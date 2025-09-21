@@ -1,12 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
-import { FaEdit } from "react-icons/fa"; // Import icon edit
+import { FaEdit } from "react-icons/fa";
 import config from "../constant/linkApi";
 import { useDispatch } from "react-redux";
 import { UpdateUser } from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import { updateUserInfo } from "../helpers/convert";
 import { UpdateConversationInfor } from "../redux/conversation/conversationSlice";
+
 const EditProfileModal = ({ isOpen, closeModal, user }) => {
   const [formData, setFormData] = useState({ ...user });
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
@@ -15,21 +16,22 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
   const [coverFile, setCoverFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+
   const handleImageChange = (e, type) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (type === "avatar") {
-          setAvatarPreview(reader.result);
-          setAvatarFile(file);
-        } else {
-          setCoverPreview(reader.result);
-          setCoverFile(file);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (type === "avatar") {
+        setAvatarPreview(reader.result);
+        setAvatarFile(file);
+      } else {
+        setCoverPreview(reader.result);
+        setCoverFile(file);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const uploadImage = async (file) => {
@@ -38,15 +40,9 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post(
-        `${config.API_URL}/File/Upload`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${config.API_URL}/File/Upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       return response.data.url;
     } catch (error) {
       console.error("Upload ảnh thất bại:", error);
@@ -59,41 +55,28 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
     setLoading(true);
 
     try {
-      const avatarUrl = avatarFile
-        ? await uploadImage(avatarFile)
-        : formData.avatar;
-      const coverUrl = coverFile
-        ? await uploadImage(coverFile)
-        : formData.coverPhoto;
+      const avatarUrl = avatarFile ? await uploadImage(avatarFile) : formData.avatar;
+      const coverUrl = coverFile ? await uploadImage(coverFile) : formData.coverPhoto;
 
-      const updatedData = {
-        ...formData,
+      const userUpdateDto = {
+        userId: formData.userId,
+        userName: formData.userName,
+        bio: formData.bio,
         avatar: avatarUrl,
+        sex: formData.sex,
         coverPhoto: coverUrl,
-      };
-      let userUpdateDto = {
-        userId: updatedData.userId,
-        userName: updatedData.userName,
-        bio: updatedData.bio,
-        avatar: updatedData.avatar,
-        sex: updatedData.sex,
-        coverPhoto: updatedData.coverPhoto,
-        birthday: updatedData.birthday,
-        phoneNumber: updatedData.phoneNumber,
+        birthday: formData.birthday,
+        phoneNumber: formData.phoneNumber,
         status: 1,
       };
-      try {
-        var result = await dispatch(
-          UpdateUser({ id: updatedData.userId, userUpdateDto: userUpdateDto })
-        ).unwrap();
-        if (result !== null) {
-          toast.success("Cập nhật thành công");
-          updateUserInfo(userUpdateDto);
-        } else {
-          toast.error("Cập nhật không thành công");
-          return;
-        }
-        var resultUpdateInfor = await dispatch(
+
+      const result = await dispatch(UpdateUser({ id: formData.userId, userUpdateDto })).unwrap();
+
+      if (result) {
+        toast.success("Cập nhật thành công");
+        updateUserInfo(userUpdateDto);
+
+        await dispatch(
           UpdateConversationInfor({
             id: userUpdateDto.userId,
             type: "user",
@@ -101,9 +84,11 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
             conversationName: userUpdateDto.userName,
           })
         );
-      } catch (ex) {
-        console.log(ex);
+      } else {
+        toast.error("Cập nhật không thành công");
+        return;
       }
+
       closeModal();
     } catch (error) {
       console.error("Lỗi cập nhật thông tin:", error);
@@ -115,17 +100,19 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-transparent backdrop-blur-md flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Chỉnh sửa thông tin</h2>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">
+          ✨ Chỉnh sửa thông tin
+        </h2>
 
-        {/* Ảnh bìa */}
-        <div className="relative w-full h-32 bg-gray-200 rounded overflow-hidden">
+        {/* Cover photo */}
+        <div className="relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden group">
           {coverPreview && (
             <img
               src={coverPreview}
               alt="Cover"
-              className="w-full h-full object-cover rounded"
+              className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
             />
           )}
           <input
@@ -134,21 +121,19 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
             onChange={(e) => handleImageChange(e, "coverPhoto")}
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
-
-          {/* Icon Edit */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 p-2 rounded-full cursor-pointer">
-            <FaEdit className="text-white" />
+          <div className="absolute bottom-2 right-2 bg-black/60 p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
+            <FaEdit className="text-white text-sm" />
           </div>
         </div>
 
-        {/* Ảnh đại diện */}
-        <div className="relative flex justify-center mt-4">
-          <div className="relative w-24 h-24 rounded-full border-2 border-white overflow-hidden">
+        {/* Avatar */}
+        <div className="relative flex justify-center -mt-12">
+          <div className="relative w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden group">
             {avatarPreview && (
               <img
                 src={avatarPreview}
                 alt="Avatar"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
               />
             )}
             <input
@@ -157,63 +142,44 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
               onChange={(e) => handleImageChange(e, "avatar")}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
-
-            {/* Icon Edit */}
-            <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 p-2 rounded-full cursor-pointer">
-              <FaEdit className="text-white text-sm" />
+            <div className="absolute bottom-1 right-1 bg-black/60 p-2 rounded-full opacity-0 group-hover:opacity-100 transition">
+              <FaEdit className="text-white text-xs" />
             </div>
           </div>
         </div>
 
-        {/* Hiển thị trạng thái loading */}
         {loading && (
-          <p className="text-center text-sm text-blue-500 mt-2">
-            Đang cập nhật...
-          </p>
+          <p className="text-center text-sm text-blue-500 mt-2">Đang cập nhật...</p>
         )}
 
-        {/* Form chỉnh sửa thông tin */}
-        <form onSubmit={handleSubmit} className="space-y-3 mt-4">
-          {/* Tên người dùng */}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           <div>
-            <label className="block text-gray-600 text-sm">
-              Tên người dùng
-            </label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Tên người dùng</label>
             <input
               type="text"
-              name="userName"
               value={formData.userName}
-              onChange={(e) =>
-                setFormData({ ...formData, userName: e.target.value })
-              }
-              className="w-full p-2 border rounded"
+              onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
-          {/* Bio */}
           <div>
-            <label className="block text-gray-600 text-sm">Bio</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Bio</label>
             <input
               type="text"
-              name="bio"
               value={formData.bio === "None" ? "" : formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-              className="w-full p-2 border rounded"
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
-          {/* Giới tính */}
           <div>
-            <label className="block text-gray-600 text-sm">Giới tính</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Giới tính</label>
             <select
-              name="sex"
               value={formData.sex}
-              onChange={(e) =>
-                setFormData({ ...formData, sex: e.target.value })
-              }
-              className="w-full p-2 border rounded bg-white"
+              onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+              className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
             >
               <option value="">Chọn giới tính</option>
               <option value="Male">Nam</option>
@@ -222,55 +188,43 @@ const EditProfileModal = ({ isOpen, closeModal, user }) => {
             </select>
           </div>
 
-          {/* Số điện thoại */}
           <div>
-            <label className="block text-gray-600 text-sm">Số điện thoại</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Số điện thoại</label>
             <input
               type="text"
-              name="phoneNumber"
               value={formData.phoneNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, phoneNumber: e.target.value })
-              }
-              className="w-full p-2 border rounded"
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
-          {/* Ngày sinh */}
           <div>
-            <label className="block text-gray-600 text-sm">Ngày sinh</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Ngày sinh</label>
             <input
               type="date"
-              name="birthday"
               value={formData.birthday?.split("T")[0]}
-              onChange={(e) =>
-                setFormData({ ...formData, birthday: e.target.value })
-              }
-              className="w-full p-2 border rounded"
+              onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 pt-2">
             <button
               type="button"
               onClick={closeModal}
-              className="p-2 bg-gray-300 rounded"
+              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
             >
               Hủy
             </button>
-            {/* <button
-              type="submit"
-              className="p-2 bg-blue-500 text-white rounded"
-            >
-              Lưu
-            </button> */}
             <button
               type="submit"
-              className={`p-2 rounded ${
-                loading ? "bg-gray-400" : "bg-blue-500 text-white"
-              }`}
               disabled={loading}
+              className={`px-4 py-2 rounded-lg transition ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
             >
               {loading ? "Đang lưu..." : "Lưu"}
             </button>

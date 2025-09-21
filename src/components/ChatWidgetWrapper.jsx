@@ -12,7 +12,7 @@ const ChatWidgetWrapper = () => {
         <div className="relative w-[400px] h-[520px] bg-gray-100 rounded-lg shadow-lg flex flex-col">
           {/* Header */}
           <div className="flex justify-between items-center bg-gray-700 text-white px-4 py-2 rounded-t-lg">
-            <span className="font-semibold">ChatAI</span>
+            <span className="font-semibold">Chat</span>
             <button
               className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"
               onClick={() => setIsOpen(false)}
