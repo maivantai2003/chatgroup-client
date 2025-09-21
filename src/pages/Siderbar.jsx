@@ -5,6 +5,7 @@ import {
   FaUserPlus,
   FaSignOutAlt,
   FaRegComment,
+  FaNewspaper,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -44,6 +45,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           id: "requests",
           icon: <FaUserPlus className="w-6 h-6" />,
           badge: friendRequests?.length > 0 ? friendRequests.length : null,
+        },{
+          id:"news",
+          icon:<FaNewspaper className="w-6 h-6"></FaNewspaper>
         },
       ].map(({ id, icon, badge }) => (
         <button

@@ -88,7 +88,7 @@ const useVideoCall = (toUserId) => {
       const stream = await getMediaStream();
       const pc = createPeerConnection(toUserId);
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
+      console.log(stream.getTracks())
       await connection.invoke("SendCallRequest", toUserId);
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);

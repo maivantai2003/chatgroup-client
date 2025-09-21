@@ -12,6 +12,7 @@ import usermessageReducer from "./usermessage/usermessageSlice"
 import groupmessageReducer from "./groupmessage/groupmessageSlice"
 import usermessagefileReducer from "./usermessagefile/usermessagefileSlice"
 import groupmessagefileReducer from "./groupmessagefile/groupmessagefileSlice"
+import newPaperReducer from "./newPaper/newPaperSlice"
 const store=configureStore({
     reducer:{
         auth:authReducer,
@@ -26,7 +27,8 @@ const store=configureStore({
         usermessage:usermessageReducer,
         groupmessage:groupmessageReducer,
         usermessagefile:usermessagefileReducer,
-        groupmessagefile:groupmessagefileReducer
+        groupmessagefile:groupmessagefileReducer,
+        newpaper:newPaperReducer
         
     },
     middleware: (getDefaultMiddleware) =>
