@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { XCircle, Video, VideoOff, Minimize2, Maximize2 } from "lucide-react";
+import { XCircle, Video, VideoOff, Minimize2, Maximize2, Mic, MicOff } from "lucide-react";
 
 const VideoCallModal = ({
   localVideoRef,
@@ -10,8 +10,10 @@ const VideoCallModal = ({
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
+  const [microOn, setMicroOn] = useState(true); // trạng thái micro
   const boxSize = { width: 300, height: 200 };
-  // trạng thái kéo-thả
+
+  // trạng thái kéo-thả khi minimized
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const dragRef = useRef(null);
   const isDragging = useRef(false);
@@ -38,6 +40,15 @@ const VideoCallModal = ({
     }
   };
 
+  const toggleMicro = () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+      setMicroOn((prev) => !prev);
+    }
+  };
+
   // --- Drag handlers ---
   const handleMouseDown = (e) => {
     if (!isMinimized) return;
@@ -51,19 +62,18 @@ const VideoCallModal = ({
   };
 
   const handleMouseMove = (e) => {
-     if (!isDragging.current) return;
+    if (!isDragging.current) return;
 
-  const newX = e.clientX - offset.current.x;
-  const newY = e.clientY - offset.current.y;
+    const newX = e.clientX - offset.current.x;
+    const newY = e.clientY - offset.current.y;
 
-  // lấy kích thước box thực tế (sau khi responsive)
-  const boxWidth = Math.min(boxSize.width, window.innerWidth * 0.9);
-  const boxHeight = Math.min(boxSize.height, window.innerHeight * 0.4);
+    const boxWidth = Math.min(boxSize.width, window.innerWidth * 0.9);
+    const boxHeight = Math.min(boxSize.height, window.innerHeight * 0.4);
 
-  const clampedX = Math.max(0, Math.min(newX, window.innerWidth - boxWidth));
-  const clampedY = Math.max(0, Math.min(newY, window.innerHeight - boxHeight));
+    const clampedX = Math.max(0, Math.min(newX, window.innerWidth - boxWidth));
+    const clampedY = Math.max(0, Math.min(newY, window.innerHeight - boxHeight));
 
-  setPosition({ x: clampedX, y: clampedY });
+    setPosition({ x: clampedX, y: clampedY });
   };
 
   const handleMouseUp = () => {
@@ -79,33 +89,31 @@ const VideoCallModal = ({
       style={
         isMinimized
           ? {
-             left: position.x,
-        top: position.y,
-        width: `${boxSize.width}px`,
-        height: `${boxSize.height}px`,
-        maxWidth: "90vw",
-        maxHeight: "40vh", // <= tránh tràn chiều cao
-        position: "fixed",
-        zIndex: 9999,
-        cursor: "move",
+              left: position.x,
+              top: position.y,
+              width: `${boxSize.width}px`,
+              height: `${boxSize.height}px`,
+              maxWidth: "90vw",
+              maxHeight: "40vh",
+              position: "fixed",
+              zIndex: 9999,
+              cursor: "move",
             }
           : {}
       }
       className={`fixed z-50 transition-all ${
         isMinimized
           ? "rounded-xl shadow-xl bg-white"
-          : "inset-0 flex items-center justify-center bg-black bg-opacity-80 p-4"
+          : "inset-0 flex items-center justify-center p-4" // nền trong suốt
       }`}
     >
       <div
-        className={`bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
-          isMinimized
-            ? "w-full h-full"
-            : "w-full max-w-4xl h-auto p-4 space-y-4"
+        className={`bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col w-full max-w-4xl max-h-[90vh] ${
+          isMinimized ? "h-full" : "space-y-4"
         }`}
       >
         {/* Header */}
-        <div className="flex justify-between items-center border-b pb-2 cursor-default">
+        <div className="flex justify-between items-center border-b pb-2 px-4 cursor-default">
           <h2 className="text-lg font-semibold text-gray-800">
             Cuộc gọi video
           </h2>
@@ -129,8 +137,7 @@ const VideoCallModal = ({
         </div>
 
         {/* Video area */}
-        <div className="relative w-full h-full bg-black rounded-xl overflow-hidden">
-          {/* Remote video full background */}
+        <div className="flex-1 relative bg-black rounded-xl overflow-hidden">
           <video
             ref={remoteVideoRef}
             autoPlay
@@ -143,7 +150,7 @@ const VideoCallModal = ({
             </span>
           )}
 
-          {/* Local video thumbnail ở góc phải dưới */}
+          {/* Local video thumbnail */}
           <div className="absolute bottom-2 right-2 w-24 h-24 rounded-md overflow-hidden border-2 border-white shadow-lg">
             <video
               ref={localVideoRef}
@@ -154,7 +161,13 @@ const VideoCallModal = ({
             />
             {!cameraOn && (
               <span className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black bg-opacity-70">
-                Camera tắt
+                
+                <VideoOff size={20}/>
+              </span>
+            )}
+            {!microOn && (
+              <span className="absolute top-1 left-1 flex items-center justify-center text-white text-sm bg-black bg-opacity-70 px-1 rounded">
+                Mic tắt
               </span>
             )}
           </div>
@@ -171,6 +184,16 @@ const VideoCallModal = ({
                 <Video size={24} className="text-gray-700" />
               ) : (
                 <VideoOff size={24} className="text-red-500" />
+              )}
+            </button>
+            <button
+              onClick={toggleMicro}
+              className="bg-gray-200 hover:bg-gray-300 p-3 rounded-full"
+            >
+              {microOn ? (
+                <Mic size={24} className="text-gray-700" />
+              ) : (
+                <MicOff size={24} className="text-red-500" />
               )}
             </button>
             <button
