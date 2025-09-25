@@ -695,7 +695,6 @@ const SelectMethod = ({
             }
             setMessage(newMessage);
 
-            // CẬP NHẬT: Tự động điều chỉnh chiều cao textarea
             e.target.style.height = "auto";
             //e.target.style.height = e.target.scrollHeight + "px";
             e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";

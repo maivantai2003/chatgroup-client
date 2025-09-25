@@ -16,6 +16,7 @@ const GroupMessages = ({ userId, id }) => {
   const connection = useContext(SignalRContext);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
+  const notificationSound = new Audio("/sound/notification.mp3");
   const listGroupMessage = useSelector(
     (state) => state.groupmessage.listGroupMessage
   );
@@ -50,6 +51,7 @@ const GroupMessages = ({ userId, id }) => {
       connection.on("ReceiveGroupMessage", (senderId, groupMessage) => {
         if (senderId !== userId.toString()) {
           dispatch(addGroupMessageRecevie(groupMessage));
+          notificationSound.play().catch(() => {});
         }
       });
     }

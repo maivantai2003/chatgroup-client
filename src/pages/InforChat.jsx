@@ -18,7 +18,7 @@ const InforChat = ({ conversation }) => {
   // }
 
   return (
-    <div className="w-1/4 bg-white p-4">
+    <div className="w-1/4 bg-white p-4 border-l border-gray-200">
       {conversation.type === "group" ? (
         <GroupInfo conversation={conversation} />
       ) : conversation.type === "cloud" ? (  

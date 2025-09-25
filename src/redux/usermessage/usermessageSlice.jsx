@@ -9,10 +9,11 @@ export const CreateUserMessage = createAsyncThunk(
 );
 export const GetAllUserMessage = createAsyncThunk(
   "usermessage/GetAllUserMessage",
-  async ({ senderId, receiverId }) => {
+  async ({ senderId, receiverId,lastMessage,pageSize }) => {
     const response = await usermessageService.GetAllUserMessage(
       senderId,
       receiverId
+      ,lastMessage,pageSize
     );
     return response;
   }
@@ -43,7 +44,7 @@ const usermessageSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(CreateUserMessage.fulfilled, (state, action) => {
-      state.listUserMessage.push(action.payload);
+      state.listUserMessage=[...state.listUserMessage,...action.payload];
     }),
       builder.addCase(GetAllUserMessage.fulfilled, (state, action) => {
         state.listUserMessage = action.payload;

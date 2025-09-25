@@ -9,13 +9,18 @@ import { formatTime } from "../helpers/formatTime";
 import { groupMessagesByDate } from "../helpers/groupMessageByDate";
 import { SignalRContext } from "../context/SignalRContext";
 import FileMessage from "./FileMessage";
+import MessageBubble from "./MessageBubble";
 
 const UserMessages = ({ userId, id, type, avatar }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const connection = useContext(SignalRContext);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const pageSize = 10;
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
+  const notificationSound=new Audio('/sound/notification.mp3');
   const listUserMessage = useSelector(
     (state) => state.usermessage.listUserMessage
   );
@@ -23,7 +28,7 @@ const UserMessages = ({ userId, id, type, avatar }) => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await dispatch(GetAllUserMessage({ senderId: userId, receiverId: id }));
+      await dispatch(GetAllUserMessage({ senderId: userId, receiverId: id,lastMessage: null, pageSize }));
       setLoading(false);
     };
     fetchData();
@@ -33,6 +38,24 @@ const UserMessages = ({ userId, id, type, avatar }) => {
     if (connection) {
       connection.on("ReceiveUserMessage", (userMessage) => {
         dispatch(receiveUserMessage(userMessage));
+        notificationSound.play().catch(() => {});
+        if ("Notification" in window) {
+          if (Notification.permission === "granted") {
+            new Notification("Bạn có tin nhắn mới", {
+              body: userMessage.content || "Tin nhắn mới",
+              icon: avatar || "/default-avatar.png",
+            });
+          } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then((permission) => {
+              if (permission === "granted") {
+                new Notification("Bạn có tin nhắn mới", {
+                  body: userMessage.content || "Tin nhắn mới",
+                  icon: avatar || "/default-avatar.png",
+                });
+              }
+            });
+          }
+}
       });
       connection.on("ReceiveUserMessageFile", (file) => {
         dispatch(addFilesToUserMessage(file));
@@ -56,15 +79,44 @@ const UserMessages = ({ userId, id, type, avatar }) => {
       }, 100);
     }
   }, [listUserMessage]);
+  useEffect(() => {
+  const div = containerRef.current;
+  if (!div) return;
+  div.addEventListener("scroll", handleScroll);
+  return () => div.removeEventListener("scroll", handleScroll);
+  }, [listUserMessage, loadingMore, hasMore]);
 
   const filteredMessages = listUserMessage.filter(
     (msg) =>
       (msg.senderId === userId && msg.receiverId === id) ||
       (msg.senderId === id && msg.receiverId === userId)
   );
+    const handleScroll = async () => {
+    if (!containerRef.current || loadingMore || !hasMore) return;
+
+    if (containerRef.current.scrollTop === 0) {
+      setLoadingMore(true);
+      const oldestMsg = listUserMessage[listUserMessage.length - 1];
+      const lastMessageDate = oldestMsg?.createAt;
+
+      const result = await dispatch(GetAllUserMessage({
+        senderId: userId,
+        receiverId: id,
+        lastMessage: lastMessageDate,
+        pageSize
+      }));
+
+      if (result.payload.length < pageSize) setHasMore(false);
+      setLoadingMore(false);
+    }
+  };
 
   const groupedMessages = groupMessagesByDate(filteredMessages);
-
+  {loadingMore && (
+  <div className="flex justify-center my-2 text-gray-500 text-sm">
+    Đang tải thêm tin nhắn...
+  </div>
+)}
   return (
     <div
       className="flex flex-col space-y-3 p-4 bg-gray-100 min-h-screen overflow-y-auto"
@@ -115,8 +167,16 @@ const UserMessages = ({ userId, id, type, avatar }) => {
                     </div>
                   </div>
                 )}
-
-                {/* Nếu có file, mỗi file là 1 bubble */}
+                {/* <MessageBubble
+                  key={msg.userMessageId}
+                  msg={msg}
+                  userId={userId}
+                  avatar={avatar}
+                  onReact={(m) => console.log("Thả cảm xúc", m.userMessageId)}
+                  onCopy={(m) => navigator.clipboard.writeText(m.content)}
+                  onDelete={(m) => console.log("Xóa", m.userMessageId)}
+                  onMore={(m) => console.log("Tùy chọn khác", m.userMessageId)}
+                /> */}
                 {msg.files &&
                   msg.files.length > 0 &&
                   msg.files.map((file, index) => (
