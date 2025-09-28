@@ -13,7 +13,8 @@ export const GetAllUserMessage = createAsyncThunk(
     const response = await usermessageService.GetAllUserMessage(
       senderId,
       receiverId
-      ,lastMessage,pageSize
+      ,lastMessage
+      ,pageSize
     );
     return response;
   }
@@ -44,10 +45,14 @@ const usermessageSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(CreateUserMessage.fulfilled, (state, action) => {
-      state.listUserMessage=[...state.listUserMessage,...action.payload];
+      state.listUserMessage.push(action.payload);
     }),
       builder.addCase(GetAllUserMessage.fulfilled, (state, action) => {
-        state.listUserMessage = action.payload;
+        if (action.meta.arg.lastMessage) {
+          state.listUserMessage = [...action.payload, ...state.listUserMessage];
+        } else {
+          state.listUserMessage = action.payload;
+        }
       });
   },
 });

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { SignalRContext } from "../context/SignalRContext";
 import { jwtDecode } from "jwt-decode";
 import { GoogleLoginButton } from "../components/GoogleLoginButton";
-
+import { requestPermissionAndGetToken } from "../firebase/firebase";
 const LoginForm = () => {
   const { signIn } = useAuth();
   const user = useSelector((state) => state.auth.userLogin);
@@ -30,6 +30,12 @@ const LoginForm = () => {
         phoneNumber: data.userName,
         userName: data.password,
       };
+      console.log(authRequest);
+      const fcmToken = await requestPermissionAndGetToken()
+      const deviceInfo = navigator.userAgent;
+      const deviceType = "web";
+      console.log("FCM Token:", fcmToken);
+      authRequest = { ...authRequest, fcmToken, deviceInfo, deviceType };
       console.log(authRequest);
       const result = await dispatch(login(authRequest)).unwrap();
       localStorage.setItem("accessToken", result.accessToken);

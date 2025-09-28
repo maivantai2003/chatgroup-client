@@ -19,23 +19,8 @@ import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { isTokenExpired } from "./utils/helpers";
 import { NewParers } from "./pages/NewPapers";
-import { toast } from "react-toastify";
 function App() {
   //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  useEffect(() => {
-  if ("Notification" in window) {
-    if (Notification.permission === "denied") {
-      // Hiển thị cảnh báo UI
-      toast.warning("Trình duyệt đang chặn thông báo. Vui lòng bật lại trong cài đặt.");
-    } else if (Notification.permission === "default") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "denied") {
-          toast.warning("Bạn đã từ chối thông báo. Có thể bật lại trong cài đặt trình duyệt.");
-        }
-      });
-    }
-  }
-}, []);
 
   return (
       <Routes>
@@ -76,7 +61,7 @@ const MainLayout = () => {
     <>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex h-screen w-full">
+      <div className="flex-1 flex h-full">
         {activeTab === "requests" ? (
           <FriendSuggestions id={userId} />
         ) : activeTab === "friends" ? (
