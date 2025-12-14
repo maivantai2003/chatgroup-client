@@ -12,16 +12,15 @@ import FriendList from "./pages/FriendList";
 import GroupList from "./pages/GroupList";
 import ImageSlider from "./components/ImageSlider";
 import ListConversation from "./pages/ListConversation";
+import NewParers from "./pages/NewPapers";
 import ChatWidgetWrapper from "./components/ChatWidgetWrapper";
 import { ForgotPassword } from "./components/ForgotPasswordPage";
 import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { isTokenExpired } from "./utils/helpers";
-import { NewParers } from "./pages/NewPapers";
+import { useCallback } from "react";
 function App() {
-  //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-
   return (
       <Routes>
       <Route path="/login" element={<LoginForm />} />
@@ -39,6 +38,10 @@ const MainLayout = () => {
   const [activeTab, setActiveTab] = useState("message");
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [showInfor, setShowInfor] = useState(true);
+  const handleSelectConversation = useCallback(
+    (conv) => setSelectedConversation(conv),
+    []
+  );
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
   useEffect(() => {
@@ -97,7 +100,7 @@ const MainLayout = () => {
               {/* {search ? <ListGroup /> : <input />} */}
               <ListConversation
                 id={userId}
-                onSelectConversation={setSelectedConversation}
+                onSelectConversation={handleSelectConversation}
                 search={search}
               />
             </div>

@@ -6,9 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
 import { SignalRContext } from "../context/SignalRContext";
-import { jwtDecode } from "jwt-decode";
 import { GoogleLoginButton } from "../components/GoogleLoginButton";
-import { requestPermissionAndGetToken } from "../firebase/firebase";
+import { handleLoginSuccess } from "../helpers/handleLoginSuccess";
+// import { handleUpdatestatus} from "../helpers/handleUpdateStatus";
+// import { handleCreateInforDevice } from "../helpers/handleCreateInforDevice";
+import LoadingOverlay from "../components/LoadingOverlay";
+import { processAfterLogin } from "../helpers/processAfterLogin";
 const LoginForm = () => {
   const { signIn } = useAuth();
   const user = useSelector((state) => state.auth.userLogin);
@@ -30,47 +33,38 @@ const LoginForm = () => {
         phoneNumber: data.userName,
         userName: data.password,
       };
-      console.log(authRequest);
-      const fcmToken = await requestPermissionAndGetToken()
-      const deviceInfo = navigator.userAgent;
-      const deviceType = "web";
-      console.log("FCM Token:", fcmToken);
-      authRequest = { ...authRequest, fcmToken, deviceInfo, deviceType };
-      console.log(authRequest);
       const result = await dispatch(login(authRequest)).unwrap();
-      localStorage.setItem("accessToken", result.accessToken);
-      window.dispatchEvent(new Event("storage"));
-      const token = localStorage.getItem("accessToken");
-      var user = jwtDecode(token).userInfor;
-      localStorage.setItem("user", user);
-      var userInfor = JSON.parse(localStorage.getItem("user"));
-      var userId = userInfor.UserId;
-      console.log(userId);
-      if (connection) {
-        connection.on("CheckConnection", (value) => {
-          console.log(value);
-        });
-        connection.invoke("LoadRequestFriend", userId.toString());
-      }
-      // console.log(authRequest);
-      if (result !== null) {
+      if(result?.accessToken){
+        await handleLoginSuccess(result?.accessToken);
+        await processAfterLogin(result?.accessToken,connection)
+        // await handleLoginSuccess(result.accessToken);
+        // var userInfor = JSON.parse(localStorage.getItem("user"));
+        // var userId = userInfor.UserId;
+        // await handleUpdatestatus(userId)
+        // await handleCreateInforDevice(userId)
+        // if (connection) {
+        //   connection.on("CheckConnection",(value) => {
+        //     console.log(value);
+        //   });
+        //   connection.invoke("LoadRequestFriend", userId.toString());
+        // }
         setErrorMessage(null);
         navigate("/");
         toast.success("Đăng Nhập Thành Công");
-      } else {
-        setErrorMessage(result?.reason || "Đăng nhập thất bại");
-        toast.error("Vui Lòng Kiểm Tra Số Điện Thoại Hoặc Mật Khẩu");
-        return;
       }
+      
     } catch (error) {
-      setLogin(false);
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
       toast.error("Lỗi hệ thống. Vui lòng thử lại!");
-      return;
+      //return;
+    }finally {
+      setLogin(false);
     }
   };
 
   return (
+    <>
+    {isLogin && <LoadingOverlay text="Đang đăng nhập..." />}
     <div
       className="flex items-center justify-center min-h-screen bg-cover bg-center"
       style={{
@@ -154,6 +148,7 @@ const LoginForm = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

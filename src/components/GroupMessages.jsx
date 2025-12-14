@@ -90,17 +90,13 @@ const GroupMessages = ({ userId, id }) => {
       ) : (
         Object.keys(groupedMessages).map((date, index) => (
           <div key={index}>
-            {/* Hiển thị ngày */}
             <div className="flex justify-center my-2">
               <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full shadow-sm">
                 {date}
               </div>
             </div>
-
-            {/* Hiển thị tin nhắn trong ngày */}
             {groupedMessages[date].map((msg) => (
               <div key={msg.groupedMessageId} className="flex flex-col mb-3">
-                {/* Nếu có text */}
                 {msg.content && (
                   <div
                     className={`flex items-end space-x-2 ${
@@ -133,8 +129,6 @@ const GroupMessages = ({ userId, id }) => {
                     </div>
                   </div>
                 )}
-
-                {/* Nếu có file, mỗi file là 1 bubble riêng */}
                 {msg.files &&
                   msg.files.length > 0 &&
                   msg.files.map((file, index) => (

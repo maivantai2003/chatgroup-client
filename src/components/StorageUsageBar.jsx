@@ -10,7 +10,6 @@ const parseSizeToMB = (sizeString) => {
 };
 
 const StorageUsageBar = ({ files, maxSizeMB = 1024 }) => {
-  console.log(files);
   const totalSizeMB = files.reduce(
     (sum, file) => sum + parseSizeToMB(file.sizeFile),
     0
@@ -70,10 +69,6 @@ const StorageUsageBar = ({ files, maxSizeMB = 1024 }) => {
         />
       </div>
       <div className="flex justify-between text-xs text-gray-500 mt-1">
-        {/* <span>Ảnh</span>
-        <span>Video</span>
-        <span>File</span>
-        <span>Khác</span> */}
         <div className="flex items-center space-x-1">
           <span className="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
           <span>Ảnh</span>

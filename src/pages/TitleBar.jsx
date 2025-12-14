@@ -1,5 +1,5 @@
 import { UserIcon, UserPlusIcon} from "@heroicons/react/24/outline";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import FriendRequestModal from "../components/FriendRequestModal";
 import CreateGroupModal from "../components/CreateGroupModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -61,4 +61,4 @@ const TitleBar = ({ name,id,avatar }) => {
   );
 };
 
-export default TitleBar;
+export default React.memo(TitleBar);

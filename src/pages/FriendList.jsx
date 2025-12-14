@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
@@ -176,4 +176,4 @@ const FriendList = ({ id }) => {
   );
 };
 
-export default FriendList;
+export default React.memo(FriendList);
