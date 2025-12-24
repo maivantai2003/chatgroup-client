@@ -15,12 +15,34 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log("[firebase-messaging-sw.js] Received background message:", payload);
+  const data = payload.data || {};
+  // const notificationTitle = payload.notification?.title || "Thông báo mới";
+  // const notificationOptions = {
+  //   body: payload.notification?.body,
+  //   icon: "/logo192.png",
+  // };
 
-  const notificationTitle = payload.notification?.title || "Thông báo mới";
-  const notificationOptions = {
-    body: payload.notification?.body,
-    icon: "/logo192.png",
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  // self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(
+    data.title || "Thông báo",
+    {
+      body: data.body,
+      data: data,
+      icon: "/src/assets/images/noti.png"
+    }
+  );
+});
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const data = event.notification.data;
+  let url = "/";
+  if (data.action === "open_chat") {
+    url = `/chat/${data.chatId}`;
+  }
+  if (data.action === "system_notice") {
+    url = "/notifications";
+  }
+  event.waitUntil(
+    clients.openWindow(url)
+  );
 });

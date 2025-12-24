@@ -8,10 +8,10 @@ import { toast } from "react-toastify";
 import { SignalRContext } from "../context/SignalRContext";
 import { GoogleLoginButton } from "../components/GoogleLoginButton";
 import { handleLoginSuccess } from "../helpers/handleLoginSuccess";
-// import { handleUpdatestatus} from "../helpers/handleUpdateStatus";
-// import { handleCreateInforDevice } from "../helpers/handleCreateInforDevice";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { processAfterLogin } from "../helpers/processAfterLogin";
+import { getDeviceName, getOS } from "../helpers/getInforDevice";
+import { getDeviceId } from "../helpers/getDeviceId";
 const LoginForm = () => {
   const { signIn } = useAuth();
   const user = useSelector((state) => state.auth.userLogin);
@@ -29,25 +29,29 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     try {
       setLogin(true);
+      const deviceId = await getDeviceId();
       let authRequest = {
         phoneNumber: data.userName,
         userName: data.password,
+        browser: navigator.userAgent,
+        deviceId: deviceId,
+        os: getOS(),
+        deviceName: getDeviceName()
       };
+      console.log(authRequest)
       const result = await dispatch(login(authRequest)).unwrap();
+      if (result.requireDeviceVerification) {
+        navigate("/verify-device", {
+          state: {
+            verifyToken: result.verifyToken,
+            deviceName: result.deviceName
+          }
+        });
+        return;
+      }
       if(result?.accessToken){
         await handleLoginSuccess(result?.accessToken);
         await processAfterLogin(result?.accessToken,connection)
-        // await handleLoginSuccess(result.accessToken);
-        // var userInfor = JSON.parse(localStorage.getItem("user"));
-        // var userId = userInfor.UserId;
-        // await handleUpdatestatus(userId)
-        // await handleCreateInforDevice(userId)
-        // if (connection) {
-        //   connection.on("CheckConnection",(value) => {
-        //     console.log(value);
-        //   });
-        //   connection.invoke("LoadRequestFriend", userId.toString());
-        // }
         setErrorMessage(null);
         navigate("/");
         toast.success("Đăng Nhập Thành Công");

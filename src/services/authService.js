@@ -1,7 +1,7 @@
 import axiosInstance from "../interceptors/AxiosInstance";
 const authService = {
   login: async (authRequest) => {
-    const response = await axiosInstance.post("Authen/AuthToken",authRequest);
+    const response = await axiosInstance.post("Authen/Login",authRequest);
     return response.data;
   },
 
@@ -11,6 +11,10 @@ const authService = {
   },
   register:async(userRegister)=>{
     const response=await axiosInstance.post("Authen/Register",userRegister)
+    return response.data
+  },
+  verifyDevice:async(data) => {
+    const response=await axiosInstance.post("Authen/verify-device", data)
     return response.data
   }
 };

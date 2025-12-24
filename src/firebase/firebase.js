@@ -35,12 +35,31 @@ export const requestPermissionAndGetToken = async () => {
 };
 
 // 🔹 Lắng nghe khi app đang foreground
-export const listenForegroundMessage = () => {
+export const listenForegroundMessage = (navigate) => {
   onMessage(messaging, (payload) => {
     console.log("Foreground message:", payload);
-    new Notification(payload.notification.title, {
-      body: payload.notification.body,
-      icon: "/logo192.png",
-    });
+    // new Notification(payload.notification.title, {
+    //   body: payload.notification.body,
+    //   icon: "/logo192.png",
+    // });
+    const data = payload.data;
+    if (!data) return;
+
+    handleAction(data, navigate);
   });
 };
+const handleAction = (data, navigate) => {
+  switch (data.action) {
+    case "open_chat":
+      navigate(`/chat/${data.chatId}`);
+      break;
+
+    case "open_profile":
+      navigate(`/profile`);
+      break;
+
+    case "system_notice":
+      navigate(`/notifications`);
+      break;
+  }
+}

@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { isTokenExpired } from "./utils/helpers";
 import { useCallback } from "react";
+import VerifyDevice from "./pages/VerifyDevice";
 function App() {
   return (
       <Routes>
@@ -30,6 +31,7 @@ function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword/>}/>
       <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+      <Route path="/verify-device" element={<VerifyDevice />} />
     </Routes>
   );
 }

@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { handleLoginSuccess } from "../helpers/handleLoginSuccess";
 import { useContext, useState } from "react";
 import { SignalRContext } from "../context/SignalRContext";
-import { handleUpdatestatus } from "../helpers/handleUpdateStatus";
-import { handleCreateInforDevice } from "../helpers/handleCreateInforDevice";
 import LoadingOverlay from "./LoadingOverlay";
 import { processAfterLogin } from "../helpers/processAfterLogin";
 export const GoogleLoginButton=()=>{
@@ -21,34 +19,13 @@ export const GoogleLoginButton=()=>{
       const result = await axios.post(config.API_URL + "/authen/google-login", {
         token: googleToken,
       });
-
-      console.log("Đăng nhập thành công:", result.data);
-       if (result.data?.accessToken) {
+      if (result.data?.accessToken) {
         await handleLoginSuccess(result.data?.accessToken);
-        // var userInfor = JSON.parse(localStorage.getItem("user"));
-        // var userId = userInfor.UserId;
-        // await handleUpdatestatus(userId)
-        // await handleCreateInforDevice(userId)
-        // if (connection) {
-        //   connection.on("CheckConnection", (value) => {
-        //     console.log(value);
-        //   });
-        //   connection.invoke("LoadRequestFriend", userId.toString());
-        // }
         await processAfterLogin(result.data?.accessToken,connection)
-        // localStorage.setItem("accessToken", result.data.accessToken);
-        // window.dispatchEvent(new Event("storage"));
-        // const token = localStorage.getItem("accessToken");
-        // var user = jwtDecode(token).userInfor;
-        // localStorage.setItem("user", user);
-        // const fcmToken = await requestPermissionAndGetToken()
-        // const deviceInfo = navigator.userAgent;
-        // const deviceType = "web";
-        // console.log("FCM Token:", fcmToken);
-        toast.success("Đăng nhập Google thành công");
         navigate("/");
+        toast.success("Đăng nhập Google thành công");
       } else {
-        toast.error("Không lấy được accessToken từ server");
+        toast.error("Gmail không tồn tại");
       }
     } catch (error) {
       console.error("Lỗi khi login bằng Google:", error);
