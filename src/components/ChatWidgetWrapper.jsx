@@ -1,4 +1,3 @@
-// src/components/ChatWidgetWrapper.jsx
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import OpenAIChatBox from "./OpenAIChatBox";

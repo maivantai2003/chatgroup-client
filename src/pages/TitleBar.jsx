@@ -1,5 +1,5 @@
 import { UserIcon, UserPlusIcon} from "@heroicons/react/24/outline";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import FriendRequestModal from "../components/FriendRequestModal";
 import CreateGroupModal from "../components/CreateGroupModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,7 +22,7 @@ const TitleBar = ({ name,id,avatar }) => {
     setEditProfileOpen(true);
   }, [dispatch, user, id]);
   return (
-    <div className="flex items-center justify-between p-4 bg-white shadow-md">
+    <div className="flex items-center justify-between p-4 bg-white shadow-md border-b border-gray-200">
       {/* Avatar + Tên */}
       <div className="flex items-center space-x-3">
         <img
@@ -61,4 +61,4 @@ const TitleBar = ({ name,id,avatar }) => {
   );
 };
 
-export default TitleBar;
+export default React.memo(TitleBar);

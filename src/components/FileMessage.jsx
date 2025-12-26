@@ -1,34 +1,18 @@
 import { useState, useEffect } from "react";
 import {
-  FaDownload,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileAlt,
-  FaRegFileArchive,
-  FaRegFileAudio,
-  FaRegFileVideo,
-  FaRegFileImage,
-} from "react-icons/fa";
+  File as FileIcon,
+  FileText,
+  FileImage,
+  FileVideo,
+  FileAudio,
+  FileArchive,
+  FileSpreadsheet,
+  FileCode,
+  FilePlus2,
+  Download,
+} from "lucide-react";
+
 import { SiZalo } from "react-icons/si";
-
-const formatSize = (size) => {
-  if (!size) return "N/A";
-  const bytes = parseInt(size, 10);
-  if (isNaN(bytes)) return "N/A";
-
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  let order = 0;
-  let formattedSize = bytes;
-
-  while (formattedSize >= 1024 && order < sizes.length - 1) {
-    order++;
-    formattedSize /= 1024;
-  }
-
-  return `${formattedSize.toFixed(2)} ${sizes[order]}`;
-};
 
 const isImage = (file) =>
   ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(
@@ -38,44 +22,45 @@ const isImage = (file) =>
 const getFileIcon = (fileType) => {
   switch (fileType.toLowerCase()) {
     case "pdf":
-      return <FaRegFilePdf className="text-red-500 text-3xl mr-3" />;
+      return <FileText className="w-10 h-10 text-red-500" />;
     case "doc":
     case "docx":
-      return <FaRegFileWord className="text-blue-500 text-3xl mr-3" />;
+      return <FileText className="w-10 h-10 text-blue-500" />;
     case "xls":
     case "xlsx":
-      return <FaRegFileExcel className="text-green-500 text-3xl mr-3" />;
+      return <FileSpreadsheet className="w-10 h-10 text-green-500" />;
     case "ppt":
     case "pptx":
-      return <FaRegFilePowerpoint className="text-orange-500 text-3xl mr-3" />;
+      return <FilePlus2 className="w-10 h-10 text-orange-500" />;
     case "zip":
     case "rar":
     case "7z":
-      return <FaRegFileArchive className="text-purple-500 text-3xl mr-3" />;
+      return <FileArchive className="w-10 h-10 text-purple-500" />;
     case "mp3":
     case "wav":
     case "flac":
-      return <FaRegFileAudio className="text-yellow-500 text-3xl mr-3" />;
+      return <FileAudio className="w-10 h-10 text-yellow-500" />;
     case "mp4":
     case "avi":
     case "mkv":
-      return <FaRegFileVideo className="text-indigo-500 text-3xl mr-3" />;
+      return <FileVideo className="w-10 h-10 text-indigo-500" />;
     case "jpg":
     case "jpeg":
     case "png":
     case "gif":
     case "svg":
     case "webp":
-      return <FaRegFileImage className="text-teal-500 text-3xl mr-3" />;
-    case "zalo":
-      return <SiZalo className="text-blue-500 text-3xl mr-3" />;
+      return <FileImage className="w-10 h-10 text-teal-500" />;
+    case "txt":
+      return <FileCode className="w-10 h-10 text-gray-500" />;
     default:
-      return <FaRegFileAlt className="text-gray-500 text-3xl mr-3" />;
+      return <FileIcon className="w-10 h-10 text-gray-400" />;
   }
 };
 
 const FileMessage = ({ file }) => {
   const [preview, setPreview] = useState("");
+
   useEffect(() => {
     if (file.typeFile.toLowerCase() === "txt") {
       fetch(file.fileUrl)
@@ -89,29 +74,40 @@ const FileMessage = ({ file }) => {
   }, [file.fileUrl, file.typeFile]);
 
   return (
-    <div className="flex flex-col border p-2 rounded mb-2 bg-gray-50">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center flex-1 overflow-hidden">
+    <div className="flex flex-col bg-white rounded-lg shadow-sm p-3 w-64">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3 w-5/6">
           {isImage(file) ? (
             <img
               src={file.fileUrl}
               alt={file.fileName}
-              className="w-10 h-10 object-cover rounded mr-3"
+              className="w-12 h-12 object-cover rounded-md"
             />
           ) : (
             getFileIcon(file.typeFile)
           )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{file.fileName}</p>
+          <div className="flex flex-col overflow-hidden">
+            <p className="text-sm font-semibold text-gray-800 truncate">
+              {file.fileName}
+            </p>
             <p className="text-xs text-gray-500">{file.sizeFile}</p>
           </div>
         </div>
-        <a href={file.fileUrl} download className="text-blue-500 text-lg p-2">
-          <FaDownload />
+        <a
+          href={file.fileUrl}
+          download
+          className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+          title="Tải xuống"
+          target="_blank"
+        >
+          <Download className="w-5 h-5" />
         </a>
       </div>
+
+      {/* Preview cho txt */}
       {file.typeFile.toLowerCase() === "txt" && (
-        <pre className="text-xs text-gray-700 bg-white p-2 rounded overflow-x-auto">
+        <pre className="mt-2 text-xs text-gray-700 bg-gray-100 p-2 rounded-md overflow-x-auto max-h-24 whitespace-pre-wrap font-mono">
           {preview}
         </pre>
       )}

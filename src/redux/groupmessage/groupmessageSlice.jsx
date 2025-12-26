@@ -9,8 +9,8 @@ export const AddGroupMessage = createAsyncThunk(
 );
 export const GetAllGroupMessage = createAsyncThunk(
   "groupmessage/GetAllGroupMessage",
-  async (id) => {
-    const response = await groupmessageService.GetAllGroupMessage(id);
+  async (id,lastMessageDate,pageSize) => {
+    const response = await groupmessageService.GetAllGroupMessage(id,lastMessageDate,pageSize);
     return response;
   }
 );
@@ -46,7 +46,12 @@ const groupmessageSlice = createSlice({
         state.listGroupMessage.push(action.payload);
       })
       .addCase(GetAllGroupMessage.fulfilled, (state, action) => {
-        state.listGroupMessage = action.payload;
+        //state.listGroupMessage = action.payload;
+        if(action.meta.arg.lastMessageDate){
+          state.listGroupMessage = [...action.payload, ...state.listGroupMessage];
+        }else{
+          state.listGroupMessage = action.payload;
+        }
       });
   },
 });

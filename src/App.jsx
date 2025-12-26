@@ -12,15 +12,16 @@ import FriendList from "./pages/FriendList";
 import GroupList from "./pages/GroupList";
 import ImageSlider from "./components/ImageSlider";
 import ListConversation from "./pages/ListConversation";
+import NewParers from "./pages/NewPapers";
 import ChatWidgetWrapper from "./components/ChatWidgetWrapper";
 import { ForgotPassword } from "./components/ForgotPasswordPage";
 import { ResetPasswordPage } from "./components/ResetPasswordPage";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { isTokenExpired } from "./utils/helpers";
-import { NewParers } from "./pages/NewPapers";
+import { useCallback } from "react";
+import VerifyDevice from "./pages/VerifyDevice";
 function App() {
-  //const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
       <Routes>
       <Route path="/login" element={<LoginForm />} />
@@ -30,6 +31,7 @@ function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword/>}/>
       <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+      <Route path="/verify-device" element={<VerifyDevice />} />
     </Routes>
   );
 }
@@ -38,6 +40,10 @@ const MainLayout = () => {
   const [activeTab, setActiveTab] = useState("message");
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [showInfor, setShowInfor] = useState(true);
+  const handleSelectConversation = useCallback(
+    (conv) => setSelectedConversation(conv),
+    []
+  );
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
   useEffect(() => {
@@ -47,7 +53,8 @@ const MainLayout = () => {
       navigate("/login", { replace: true });
     }
   }, [token, navigate]);
-
+  
+  
   if (!token || isTokenExpired(token)) {
     return null;
   }
@@ -59,7 +66,7 @@ const MainLayout = () => {
     <>
     <div className="bg-gray-100 flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex h-screen w-full">
+      <div className="flex-1 flex h-full">
         {activeTab === "requests" ? (
           <FriendSuggestions id={userId} />
         ) : activeTab === "friends" ? (
@@ -70,7 +77,7 @@ const MainLayout = () => {
           <NewParers/>
         ) : (
           <>
-            <div className="w-1/4 bg-white text-black flex flex-col">
+            <div className="w-1/4 bg-white text-black flex flex-col border-r border-gray-200">
               <TitleBar name={userName} id={userId} avatar={avatar} />
               <div className="p-4">
                 <div className="flex items-center w-full h-8 px-3 rounded-lg bg-gray-100 text-gray-600">
@@ -95,7 +102,7 @@ const MainLayout = () => {
               {/* {search ? <ListGroup /> : <input />} */}
               <ListConversation
                 id={userId}
-                onSelectConversation={setSelectedConversation}
+                onSelectConversation={handleSelectConversation}
                 search={search}
               />
             </div>

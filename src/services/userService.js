@@ -19,6 +19,11 @@ const userService = {
   CheckPhoneNumber:async(phoneNumber)=>{
     const response=await axiosInstance.get("User/CheckPhoneNumber?phoneNumber="+phoneNumber)
     return response.data
+  },
+  UpdateStatus:async(userId,userUpdateStatusDto)=>{
+    console.log(userUpdateStatusDto)
+    const response=await axiosInstance.put(`User/UpdateStatus/${userId}`,userUpdateStatusDto)
+    return response.data
   }
 };
 

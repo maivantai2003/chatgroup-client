@@ -55,8 +55,13 @@ const ListConversation = ({ id, onSelectConversation,search }) => {
         dispatch(addConversatioInState(conversation))
       })
       connection.on("ReceiveConversationMemberInGroup",(conversation)=>{
-        
+
         dispatch(updateConversationInState(conversation))
+      })
+      connection.on("birthday",(conversation)=>{
+        console.log("send message to friend")
+        console.log(conversation)
+        dispatch(updateConversationInState(conversation));
       })
       return () => {
         connection.off("MemberToGroup");

@@ -6,9 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
 import { SignalRContext } from "../context/SignalRContext";
-import { jwtDecode } from "jwt-decode";
 import { GoogleLoginButton } from "../components/GoogleLoginButton";
-
+import { handleLoginSuccess } from "../helpers/handleLoginSuccess";
+import LoadingOverlay from "../components/LoadingOverlay";
+import { processAfterLogin } from "../helpers/processAfterLogin";
+import { getDeviceName, getOS } from "../helpers/getInforDevice";
+import { getDeviceId } from "../helpers/getDeviceId";
 const LoginForm = () => {
   const { signIn } = useAuth();
   const user = useSelector((state) => state.auth.userLogin);
@@ -26,45 +29,46 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     try {
       setLogin(true);
+      const deviceId = await getDeviceId();
       let authRequest = {
         phoneNumber: data.userName,
         userName: data.password,
+        browser: navigator.userAgent,
+        deviceId: deviceId,
+        os: getOS(),
+        deviceName: getDeviceName()
       };
-      console.log(authRequest);
+      console.log(authRequest)
       const result = await dispatch(login(authRequest)).unwrap();
-      localStorage.setItem("accessToken", result.accessToken);
-      window.dispatchEvent(new Event("storage"));
-      const token = localStorage.getItem("accessToken");
-      var user = jwtDecode(token).userInfor;
-      localStorage.setItem("user", user);
-      var userInfor = JSON.parse(localStorage.getItem("user"));
-      var userId = userInfor.UserId;
-      console.log(userId);
-      if (connection) {
-        connection.on("CheckConnection", (value) => {
-          console.log(value);
+      if (result.requireDeviceVerification) {
+        navigate("/verify-device", {
+          state: {
+            verifyToken: result.verifyToken,
+            deviceName: result.deviceName
+          }
         });
-        connection.invoke("LoadRequestFriend", userId.toString());
+        return;
       }
-      // console.log(authRequest);
-      if (result !== null) {
+      if(result?.accessToken){
+        await handleLoginSuccess(result?.accessToken);
+        await processAfterLogin(result?.accessToken,connection)
         setErrorMessage(null);
         navigate("/");
         toast.success("Đăng Nhập Thành Công");
-      } else {
-        setErrorMessage(result?.reason || "Đăng nhập thất bại");
-        toast.error("Vui Lòng Kiểm Tra Số Điện Thoại Hoặc Mật Khẩu");
-        return;
       }
+      
     } catch (error) {
-      setLogin(false);
       setErrorMessage(error + "Lỗi hệ thống. Vui lòng thử lại!");
       toast.error("Lỗi hệ thống. Vui lòng thử lại!");
-      return;
+      //return;
+    }finally {
+      setLogin(false);
     }
   };
 
   return (
+    <>
+    {isLogin && <LoadingOverlay text="Đang đăng nhập..." />}
     <div
       className="flex items-center justify-center min-h-screen bg-cover bg-center"
       style={{
@@ -148,6 +152,7 @@ const LoginForm = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

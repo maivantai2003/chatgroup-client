@@ -36,7 +36,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   };
 
   return (
-    <div className="w-15 bg-blue-700 text-white flex flex-col h-screen p-2 items-center space-y-6">
+    <div className="w-15 bg-gradient-to-b from-blue-800 to-blue-600 text-white flex flex-col h-screen p-2 items-center space-y-6 border-r border-gray-300">
       {[
         { id: "message", icon: <FaRegComment className="w-6 h-6" /> },
         { id: "friends", icon: <FaUser className="w-6 h-6" /> },
@@ -61,7 +61,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         >
           {icon}
           {badge && (
-            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full px-2">
               {badge > 5 ? "+5" : badge}
             </span>
           )}

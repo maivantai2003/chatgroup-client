@@ -4,8 +4,9 @@ const groupmessageService = {
     const response=await axiosInstance.post("GroupMessage/AddGroupMessage",groupMessageDto)
     return response.data
   },
-  GetAllGroupMessage:async(id)=>{
-    const response=await axiosInstance.get("GroupMessage/GetAllGroupMessage?id="+id)
+  GetAllGroupMessage:async(id,lastMessageDate,pageSize)=>{
+    const response=await axiosInstance.get("GroupMessage/GetAllGroupMessage?id="+id+"&lastMessageDate=" +
+      (lastMessageDate || "")+"&pageSize="+pageSize)
     return response.data
   }
 };

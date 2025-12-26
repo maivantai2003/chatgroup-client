@@ -1,4 +1,3 @@
-
 import { useDispatch, useSelector } from "react-redux";
 import Avatar from "../components/Avatar";
 import Header from "./Header";
@@ -14,7 +13,7 @@ import IncomingCallModal from "../components/IncomingCallModal";
 import VideoCallModal from "../components/VideoCallModal";
 //import MessageItem from "./MessageItem";
 
-const ChatMessage = ({ conversation,onToggleInfor }) => {
+const ChatMessage = ({ conversation, onToggleInfor }) => {
   const {
     startCall,
     localVideoRef,
@@ -52,7 +51,6 @@ const ChatMessage = ({ conversation,onToggleInfor }) => {
         id={conversation.id}
         onStartCall={startCall}
         onToggleInfor={onToggleInfor}
-
       />
       <div className="flex-1 p-4 overflow-y-auto">{renderMessages()}</div>
       <div className="sticky bottom-0 w-full bg-white">
@@ -73,6 +71,7 @@ const ChatMessage = ({ conversation,onToggleInfor }) => {
           callerName={"Người dùng " + incomingCall.fromUserId}
           onAccept={acceptCall}
           onReject={rejectCall}
+          callerAvatar={conversation.avatar}
         />
       )}
     </div>

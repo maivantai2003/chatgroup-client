@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { CreateCloudMessage } from "../redux/cloudmessage/cloudmessageSlice";
 import { CreateConversation } from "../redux/conversation/conversationSlice";
 import { CheckPhoneNumber } from "../redux/user/userSlice";
+import { checkEmail } from "../services/checkEmail";
 
 const RegisterForm = () => {
   const {
@@ -56,8 +57,15 @@ const RegisterForm = () => {
   };
 
   const onSubmit = async (data) => {
+    if(data.email?.trim()){
+      const result=await checkEmail(data.email);
+      if(result){
+        toast.warning("Email đã tồn tại")
+        return;
+      }
+    }
     if (data.phoneNumber) {
-      var result = await dispatch(CheckPhoneNumber(data.phoneNumber)).unwrap();
+      const result = await dispatch(CheckPhoneNumber(data.phoneNumber)).unwrap();
       console.log(result);
       if (result) {
         toast.warning("Số điện thoại đã tồn tại");
@@ -72,8 +80,8 @@ const RegisterForm = () => {
       birthday: data.birthday,
       avatar: avatarUrl,
       password: data.password,
+      gmail:data.email
     };
-    console.log(userRegister);
     try {
       const result = await dispatch(registerUser(userRegister)).unwrap();
       if (result !== null) {
@@ -205,7 +213,21 @@ const RegisterForm = () => {
               <p className="text-red-500 text-sm mt-1">{errors.birthday.message}</p>
             )}
           </div>
+          {/* Email */}
+          <div className="relative">
+            <FaLock className="absolute left-3 top-3 text-gray-400" />
+            <input
+              {...register("email", { validate:(value)=>
+                value==="" || /\S+@\S+\.\S+/.test(value) || "Email không hợp lệ",})}
+              className="w-full pl-10 p-2 border border-gray-300 rounded-lg bg-white/70 shadow-sm focus:outline-none focus:border-gray-400 focus:ring-0"
 
+              type="text"
+              placeholder="Nhập email (không bắt buộc)"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            )}
+          </div>
           {/* Password */}
           <div className="relative">
             <FaLock className="absolute left-3 top-3 text-gray-400" />

@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GetNewPapers } from "../redux/newPaper/newPaperSlice";
 import { Spinner } from "../components/Spinner";
 
-export const NewParers = () => {
+const NewParers = () => {
   const [news, setNews] = useState([]);
   const [filteredNews, setFilteredNews] = useState([]);
   const [search, setSearch] = useState("");
@@ -110,3 +110,5 @@ export const NewParers = () => {
     </div>
   );
 };
+
+export default React.memo(NewParers);

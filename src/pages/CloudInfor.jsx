@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GetAllCloudMessageFiles } from "../redux/cloudmessagefile/cloudmessagefileSlice";
 import FileItem from "../components/FileItem";
 import MediaViewer from "../components/MediaView";
+import StorageUsageBar from "../components/StorageUsageBar";
 
 const CloudInfo = ({ conversation }) => {
   const [loading, setLoading] = useState(false);
@@ -65,21 +66,8 @@ const CloudInfo = ({ conversation }) => {
         </div>
       </div>
       <div className="flex justify-around mt-4">
-        {/* <button className="flex flex-col items-center">
-            <i className="fas fa-thumbtack text-lg"></i>
-            <span className="text-xs">Ghim hội thoại</span>
-          </button> */}
+        <StorageUsageBar files={listCloudMessageFile}></StorageUsageBar>
       </div>
-      {/* <div className="mt-4">
-          <div className="flex items-center p-2 border-b">
-            <i className="fas fa-clock text-xl text-gray-600"></i>
-            <span className="ml-2 text-sm">Danh sách nhắc hẹn</span>
-          </div>
-          <div className="flex items-center p-2">
-            <i className="fas fa-users text-xl text-gray-600"></i>
-            <span className="ml-2 text-sm">9 nhóm chung</span>
-          </div>
-        </div> */}
 
       {/* Ảnh/Video */}
       <div className="h-[4px] bg-gray-200 my-4"></div>
