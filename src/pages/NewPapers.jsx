@@ -1,6 +1,6 @@
 import React,{ useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { GetNewPapers } from "../redux/newPaper/newPaperSlice";
+import { GetNewPapers } from "../redux/newpaper/newPaperSlice";
 import { Spinner } from "../components/Spinner";
 
 const NewParers = () => {
