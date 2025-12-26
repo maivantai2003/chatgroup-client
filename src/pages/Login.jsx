@@ -13,7 +13,7 @@ import { processAfterLogin } from "../helpers/processAfterLogin";
 import { getDeviceName, getOS } from "../helpers/getInforDevice";
 import { getDeviceId } from "../helpers/getDeviceId";
 const LoginForm = () => {
-  const { signIn } = useAuth();
+  //const { signIn } = useAuth();
   const user = useSelector((state) => state.auth.userLogin);
   const {
     register,
