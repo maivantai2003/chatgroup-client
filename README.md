@@ -112,13 +112,6 @@ npm run dev
 <img src="./demo_image/job_history.png" >
 <img src="./demo_image/job_submitted.png" >
 
-**Department management**
-<img src="./demo_image/department.png" >
-<img src="./demo_image/create_department.png" >
-
-**Employee management**
-<img src="./demo_image/staff.png" >
-<img src="./demo_image/create-staff.png" >
 
 **Account management**
 <img src="./demo_image/account.png" >
