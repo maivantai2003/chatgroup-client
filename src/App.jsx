@@ -1,5 +1,4 @@
 import "./App.css";
-//import SearchInput from "./components/SearchInput";
 import ChatMessage from "./pages/ChatMessage";
 import InforChat from "./pages/InforChat";
 import LoginForm from "./pages/Login";
