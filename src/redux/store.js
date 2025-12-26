@@ -12,7 +12,7 @@ import usermessageReducer from "./usermessage/usermessageSlice"
 import groupmessageReducer from "./groupmessage/groupmessageSlice"
 import usermessagefileReducer from "./usermessagefile/usermessagefileSlice"
 import groupmessagefileReducer from "./groupmessagefile/groupmessagefileSlice"
-import newPaperReducer from "./newPaper/newPaperSlice"
+import newPaperReducer from "./newpaper/newPaperSlice"
 const store=configureStore({
     reducer:{
         auth:authReducer,
